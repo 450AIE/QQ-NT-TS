@@ -1,0 +1,373 @@
+{
+  "id": "4649857",
+  "name": "QQ NT",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "577312",
+      "name": "加号",
+      "font_class": "jiahao",
+      "unicode": "e726",
+      "unicode_decimal": 59174
+    },
+    {
+      "icon_id": "837612",
+      "name": "语音",
+      "font_class": "yuyin",
+      "unicode": "e687",
+      "unicode_decimal": 59015
+    },
+    {
+      "icon_id": "924702",
+      "name": "其他",
+      "font_class": "qita",
+      "unicode": "e61a",
+      "unicode_decimal": 58906
+    },
+    {
+      "icon_id": "5485635",
+      "name": "链接",
+      "font_class": "lianjie",
+      "unicode": "e60d",
+      "unicode_decimal": 58893
+    },
+    {
+      "icon_id": "7730600",
+      "name": "聊天记录",
+      "font_class": "lalalal",
+      "unicode": "e658",
+      "unicode_decimal": 58968
+    },
+    {
+      "icon_id": "10836617",
+      "name": "联系人",
+      "font_class": "lianxiren",
+      "unicode": "e61b",
+      "unicode_decimal": 58907
+    },
+    {
+      "icon_id": "24656840",
+      "name": "笔记本、笔记",
+      "font_class": "a-bijibenbiji",
+      "unicode": "e6bf",
+      "unicode_decimal": 59071
+    },
+    {
+      "icon_id": "41635593",
+      "name": "mti-系-类型管理",
+      "font_class": "mti-xi-leixingguanli",
+      "unicode": "e793",
+      "unicode_decimal": 59283
+    },
+    {
+      "icon_id": "833265",
+      "name": "历史记录",
+      "font_class": "lishijilu",
+      "unicode": "e8ad",
+      "unicode_decimal": 59565
+    },
+    {
+      "icon_id": "996876",
+      "name": "禁止",
+      "font_class": "ai55",
+      "unicode": "e6ad",
+      "unicode_decimal": 59053
+    },
+    {
+      "icon_id": "999221",
+      "name": "关机",
+      "font_class": "ai240",
+      "unicode": "e6e4",
+      "unicode_decimal": 59108
+    },
+    {
+      "icon_id": "1285185",
+      "name": "ico版本更新",
+      "font_class": "icobanbengengxin",
+      "unicode": "e67d",
+      "unicode_decimal": 59005
+    },
+    {
+      "icon_id": "1457542",
+      "name": "详情",
+      "font_class": "xiangqing",
+      "unicode": "e6ab",
+      "unicode_decimal": 59051
+    },
+    {
+      "icon_id": "1474425",
+      "name": "添加",
+      "font_class": "tianjia-xue",
+      "unicode": "e636",
+      "unicode_decimal": 58934
+    },
+    {
+      "icon_id": "3427860",
+      "name": "链接",
+      "font_class": "icon-",
+      "unicode": "e620",
+      "unicode_decimal": 58912
+    },
+    {
+      "icon_id": "3930491",
+      "name": "键盘",
+      "font_class": "jianpan",
+      "unicode": "e618",
+      "unicode_decimal": 58904
+    },
+    {
+      "icon_id": "4189394",
+      "name": "响铃",
+      "font_class": "xiangling",
+      "unicode": "e634",
+      "unicode_decimal": 58932
+    },
+    {
+      "icon_id": "4880421",
+      "name": "下载",
+      "font_class": "xiazai",
+      "unicode": "e606",
+      "unicode_decimal": 58886
+    },
+    {
+      "icon_id": "6571721",
+      "name": "设置",
+      "font_class": "shezhi",
+      "unicode": "e694",
+      "unicode_decimal": 59028
+    },
+    {
+      "icon_id": "6762077",
+      "name": "机器人",
+      "font_class": "jiqiren",
+      "unicode": "e6ac",
+      "unicode_decimal": 59052
+    },
+    {
+      "icon_id": "6894326",
+      "name": "QQ游戏",
+      "font_class": "QQyouxi",
+      "unicode": "e703",
+      "unicode_decimal": 59139
+    },
+    {
+      "icon_id": "6974619",
+      "name": "好友管理",
+      "font_class": "haoyouguanli",
+      "unicode": "e6c9",
+      "unicode_decimal": 59081
+    },
+    {
+      "icon_id": "10121917",
+      "name": "画笔",
+      "font_class": "huabi",
+      "unicode": "e619",
+      "unicode_decimal": 58905
+    },
+    {
+      "icon_id": "15191922",
+      "name": "商务咨询",
+      "font_class": "shangwuzixun",
+      "unicode": "e67c",
+      "unicode_decimal": 59004
+    },
+    {
+      "icon_id": "15821674",
+      "name": "静音",
+      "font_class": "jingyin",
+      "unicode": "e60c",
+      "unicode_decimal": 58892
+    },
+    {
+      "icon_id": "18165266",
+      "name": "锁,密码,锁定",
+      "font_class": "lock",
+      "unicode": "e881",
+      "unicode_decimal": 59521
+    },
+    {
+      "icon_id": "18211395",
+      "name": "内存卡",
+      "font_class": "neicunka",
+      "unicode": "e7b2",
+      "unicode_decimal": 59314
+    },
+    {
+      "icon_id": "19992969",
+      "name": "截屏",
+      "font_class": "jieping",
+      "unicode": "e81e",
+      "unicode_decimal": 59422
+    },
+    {
+      "icon_id": "20009239",
+      "name": "moon月亮",
+      "font_class": "moonyueliang",
+      "unicode": "e6dd",
+      "unicode_decimal": 59101
+    },
+    {
+      "icon_id": "29238072",
+      "name": "腾讯微云",
+      "font_class": "channel-weiyunapp",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "30054727",
+      "name": "投屏",
+      "font_class": "touping",
+      "unicode": "e839",
+      "unicode_decimal": 59449
+    },
+    {
+      "icon_id": "38599607",
+      "name": "QQ音乐-copy",
+      "font_class": "QQyinle3",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "38617555",
+      "name": "AI腾讯文档-01",
+      "font_class": "AItengxunwendang-01",
+      "unicode": "e71c",
+      "unicode_decimal": 59164
+    },
+    {
+      "icon_id": "39418616",
+      "name": "换肤",
+      "font_class": "huanfu",
+      "unicode": "e629",
+      "unicode_decimal": 58921
+    },
+    {
+      "icon_id": "1415513",
+      "name": "管理设备",
+      "font_class": "guanlishebei",
+      "unicode": "e837",
+      "unicode_decimal": 59447
+    },
+    {
+      "icon_id": "720974",
+      "name": "信息",
+      "font_class": "xiazai16",
+      "unicode": "e610",
+      "unicode_decimal": 58896
+    },
+    {
+      "icon_id": "1479642",
+      "name": "表情",
+      "font_class": "biaoqing",
+      "unicode": "e681",
+      "unicode_decimal": 59009
+    },
+    {
+      "icon_id": "1649166",
+      "name": "最小化",
+      "font_class": "zuixiaohua",
+      "unicode": "e67a",
+      "unicode_decimal": 59002
+    },
+    {
+      "icon_id": "1766510",
+      "name": "符号-折叠面板",
+      "font_class": "zhediemianban",
+      "unicode": "e6a0",
+      "unicode_decimal": 59040
+    },
+    {
+      "icon_id": "2301640",
+      "name": "用户",
+      "font_class": "yonghu",
+      "unicode": "e60a",
+      "unicode_decimal": 58890
+    },
+    {
+      "icon_id": "3267408",
+      "name": "收藏",
+      "font_class": "shoucang",
+      "unicode": "e617",
+      "unicode_decimal": 58903
+    },
+    {
+      "icon_id": "4251741",
+      "name": "录像",
+      "font_class": "luxiang",
+      "unicode": "e646",
+      "unicode_decimal": 58950
+    },
+    {
+      "icon_id": "6186661",
+      "name": "邮箱",
+      "font_class": "youxiang",
+      "unicode": "e664",
+      "unicode_decimal": 58980
+    },
+    {
+      "icon_id": "8328310",
+      "name": "相册",
+      "font_class": "tupian",
+      "unicode": "e607",
+      "unicode_decimal": 58887
+    },
+    {
+      "icon_id": "10582818",
+      "name": "个人空间",
+      "font_class": "gerenkongjian",
+      "unicode": "e67b",
+      "unicode_decimal": 59003
+    },
+    {
+      "icon_id": "10715419",
+      "name": "电话",
+      "font_class": "dianhua",
+      "unicode": "e632",
+      "unicode_decimal": 58930
+    },
+    {
+      "icon_id": "10715423",
+      "name": "关闭",
+      "font_class": "guanbi",
+      "unicode": "e633",
+      "unicode_decimal": 58931
+    },
+    {
+      "icon_id": "10717944",
+      "name": "更多",
+      "font_class": "gengduo",
+      "unicode": "e648",
+      "unicode_decimal": 58952
+    },
+    {
+      "icon_id": "11121473",
+      "name": "文件",
+      "font_class": "wenjian",
+      "unicode": "e63b",
+      "unicode_decimal": 58939
+    },
+    {
+      "icon_id": "11490920",
+      "name": "最大化",
+      "font_class": "zuidahua",
+      "unicode": "e651",
+      "unicode_decimal": 58961
+    },
+    {
+      "icon_id": "11555733",
+      "name": "点点点",
+      "font_class": "diandiandian",
+      "unicode": "e628",
+      "unicode_decimal": 58920
+    },
+    {
+      "icon_id": "22978048",
+      "name": "游戏",
+      "font_class": "youxi",
+      "unicode": "e8a1",
+      "unicode_decimal": 59553
+    }
+  ]
+}

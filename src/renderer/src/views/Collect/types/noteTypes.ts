@@ -1,0 +1,7 @@
+export const CHAT_LOG = 'CHAT_LOG'
+export const PICTURE = 'PICTURE'
+export const VIDEO = 'VIDEO'
+export const FILE = 'FILE'
+export const LINK = 'LINK'
+export const NOTE = 'NOTE'
+export const OTHERS = 'OTHERS'

@@ -1,0 +1,26 @@
+export const settingGlobalIconList = [
+    {
+        icon:'#icon-shezhi',
+        text:'通用'
+    },
+    {
+        icon:'#icon-xiangling',
+        text:'消息设置'
+    },
+    {
+        icon:'#icon-neicunka',
+        text:'存储管理'
+    },
+    {
+        icon:'#icon-jianpan',
+        text:'快捷键'
+    },
+    {
+        icon:'#icon-haoyouguanli',
+        text:'权限设置'
+    },
+    {
+        icon:'#icon-huanfu',
+        text:'超级调色盘'
+    }
+]

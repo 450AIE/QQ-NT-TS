@@ -1,0 +1,120 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-user-drag:none;
+  -webkit-app-region: no-drag;
+  user-select: none;
+}
+.w {
+  padding: 0 10px;
+}
+.ww {
+    padding:0 20px;
+}
+
+
+.light-theme {
+    --global-font-size:16px;
+    --background-gray1-color:#f2f2f2;
+    --background-gray2-color:#f5f5f5;
+    --background-gray3-color:#e0e0e0;
+    --background-gray4-color:#e7e7e7;
+    /* hover时的颜色 */
+    --background-gray5-color:#e9e9e9;
+    --background-blue-color:#0099ff;
+    --search-bar-border-bottom-color:#ebebeb;
+    --friend-list-and-relationship-manage-font-color:black;
+    --setting-font-color:black;
+    --sub-options-manage-font-color:black;
+    --sub-options-manage-cancel-button-background-color:#fff;
+    --normal-font-color:black;
+    --sub-setting-popover-background-color:#fff;
+    --icon-fill-color:black;
+    --sub-icon-hover-background-color:#e9e9e9;
+    --search-bar-background-color:#fff;
+    --search-bar-input-background-color:#ffffff;
+    --friend-list-and-relationship-manage-background-color:#fff;
+    --app-operate-background-color:#f2f2f2;
+    --app-operate-hover-background-colors:#eaeaea;
+    --app-operate-icon-color:black;
+    --resize-bar-background-color:#ebebeb;
+    --friend-session-top-border-bottom-background-color:#ebebeb;
+    --friend-session-bottom-border-top-background-color:#ebebeb;
+    --el-input-background-color:#f5f5f5;
+    --segment-hover-block-background-color:#ffffff;
+    --setting-top-border-bottom-background-color:#ececec;
+    --sub-options-items-card-background-color:#fff;
+    --sub-options-manage-background-color:#f2f2f2;
+    --sub-options-manage-item-card-background-color:#fff;
+    --setting-left-options-background-color:#fff;
+    --setting-left-option-selected-background-color:#ebebeb;
+    --setting-left-option-hover-background-color:#f5f5f5;
+    --friend-manage-button-border-color:#ebebeb;
+    --friend-manage-button-hover-background-color:#f5f5f5;
+    --group-info-column-border-bottom-background-color:#ebebeb;
+    --collect-left-option-hover-background-color:#f5f5f5;
+    --collect-left-option-menu-background-color:#fff;
+    --collect-right-background-color:#f3f3f3;
+    --collect-block-background-color:#fff;
+    --collect-block-hover-background-color:#e9e9e9;
+    --collect-create-note-backgroud-color:#fff;
+    --collect-create-note-background-color:#fff;
+    --overflow-hidden:hidden;
+    --overflow-visible:visible;
+    font-size: var(--global-font-size,16px);
+    overflow:var(--overflow-hidden);
+}
+
+
+
+
+
+
+
+
+.dark-theme {
+    --global-font-size:16px;
+    --background-gray1-color:#111111;
+    --background-gray2-color:#2d2d2d;
+    --setting-font-color:#e0e0e0;
+    --normal-font-color:#fff;
+    --sub-options-manage-font-color:#e0e0e0;
+    --friend-list-and-relationship-manage-font-color:#ccc;
+    --sub-setting-popover-background-color:#242424;
+    --icon-fill-color:#b8b8b8;
+    --sub-icon-hover-background-color:#1a1a1a;
+    --search-bar-background-color:#1b1b1b;
+    --search-bar-input-background-color:#282828;
+    --search-bar-border-bottom-color:#1f1f1f;
+    --friend-list-and-relationship-manage-background-color:#1b1b1b;
+    --app-operate-background-color:#111111;
+    --app-operate-hover-background-color:#242424;
+    --app-operate-icon-color:#fff;
+    --resize-bar-background-color:#181818;
+    --friend-session-top-border-bottom-background-color:#1f1f1f;
+    --friend-session-bottom-border-top-background-color:#1f1f1f;
+    --el-input-background-color:#282828;
+    --segment-hover-block-background-color:#353535;
+    --setting-top-border-bottom-background-color:#1f1f1f;
+    --sub-options-items-card-background-color:#262626;
+    --sub-options-manage-background-color:#262626;
+    --sub-options-manage-item-card-background-color:#333333;
+    --setting-left-options-background-color:#1b1b1b;
+    --setting-left-option-selected-background-color:#373737;
+    --setting-left-option-hover-background-color:#373737;
+    --friend-manage-button-border-color:#494949;
+    --friend-manage-button-hover-background-color:#2d2d2d;
+    --group-info-column-border-bottom-background-color:#282828;
+    --collect-left-option-hover-background-color:#242424;
+    --collect-left-option-menu-background-color:#1b1b1b;
+    --collect-right-background-color:#0f0f0f;
+    --collect-block-hover-background-color:#373737;
+    --collect-block-background-color:#1b1b1b;
+    --collect-create-note-backgroud-color:#1b1b1b;
+    --collect-create-note-background-color:#1b1b1b;
+    --overflow-hidden:hidden;
+    --overflow-visible:visible;
+    font-size: var(--global-font-size,16px);
+    overflow:var(--overflow-hidden);
+}
