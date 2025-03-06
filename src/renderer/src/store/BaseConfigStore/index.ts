@@ -1,13 +1,15 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { isEqual } from 'lodash-es'
+import { subOption } from './types'
+import { DeviceInfo } from '@utils/types/device'
 
 const useBaseConfigStore = defineStore('baseConfigStore', () => {
     // 全局字体大小
     const globalFontSize = ref(0)
     // 是否暗夜模式
     const isDarkTheme = ref(false)
-    const setIsDarkTheme = (flag) => {
+    const setIsDarkTheme = (flag: boolean) => {
         if (isDarkTheme.value === flag) return false
         isDarkTheme.value = flag
         return true
@@ -19,6 +21,16 @@ const useBaseConfigStore = defineStore('baseConfigStore', () => {
         '#icon-youxi',
         '#icon-diandiandian'
     ]
+    const deviceInfo: DeviceInfo = ref({})
+    const setDeviceInfo = (newInfo: DeviceInfo) => {
+        if (isEqual(deviceInfo.value, newInfo)) return false
+        deviceInfo.value = newInfo
+        return true
+    }
+    // 用户信息
+    const userInfo = ref({
+        token: ''
+    })
     // 最左侧图标
     const upperIconList = ref(upperFixedIconList)
     const bottomIconList = ref([
@@ -28,7 +40,7 @@ const useBaseConfigStore = defineStore('baseConfigStore', () => {
         '#icon-youxiang'
     ])
     // 管理页面，控制左侧是显示哪些图标
-    const subOptionsManageList = ref([
+    const subOptionsManageList = ref<subOption[]>([
         {
             id: 1,
             icon: '#icon-QQyinle3',
@@ -70,10 +82,6 @@ const useBaseConfigStore = defineStore('baseConfigStore', () => {
     const setSubOptionsManageList = (newList, isSubOptionsManageStrike = false) => {
         const newArr = newList.sort((cur, nex) => cur.id - nex.id)
         const oldArr = subOptionsManageList.value.sort((cur, nex) => cur.id - nex.id)
-        // console.log('old:',oldArr)
-        // console.log('new:',newArr)
-        // console.log(isEqual(oldArr,newArr))
-        // if(flag) return true
         if (isSubOptionsManageStrike) return true
         if (isEqual(newArr, oldArr)) return false
         subOptionsManageList.value = newArr
@@ -85,7 +93,7 @@ const useBaseConfigStore = defineStore('baseConfigStore', () => {
         upperIconList.value = arr
         return true
     }
-    const setGlobalFontSize = (newFontSize, directlyUpdate = false) => {
+    const setGlobalFontSize = (newFontSize: number, directlyUpdate = false) => {
         if (globalFontSize.value === newFontSize && !directlyUpdate) return false
         globalFontSize.value = newFontSize
         // 并且应用
@@ -95,8 +103,11 @@ const useBaseConfigStore = defineStore('baseConfigStore', () => {
         return true
     }
     return {
+        userInfo,
+        deviceInfo,
         globalFontSize,
         setGlobalFontSize,
+        setDeviceInfo,
         isDarkTheme,
         setIsDarkTheme,
         upperIconList,

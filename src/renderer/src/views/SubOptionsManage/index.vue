@@ -1,7 +1,7 @@
 <script setup>
 import SubOptionsItemsCard from './components/SubOptionsItemsCard/index.vue'
 import { onMounted, ref, watch } from 'vue';
-import useBaseConfigStore from '../../store/baseConfigStore';
+import useBaseConfigStore from '../../store/BaseConfigStore';
 import { storeToRefs } from 'pinia';
 import useUpdatePiniaStateSync from '../../hooks/useUpdatePiniaStateSync';
 import useBeforeCreateGetUpdatedPiniaState from '../../hooks/useBeforeCreateGetUpdatedPiniaState';

@@ -10,7 +10,7 @@ import http from '@renderer/utils/http/http'
 import Note from '../../types/Note'
 import { NOTE } from '../../types/noteTypes'
 import { storeToRefs } from 'pinia'
-import useBaseConfigStore from '@renderer/store/baseConfigStore'
+import useBaseConfigStore from '@renderer/store/BaseConfigStore'
 
 useBeforeCreateGetUpdatedPiniaState()
 useUpdatePiniaStateSync()

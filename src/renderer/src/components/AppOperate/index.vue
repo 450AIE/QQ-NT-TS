@@ -1,26 +1,22 @@
-<script setup>
+<script lang="ts" setup>
 import { onBeforeUpdate, ref } from 'vue'
 import { normalIconList, normalIconListWithFold } from './iconList'
+import { AppOprateProps } from './types'
+
 //0普通，1带折叠
-const props = defineProps({
-    type: {
-        required: false,
-        type: Number,
-        default: 0
-    }
-})
+const { type = 0 } = defineProps<AppOprateProps>()
 let len = 0
 const operateIconList = ref([])
-if (props.type === 0) {
+if (type === 0) {
     operateIconList.value = normalIconList
-} else if (props.type === 1) {
+} else if (type === 1) {
     operateIconList.value = normalIconListWithFold
 }
 len = operateIconList.value.length
 onBeforeUpdate(() => {
-    if (props.type === 0) {
+    if (type === 0) {
         operateIconList.value = normalIconList
-    } else if (props.type === 1) {
+    } else if (type === 1) {
         operateIconList.value = normalIconListWithFold
     }
     len = operateIconList.value.length
@@ -58,9 +54,10 @@ function appOperate(type) {
     align-items: center;
     position: absolute !important;
     height: 25px !important;
+    right: 0;
+    top: 0;
     z-index: 99;
     background-color: var(--app-operate-background-color);
-
     .icon {
         display: flex;
         align-items: center;

@@ -9,8 +9,7 @@ const router = createRouter({
             children: [
                 {
                     path: 'friend_session',
-                    component: () =>
-                        import('@renderer/views/FriendsList/views/FriendSession/index.vue')
+                    component: () => import('@renderer/views/FriendsList/views/FriendSession/index.vue')
                 }
             ]
         },
@@ -29,8 +28,7 @@ const router = createRouter({
             children: [
                 {
                     path: 'general',
-                    component: () =>
-                        import('@renderer/views/SettingViews/views/GeneralSetting/index.vue')
+                    component: () => import('@renderer/views/SettingViews/views/GeneralSetting/index.vue')
                 }
             ]
         },
@@ -41,6 +39,14 @@ const router = createRouter({
         {
             path: '/create_note',
             component: () => import('@renderer/views/Collect/views/CreateNote/index.vue')
+        },
+        {
+            path: '/add_friend_and_group',
+            component: () => import('@renderer/views/AddFriendAndGroup/index.vue')
+        },
+        {
+            path: '/login',
+            component: () => import('@renderer/views/Login/index.vue')
         }
     ]
 })

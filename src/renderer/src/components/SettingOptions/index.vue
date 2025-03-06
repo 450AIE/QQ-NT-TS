@@ -4,6 +4,9 @@ import { settingIconList } from './iconList'
 function settingOperate(index) {
     if (index === 6) {
         ElectronAPI.createSettingGlobalWindow()
+    } else if (index === 7) {
+        // 退出登陆，干掉其他所有窗口，不过窗口的pinia状态怎么保留下来呢?
+        ElectronAPI.createLoginWindow()
     }
 }
 // onActivated(()=>console.log('setting'))

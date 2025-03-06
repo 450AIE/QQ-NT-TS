@@ -1,12 +1,13 @@
-<script setup>
+<script lang="ts" setup>
 import { useRouter } from 'vue-router'
 import SettingOptions from '@renderer/components/SettingOptions/index.vue'
 import { watch, onBeforeUnmount, onMounted, ref, onActivated } from 'vue'
 import lightQQLogo from '../../assets/light-QQ-logo.png'
 import darkQQLogo from '../../assets/dark-QQ-logo.png'
-import useBaseConfigStore from '../../store/baseConfigStore'
+import useBaseConfigStore from '../../store/BaseConfigStore'
 import { storeToRefs } from 'pinia'
 import useUpdatePiniaStateSync from '@renderer/hooks/useUpdatePiniaStateSync'
+import UserInfoMiniCard from '@renderer/components/UserInfoMiniCard/index.vue'
 // import useBeforeCreateGetUpdatedPiniaState from '@renderer/hooks/useBeforeCreateGetUpdatedPiniaState'
 // 监听pinia更新
 useUpdatePiniaStateSync()
@@ -21,6 +22,8 @@ onActivated(() => {
 const baseConfigStore = useBaseConfigStore()
 // 控制显示在左边的图标
 const upperIcons = ref([])
+// 控制展示个人信息
+const showDetail = ref(false)
 // 控制被收纳的图标
 const foldedIcons = ref([])
 const { bottomIconList, upperIconList, isDarkTheme } = storeToRefs(baseConfigStore)
@@ -36,7 +39,7 @@ async function readBaseConfigStoreFiles() {
     // console.log('本地读取的store为:',res)
     // console.log('读取到的本地存储的baseConfigStore文件:',res)
     for (const key in baseConfigStore) {
-        if (baseConfigStore.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(baseConfigStore, key)) {
             // 调用set函数修改state
             if (key.startsWith('set') && typeof baseConfigStore[key] === 'function') {
                 // 获取变量名，没有首字母
@@ -49,20 +52,19 @@ async function readBaseConfigStoreFiles() {
         }
     }
 }
-// setInterval(()=>console.log(baseConfigStore.subOptionsManageList),2000)
 readBaseConfigStoreFiles()
 //设置界面的组件
 const settingOptionsComponent = ref(null)
 const router = useRouter()
 //路由跳转
 function transRouter(subOptionIndex) {
-    let path = undefined
+    let path: string
     if (subOptionIndex === 0) {
         path = '/'
     } else if (subOptionIndex === 1) {
         path = '/relationship_manage'
     }
-    router.push(path)
+    router.push(path!)
 }
 // 监听新窗口的创建，将当前的pinia状态传递给该窗口（但是不敢确定该组件内的pinia状态是否最新）
 ElectronAPI.onListenerNewWindowCreated(() => {
@@ -89,11 +91,14 @@ onBeforeUnmount(() => {
     ElectronAPI.removeListenerNewWindowCreated()
     window.removeEventListener('resize', onListenerWindowHeightToUnfoldIcons)
 })
+// 刚创建就要获取设备信息
 onMounted(() => {
+    // 更新设备信息
+    ElectronAPI.getDeviceInfo().then((info) => baseConfigStore.setDeviceInfo(info))
     window.addEventListener('resize', onListenerWindowHeightToUnfoldIcons)
-    console.log(
-        getComputedStyle(document.querySelector('.app')).getPropertyValue('--global-font-size')
-    )
+    // console.log(
+    //     getComputedStyle(document.querySelector('.app')).getPropertyValue('--global-font-size')
+    // )
 })
 // 监听窗口高度，控制收纳左侧多余的图标
 // 同时要watch变化
@@ -140,7 +145,8 @@ watch(
             <img :src="isDarkTheme ? darkQQLogo : lightQQLogo" alt="" />
         </div>
         <div class="img">
-            <img src="../../assets/user.png" alt="" />
+            <img src="../../assets/user.png" alt="" @click="() => (showDetail = !showDetail)" />
+            <UserInfoMiniCard v-if="showDetail" class="mini-info-card" />
         </div>
         <div
             v-for="(item, index) in upperIcons"
@@ -262,11 +268,17 @@ watch(
     }
 
     .img {
+        position: relative;
         flex-shrink: 0;
         margin: 10px 5px;
         width: 35px;
         height: 35px;
-
+        .mini-info-card {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            z-index: 99;
+        }
         img {
             width: 100%;
             height: 100%;

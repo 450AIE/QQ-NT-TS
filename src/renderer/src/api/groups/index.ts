@@ -1,0 +1,95 @@
+import http from "@renderer/utils/http/http";
+
+export function createGroupAPI() {
+    return http({
+        url: "/v1/group/create",
+    })
+}
+
+
+export function setGroupInfoAPI(group_id: string, avatar_url: string, name: string, introduction: string, extra: string, caller_id: string, device_id: string) {
+    return http({
+        url: '/v1/group/update',
+        data: {
+            group_id,
+            avatar_url,
+            name,
+            introduction,
+            extra,
+            caller_id,
+            device_id
+        }
+    })
+}
+
+export function getGroupInfoAPI(group_id: string, caller_id: string, device_id: string) {
+    return http({
+        url: '/v1/group/get',
+        data: {
+            group_id,
+            caller_id,
+            device_id
+        }
+    })
+}
+
+export function getAllGroupsInfoAPI(caller_id: string, device_id: string) {
+    return http({
+        url: '/v1/group/all',
+        data: {
+            caller_id,
+            device_id
+        }
+    })
+}
+
+export function addGroupMemberAPI(group_id: string, user_ids: string[], caller_id: string, device_id: string) {
+    return http({
+        url: '/v1/group-member/add',
+        data: {
+            group_id,
+            user_ids,
+            caller_id,
+            device_id
+        }
+    })
+}
+
+export function setGroupMemberAPI(group_id: string, user_id: string, member_type: string, remarks: string, extra: string, caller_id: string, device_id: string) {
+    return http({
+        url: '/v1/group-member/update',
+        data: {
+            group_id,
+            user_id,
+            member_type,
+            remarks,
+            extra,
+            caller_id,
+            device_id
+        }
+    })
+}
+
+export function deleteGroupMemberAPI(group_id: string, user_id: string, caller_id: string, device_id: string) {
+    return http({
+        url: '/v1/group-member/update',
+        data: {
+            group_id,
+            user_id,
+            caller_id,
+            device_id
+        }
+    })
+}
+
+export function getGroupMemberInfoAPI(group_id: string, user_id: string, caller_id: string, device_id: string) {
+    return http({
+        url: "/v1/group-member/get",
+        data: {
+            group_id,
+            user_id,
+            caller_id,
+            device_id
+        }
+    })
+}

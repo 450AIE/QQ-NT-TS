@@ -1,7 +1,7 @@
 <script setup>
 // import useBeforeCreateGetUpdatedPiniaState from '@/renderer/src/hooks/useBeforeCreateGetUpdatedPiniaState';
 import useUpdatePiniaStateSync from '@renderer/hooks/useUpdatePiniaStateSync.js';
-import useBaseConfigStore from '@renderer/store/baseConfigStore';
+import useBaseConfigStore from '@renderer/store/BaseConfigStore';
 import { Minus, Plus } from '@element-plus/icons-vue';
 import { storeToRefs } from 'pinia';
 // useUpdatePiniaStateSync()

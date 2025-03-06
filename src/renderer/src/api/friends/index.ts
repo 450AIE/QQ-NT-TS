@@ -1,0 +1,59 @@
+import http from "@renderer/utils/http/http";
+
+export function applyForBeingFriendAPI(friend_id: stirng, remarks: stirng, description: string, caller_id: string, device_id: string) {
+    return http({
+        url: '/v1/friend/add',
+        data: {
+            friend_id,
+            remarks,
+            description,
+            caller_id,
+            device_id
+        }
+    })
+}
+
+export function getFriendApplicationListAPI(caller_id: stirng, device_id: string) {
+    return http({
+        url: '/v1/friend/add-list',
+        data: {
+            caller_id,
+            device_id
+        }
+    })
+}
+
+export function agreeFriendApplicationAPI(friend_id: stirng, remarks: stirng, caller_id: string, device_id: string) {
+    return http({
+        url: '/v1/friend/agree',
+        data: {
+            friend_id,
+            remarks,
+            caller_id, device_id
+        }
+    })
+}
+
+export function setFriendInfoAPI(friend_id: stirng, remarks: stirng, extra: string, caller_id: string, device_id: string) {
+    return http({
+        url: '/v1/friend/set',
+        data: {
+            friend_id,
+            remarks,
+            extra,
+            caller_id,
+            device_id
+        }
+    })
+}
+
+export function getAllFriendsInfoAPI(caller_id: string, device_id: string) {
+    return http({
+        url: "/v1/friend/all",
+        data: {
+            caller_id,
+            device_id
+        }
+    })
+}
+

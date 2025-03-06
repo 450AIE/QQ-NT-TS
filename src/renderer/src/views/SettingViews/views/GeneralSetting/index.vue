@@ -1,7 +1,7 @@
 <script setup>
 import useUpdatePiniaStateSync from '@renderer/hooks/useUpdatePiniaStateSync';
 import useBeforeCreateGetUpdatedPiniaState from '@renderer/hooks/useBeforeCreateGetUpdatedPiniaState';
-import useBaseConfigStore from '@renderer/store/baseConfigStore';
+import useBaseConfigStore from '@renderer/store/BaseConfigStore';
 import SettingOptionDetailCard from '@renderer/views/SettingViews/components/SettingOptionDetailCard/index.vue'
 import { storeToRefs } from 'pinia';
 import {  ref } from 'vue';

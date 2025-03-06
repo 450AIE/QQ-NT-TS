@@ -1,4 +1,4 @@
-import useBaseConfigStore from '../store/baseConfigStore'
+import useBaseConfigStore from '../store/BaseConfigStore'
 
 /**
  * 当窗口创建时，使用这个钩子，会自动获取最新的pinia状态来更新,
@@ -18,7 +18,7 @@ function getUpdatedPiniaState(_, jsonStore, isSettingViews = false) {
     const store = JSON.parse(jsonStore)
     // console.log('收到的store是:',store)
     for (const key in baseConfigStore) {
-        if (baseConfigStore.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(baseConfigStore, key)) {
             // 调用set函数修改state
             if (key.startsWith('set') && typeof baseConfigStore[key] === 'function') {
                 if (isSettingViews && key == 'setGlobalFontSize') continue

@@ -1,25 +1,53 @@
 <script setup>
 import { Search, Plus } from '@element-plus/icons-vue'
-defineProps({
+import { ref } from 'vue'
+const props = defineProps({
     withIcon: {
         required: false,
         type: Boolean,
         default: true
-    }
+    },
+    value: {
+        required: true,
+        type: String,
+        default: ''
+    },
+    setValue: {
+        required: true,
+        type: Function,
+        default: () => {}
+    },
+    bottomBorder: {
+        required: false,
+        type: Boolean,
+        default: true
+    },
+    onEnter: Function
 })
 defineOptions({
     name: 'SearchBar'
 })
-// onActivated(()=>{
-//     console.log('searchbar activated')
-// })
+const showDetail = ref(false)
+function openAddFriendAndGroupWindow() {
+    ElectronAPI.createAddFriendAndGroupWindow()
+}
 </script>
 
 <template>
-    <div class="search w">
-        <el-input placeholder="搜索" class="inp" :prefix-icon="Search" />
-        <div v-if="withIcon" class="plus-icon-div">
-            <el-icon class="plus-icon"><Plus /></el-icon>
+    <div
+        class="search w"
+        :style="{
+            borderBottom: props.bottomBorder ? '1px solid var(--search-bar-border-bottom-color)' : 'none'
+        }"
+    >
+        <el-input v-model="props.value" placeholder="搜索" class="inp" :prefix-icon="Search" @input="(val) => props.setValue(val)" />
+        <div v-if="props.withIcon" class="plus-icon-div">
+            <el-icon class="plus-icon" @click="() => (showDetail = !showDetail)"><Plus /></el-icon>
+            <!--  加好友，加群聊 -->
+            <ul v-if="showDetail" class="detail">
+                <li class="detail-item">创建群聊</li>
+                <li class="detail-item" @click="openAddFriendAndGroupWindow">加好友/群</li>
+            </ul>
         </div>
     </div>
 </template>
@@ -34,6 +62,7 @@ defineOptions({
     border-bottom: 1px solid var(--search-bar-border-bottom-color);
     -webkit-app-region: drag;
     .plus-icon-div {
+        position: relative;
         display: flex;
         width: 30px;
         height: 30px;
@@ -43,6 +72,30 @@ defineOptions({
         border-radius: 4px;
         .plus-icon {
             color: #9f9f9f;
+        }
+        .detail {
+            position: absolute;
+            left: 20px;
+            width: 100px;
+            top: 20px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            // background-color: var(--el-input-background-color);
+            background-color: #fff;
+            border-radius: 6px;
+            box-shadow: 0 0 8px 2px #ccc;
+            z-index: 10;
+            .detail-item {
+                display: flex;
+                flex: 1;
+                width: auto;
+                list-style: none;
+                align-items: center;
+                &:hover {
+                    background-color: #ccc;
+                }
+            }
         }
     }
     .inp {

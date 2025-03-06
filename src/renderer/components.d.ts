@@ -8,12 +8,19 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppOperate: typeof import('./src/components/AppOperate/index.vue')['default']
+    ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElButton: typeof import('element-plus/es')['ElButton']
+    ElCollapse: typeof import('element-plus/es')['ElCollapse']
+    ElCollapseItem: typeof import('element-plus/es')['ElCollapseItem']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElInput: typeof import('element-plus/es')['ElInput']
     ElPopover: typeof import('element-plus/es')['ElPopover']
     ElScrollbar: typeof import('element-plus/es')['ElScrollbar']
+    ElSegmented: typeof import('element-plus/es')['ElSegmented']
     ElSlider: typeof import('element-plus/es')['ElSlider']
+    ElTabPan: typeof import('element-plus/es')['ElTabPan']
+    ElTabPane: typeof import('element-plus/es')['ElTabPane']
+    ElTabs: typeof import('element-plus/es')['ElTabs']
     InfoBlock: typeof import('./src/components/InfoBlock/index.vue')['default']
     LeftSubOptions: typeof import('./src/components/LeftSubOptions/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
@@ -21,5 +28,6 @@ declare module 'vue' {
     SearchBar: typeof import('./src/components/SearchBar/index.vue')['default']
     SettingOptions: typeof import('./src/components/SettingOptions/index.vue')['default']
     TextMessage: typeof import('./src/components/MessageBubble/TextMessage/index.vue')['default']
+    UserInfoMiniCard: typeof import('./src/components/UserInfoMiniCard/index.vue')['default']
   }
 }

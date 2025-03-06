@@ -9,7 +9,10 @@ const windowManage = {
     closeSubManageWindow: () => ipcRenderer.send('close-sub-manage-window'),
     createSettingGlobalWindow: () => ipcRenderer.send('create-setting-global-window'),
     createCollectWindow: () => ipcRenderer.send('create-collect-window'),
-    createCreateNoteWindow: () => ipcRenderer.send('create-create-note-window')
+    createCreateNoteWindow: () => ipcRenderer.send('create-create-note-window'),
+    createAddFriendAndGroupWindow: () => ipcRenderer.send('create-add-friend-and-group-window'),
+    createMainWindow: () => ipcRenderer.send('create-main-window'),
+    createLoginWindow: () => ipcRenderer.send('create-login-window')
 }
 
 export default windowManage

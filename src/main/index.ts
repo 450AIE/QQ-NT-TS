@@ -5,48 +5,47 @@ import fs from 'fs/promises'
 import os from 'os'
 import { resolve } from 'path'
 import { pushThisWindow, isHasTheWindow, getWindow, popThisWindow } from './utils/WindowStackFunc'
-import {
-    COLLECT_WINDOW,
-    CREATE_NOTE_WINDOW,
-    MAIN_WINDOW,
-    SETTING_WINDOW,
-    SUBOPTIONS_MANAGE_WINDOW
-} from './window-type'
+import { COLLECT_WINDOW, ADD_FRIENDS_AND_GROUP_WINDOW, CREATE_NOTE_WINDOW, MAIN_WINDOW, SETTING_WINDOW, SUBOPTIONS_MANAGE_WINDOW } from './window-type'
 import { QQWindow } from './types'
+import systemInfo from './utils/getDeviceInfo'
+import { LOGIN_WINDOW } from './window-type'
+
 //存放各个窗口的栈，第一个肯定是主窗口
 const windowsStack: Array<QQWindow> = []
 function createWindow() {
     // Create the browser window.
-    const mainWindow = new BrowserWindow({
-        width: 900,
-        height: 670,
+    const loginWindow = new BrowserWindow({
+        width: 350,
+        height: 500,
         show: false,
-        minHeight: 500,
-        minWidth: 400,
         frame: false,
+        resizable: false,
         autoHideMenuBar: true,
         alwaysOnTop: true,
         webPreferences: {
             preload: join(__dirname, '../preload/index.js'),
-            sandbox: false
+            sandbox: false,
+            webSecurity: false
         }
     })
-    mainWindow.on('ready-to-show', () => {
-        mainWindow.show()
+    loginWindow.on('ready-to-show', () => {
+        loginWindow.show()
     })
-    pushThisWindow(windowsStack, MAIN_WINDOW, mainWindow)
-    mainWindow.webContents.setWindowOpenHandler((details) => {
+    pushThisWindow(windowsStack, LOGIN_WINDOW, loginWindow)
+    loginWindow.webContents.setWindowOpenHandler((details) => {
         shell.openExternal(details.url)
         return { action: 'deny' }
     })
-
+    loginWindow.on('closed', () => {
+        popThisWindow(windowsStack, LOGIN_WINDOW)
+    })
     // HMR for renderer base on electron-vite cli.
     // Load the remote URL for development or the local html file for production.
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-        mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-        console.log('这个是electron渲染进程所在的URL', process.env['ELECTRON_RENDERER_URL'])
+        loginWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/login')
+        console.log('这个是electron渲染进程所在的URL', process.env['ELECTRON_RENDERER_URL'] + '/#/login')
     } else {
-        mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+        loginWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/login' })
     }
 }
 
@@ -72,6 +71,8 @@ app.whenReady().then(() => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
 })
+
+
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -100,7 +101,8 @@ ipcMain.on('create-sub-manage-window', () => {
         // modal:true,
         frame: false,
         webPreferences: {
-            preload: join(__dirname, '../preload/index.js')
+            preload: join(__dirname, '../preload/index.js'),
+            webSecurity: false
         }
     })
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -121,6 +123,47 @@ ipcMain.on('close-sub-manage-window', () => {
     const subWin = getWindow(windowsStack, SUBOPTIONS_MANAGE_WINDOW)
     if (subWin) {
         subWin.destroy()
+    }
+})
+// 登陆结束，进入主页面
+ipcMain.on('create-main-window', () => {
+    const mainWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        minHeight: 600,
+        minWidth: 600,
+        show: false,
+        frame: false,
+        autoHideMenuBar: true,
+        alwaysOnTop: true,
+        webPreferences: {
+            preload: join(__dirname, '../preload/index.js'),
+            sandbox: false,
+            webSecurity: false
+        }
+    })
+    const loginWindow = getWindow(windowsStack, LOGIN_WINDOW)
+    if (loginWindow) {
+        loginWindow.destroy()
+    }
+    mainWindow.on('ready-to-show', () => {
+        mainWindow.show()
+    })
+    pushThisWindow(windowsStack, MAIN_WINDOW, mainWindow)
+    // 500ms后销毁登陆页，因为要让登录页去同步device_id
+    // setTimeout(() => {
+
+    // }, 500)
+    mainWindow.webContents.setWindowOpenHandler((details) => {
+        shell.openExternal(details.url)
+        return { action: 'deny' }
+    })
+    // HMR for renderer base on electron-vite cli.
+    // Load the remote URL for development or the local html file for production.
+    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+        mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+    } else {
+        mainWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/' })
     }
 })
 
@@ -149,7 +192,8 @@ ipcMain.on('create-setting-global-window', () => {
         alwaysOnTop: true,
         frame: false,
         webPreferences: {
-            preload: join(__dirname, '../preload/index.js')
+            preload: join(__dirname, '../preload/index.js'),
+            webSecurity: false
         }
     })
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -179,7 +223,8 @@ ipcMain.on('create-collect-window', () => {
         alwaysOnTop: true,
         frame: false,
         webPreferences: {
-            preload: join(__dirname, '../preload/index.js')
+            preload: join(__dirname, '../preload/index.js'),
+            webSecurity: false
         }
     })
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -195,7 +240,37 @@ ipcMain.on('create-collect-window', () => {
         popThisWindow(windowsStack, COLLECT_WINDOW)
     })
 })
-
+// 创建添加好友，群聊的页面
+ipcMain.on('create-add-friend-and-group-window', () => {
+    if (isHasTheWindow(windowsStack, ADD_FRIENDS_AND_GROUP_WINDOW)) return
+    const addFriendsAndGroupWindow = new BrowserWindow({
+        // parent: windowsStack[windowsStack.length - 1].window,
+        width: 1000,
+        height: 800,
+        minWidth: 700,
+        show: false,
+        minHeight: 800,
+        resizable: true,
+        alwaysOnTop: true,
+        frame: false,
+        webPreferences: {
+            preload: join(__dirname, '../preload/index.js'),
+            webSecurity: false
+        }
+    })
+    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+        addFriendsAndGroupWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/add_friend_and_group')
+    } else {
+        addFriendsAndGroupWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: 'add_friend_and_group' })
+    }
+    addFriendsAndGroupWindow.on('ready-to-show', () => {
+        addFriendsAndGroupWindow.show()
+    })
+    pushThisWindow(windowsStack, ADD_FRIENDS_AND_GROUP_WINDOW, addFriendsAndGroupWindow)
+    addFriendsAndGroupWindow.on('closed', () => {
+        popThisWindow(windowsStack, ADD_FRIENDS_AND_GROUP_WINDOW)
+    })
+})
 ipcMain.on('create-create-note-window', () => {
     // 如果存在当前窗口就不再创建
     if (isHasTheWindow(windowsStack, CREATE_NOTE_WINDOW)) return
@@ -210,7 +285,8 @@ ipcMain.on('create-create-note-window', () => {
         alwaysOnTop: true,
         frame: false,
         webPreferences: {
-            preload: join(__dirname, '../preload/index.js')
+            preload: join(__dirname, '../preload/index.js'),
+            webSecurity: false
         }
     })
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -226,11 +302,59 @@ ipcMain.on('create-create-note-window', () => {
         popThisWindow(windowsStack, CREATE_NOTE_WINDOW)
     })
 })
+ipcMain.on('create-login-window', () => {
+    const loginWindow = new BrowserWindow({
+        width: 350,
+        height: 500,
+        show: false,
+        frame: false,
+        resizable: false,
+        autoHideMenuBar: true,
+        alwaysOnTop: true,
+        webPreferences: {
+            preload: join(__dirname, '../preload/index.js'),
+            sandbox: false,
+            webSecurity: false
+        }
+    })
+    loginWindow.on('ready-to-show', () => {
+        loginWindow.show()
+        // 将其他页面都删除掉
+        windowsStack.forEach(win => {
+            const window = win.window
+            if (window === loginWindow) return
+            if (window && !window.isDestroyed()) {
+                window.destroy()
+            }
+        })
+    })
+    pushThisWindow(windowsStack, LOGIN_WINDOW, loginWindow)
+    loginWindow.webContents.setWindowOpenHandler((details) => {
+        shell.openExternal(details.url)
+        return { action: 'deny' }
+    })
+    loginWindow.on('closed', () => {
+        popThisWindow(windowsStack, LOGIN_WINDOW)
+    })
+    // HMR for renderer base on electron-vite cli.
+    // Load the remote URL for development or the local html file for production.
+    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+        loginWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/login')
+        console.log('这个是electron渲染进程所在的URL', process.env['ELECTRON_RENDERER_URL'] + '/#/login')
+    } else {
+        loginWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/login' })
+    }
+})
+
 /**
  * func是触发更新的函数，args是形参，相当于把触发pinia状态更新的函数传递了过来
  */
-ipcMain.on('notify-others-update-pinia-state', (_, func, args) => {
+ipcMain.on('notify-others-update-pinia-state', (e, func, args) => {
     windowsStack.forEach((win) => {
+        // 已经销毁了的窗口就不发送了
+        if (!win || win.window.isDestroyed()) return
+        // 如果是自己窗口，不发送
+        if (e.sender === win.window.webContents) return
         win.window.webContents.send('update-pinia-state', func, args)
     })
 })
@@ -239,11 +363,7 @@ ipcMain.on('write-baseConfigStore-files', (_, fileData) => {
         // console.log(resolve(__dirname,'./baseConfigStore.json'))
         // console.log(resolve(app.getPath('userData'),'./baseConfigStore.json'))
         // console.log('写文件')
-        return fs.writeFile(
-            resolve(app.getPath('userData'), './baseConfigStore.DAT'),
-            fileData,
-            'utf-8'
-        )
+        return fs.writeFile(resolve(app.getPath('userData'), './baseConfigStore.DAT'), fileData, 'utf-8')
     } catch (error) {
         console.dir(error)
     }
@@ -258,17 +378,14 @@ ipcMain.handle('read-baseConfigStore-files', () => {
 // 监听新窗口的创建，通知其他窗口有新窗口创建。
 ipcMain.on('new-window-created', () => {
     windowsStack.forEach((win) => {
-        if (win) {
+        if (win && !win.window.isDestroyed) {
             win.window.webContents.send('new-window-created')
         }
     })
 })
 // 监听了'new-window-created'事件的窗口可以传递pinia数据同步
 ipcMain.on('send-new-created-window-updated-pinia-state', (_, store) => {
-    windowsStack[windowsStack.length - 1].window.webContents.send(
-        'receive-new-created-window-updated-pinia-state',
-        store
-    )
+    windowsStack[windowsStack.length - 1].window.webContents.send('receive-new-created-window-updated-pinia-state', store)
 })
 // 将撰写的笔记保存到本地
 // ipcMain.on('write-note-files',(_,fileData)=>{
@@ -295,15 +412,17 @@ ipcMain.handle('read-all-note-files', async () => {
         console.dir(error)
     }
 })
+// 获取系统信息
+ipcMain.handle('get-system-info', () => systemInfo)
 // 将撰写的笔记保存到本地
 ipcMain.on('append-note-files', (_, fileData) => {
     try {
-        return fs.appendFile(
-            resolve(app.getPath('userData'), './notes.DAT'),
-            fileData + os.EOL,
-            'utf-8'
-        )
+        return fs.appendFile(resolve(app.getPath('userData'), './notes.DAT'), fileData + os.EOL, 'utf-8')
     } catch (error) {
         console.dir(error)
     }
 })
+// // 调试专用监听
+// ipcMain.handle('tcp',()=>{
+
+// })

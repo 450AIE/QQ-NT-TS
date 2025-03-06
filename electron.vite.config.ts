@@ -15,7 +15,9 @@ export default defineConfig({
     renderer: {
         resolve: {
             alias: {
-                '@renderer': resolve('src/renderer/src')
+                '@renderer': resolve('src/renderer/src'),
+                '@components': resolve('src/renderer/src/components'),
+                '@views': resolve('src/renderer/src/views')
             },
             extensions: ['.js', '.ts', '.vue', '.json']
         },

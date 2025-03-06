@@ -1,5 +1,5 @@
 import { onBeforeUnmount } from 'vue'
-import useBaseConfigStore from '../store/baseConfigStore'
+import useBaseConfigStore from '../store/BaseConfigStore'
 
 /**
  * 调用onListenerPiniaStateUpdate监听pinia状态更新并且更新本窗口的状态，自带onBeforeUnmount移除监听

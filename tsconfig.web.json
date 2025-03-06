@@ -5,14 +5,14 @@
     "src/renderer/src/**/*",
     "src/renderer/src/**/*.vue",
     "src/preload/*.d.ts"
-  ],
+, "src/main/utils/getDeviceInfo.ts"  ],
   "compilerOptions": {
     "composite": true,
     "baseUrl": ".",
     "paths": {
       "@renderer/*": [
         "src/renderer/src/*"
-      ]
+      ],
     }
   }
 }

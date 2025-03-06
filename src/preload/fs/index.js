@@ -18,8 +18,8 @@ const fs = {
      * 该函数仍然要await接收，因为在主进程就await把所有JSON变成数组了，async函数返回的是Promise
      * @returns {string}返回一个数组，包含所有notes，注意要JSON.parse()反序列化
      */
-    readAllNoteFiles: () => ipcRenderer.invoke('read-all-note-files')
+    readAllNoteFiles: () => ipcRenderer.invoke('read-all-note-files'),
+    getDeviceInfo: () => ipcRenderer.invoke('get-system-info')
 }
-
 
 export default fs

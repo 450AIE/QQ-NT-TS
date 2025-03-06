@@ -1,5 +1,5 @@
 <script setup>
-import useBaseConfigStore from './store/baseConfigStore';
+import useBaseConfigStore from './store/BaseConfigStore';
 const baseConfigStore = useBaseConfigStore()
 </script>
 
