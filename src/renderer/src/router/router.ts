@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
+import Login from '@renderer/views/Login/index.vue'
 
 const router = createRouter({
     history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -8,8 +9,8 @@ const router = createRouter({
             component: () => import('@renderer/views/FriendsList/index.vue'),
             children: [
                 {
-                    path: 'friend_session',
-                    component: () => import('@renderer/views/FriendsList/views/FriendSession/index.vue')
+                    path: 'session',
+                    component: () => import('@renderer/views/FriendsList/views/Session/index.vue')
                 }
             ]
         },
@@ -19,7 +20,13 @@ const router = createRouter({
         },
         {
             path: '/relationship_manage',
-            component: () => import('@renderer/views/RelationshipManage/index.vue')
+            component: () => import('@renderer/views/RelationshipManage/index.vue'),
+            children: [
+                {
+                    path: 'notification/:type',
+                    component: () => import('@renderer/views/RelationshipManage/views/Notification/index.vue')
+                }
+            ]
         },
         {
             path: '/setting_global',
@@ -46,7 +53,7 @@ const router = createRouter({
         },
         {
             path: '/login',
-            component: () => import('@renderer/views/Login/index.vue')
+            component: Login
         }
     ]
 })

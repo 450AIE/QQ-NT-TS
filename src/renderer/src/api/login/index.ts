@@ -5,6 +5,7 @@ import { DeviceInfo } from '@utils/types/device'
 export function registerAPI(info: DeviceInfo) {
     return http({
         url: '/register/device',
+        method: 'POST',
         headers: {
             ...info
         }
@@ -14,6 +15,7 @@ export function registerAPI(info: DeviceInfo) {
 export function loginAPI(username: string, password: string, device_id: string) {
     return http({
         url: '/signin',
+        method: 'POST',
         data: {
             username,
             password,

@@ -1,4 +1,8 @@
-<script setup></script>
+<script lang="ts" setup>
+import { ref } from 'vue';
+import EditPage from './components/EditPage/index.vue'
+const openUpdateUserInfoPage = ref<boolean>(false)
+</script>
 
 <template>
     <div class="container">
@@ -24,9 +28,14 @@
             </li>
         </ul>
         <div class="btn-container">
-            <el-button class="btn">编辑资料</el-button>
+            <el-button class="btn" @click="openUpdateUserInfoPage = true">编辑资料</el-button>
             <el-button class="btn">发消息</el-button>
         </div>
+        <el-dialog v-model="openUpdateUserInfoPage" width="600" modal :close-on-click-modal="false" :style="{
+            height: '400px'
+        }">
+            <EditPage :close-edit-page="() => openUpdateUserInfoPage = false" />
+        </el-dialog>
     </div>
 </template>
 
@@ -41,21 +50,26 @@
     border-radius: 10px;
     background-color: #fff;
     box-shadow: 0 0 10px 1px #ccc;
+
     .header {
         width: 100%;
         display: flex;
         justify-content: space-around;
     }
+
     .content-container {
         display: flex;
         flex-direction: column;
         width: 100%;
         list-style: none;
         margin-top: 10px;
+
         li {
             margin-left: 15px;
             height: 40px;
             width: 100%;
+            display: flex;
+
             .field {
                 display: inline-block;
                 text-align: left;
@@ -68,10 +82,13 @@
             }
         }
     }
+
     .btn-container {
         margin-top: 10px;
+
         .btn {
             width: 115px;
+
             &:last-child {
                 background-color: #0099ff;
                 color: #fff;

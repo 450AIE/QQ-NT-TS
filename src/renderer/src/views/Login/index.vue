@@ -3,11 +3,16 @@ import AppOperate from '@components/AppOperate/index.vue'
 import UserAvatar from '../../assets/user.png'
 // import useUpdatePiniaStateSync from '@renderer/hooks/useUpdatePiniaStateSync'
 import { ref } from 'vue'
+import { registerAPI } from '@renderer/api/login'
 
 // useUpdatePiniaStateSync()
 const account = ref('')
 const password = ref('')
-function login() {
+
+async function login() {
+    // const systemInfo = await ElectronAPI.getDeviceInfo()
+    // const response = await registerAPI(systemInfo)
+    // 注意将收到的device_id存储好
     // 这里要去请求接口获取设备号，然后打开主页面
     ElectronAPI.createMainWindow()
 }

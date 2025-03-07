@@ -5,6 +5,7 @@ import { subOption } from './types'
 import { DeviceInfo } from '@utils/types/device'
 
 const useBaseConfigStore = defineStore('baseConfigStore', () => {
+    const storeName = 'baseConfigStore'
     // 全局字体大小
     const globalFontSize = ref(0)
     // 是否暗夜模式
@@ -27,10 +28,6 @@ const useBaseConfigStore = defineStore('baseConfigStore', () => {
         deviceInfo.value = newInfo
         return true
     }
-    // 用户信息
-    const userInfo = ref({
-        token: ''
-    })
     // 最左侧图标
     const upperIconList = ref(upperFixedIconList)
     const bottomIconList = ref([
@@ -103,7 +100,7 @@ const useBaseConfigStore = defineStore('baseConfigStore', () => {
         return true
     }
     return {
-        userInfo,
+        storeName,
         deviceInfo,
         globalFontSize,
         setGlobalFontSize,

@@ -11,10 +11,67 @@ defineOptions({
 })
 onActivated(() => console.log('friend'))
 //这个不确定是否写成响应式
-const frendsList = [
+const friendsList = [
     {
+        user_id: 1,
         name: '死于死于安乐死',
-        img: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
+        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
+        latestTime: '' //时间戳
+    },
+    {
+        user_id: 1,
+
+        name: '死于死于安乐死',
+        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
+        latestTime: '' //时间戳
+    },
+    {
+        user_id: 1,
+
+        name: '死于死于安乐死',
+        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
+        latestTime: '' //时间戳
+    },
+    {
+        user_id: 1,
+
+        name: '死于死于安乐死',
+        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
+        latestTime: '' //时间戳
+    },
+    {
+        user_id: 1,
+
+        name: '死于死于安乐死',
+        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
+        latestTime: '' //时间戳
+    },
+    {
+        user_id: 1,
+
+        name: '死于死于安乐死',
+        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
+        latestTime: '' //时间戳
+    },
+    {
+        user_id: 1,
+
+        name: '死于死于安乐死',
+        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
+        latestTime: '' //时间戳
+    },
+    {
+        user_id: 1,
+
+        name: '死于死于安乐死',
+        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
+        latestTime: '' //时间戳
+    },
+    {
+        user_id: 1,
+
+        name: '死于死于安乐死',
+        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
         latestTime: '' //时间戳
     }
 ]
@@ -59,9 +116,9 @@ onUnmounted(() => {
     window.onresize = null
 })
 
-//先默认UID为1
-function openFriendSession(uid = 1) {
-    router.push({ path: '/friend_session', query: { uid } })
+// 根据传递的参数判断是用户还是群聊
+function openFriendSession(user_id = 1) {
+    router.push({ path: '/session', query: { type: 'user', user_id } })
 }
 </script>
 
@@ -72,14 +129,13 @@ function openFriendSession(uid = 1) {
             <SearchBar />
             <div class="scroll">
                 <el-scrollbar :max-height="scrollHeight">
-                    <InfoBlock
-                        v-for="(item, index) in 11"
-                        :key="index"
-                        username="死鱼死于安乐死"
-                        :time="new Date().getTime()"
-                        class="info-block"
-                        @click="openFriendSession(1)"
-                    ></InfoBlock>
+                    <InfoBlock v-for="(item, index) in friendsList" :key="index" :data="item" class="info-block"
+                        @click="() => openFriendSession(item.user_id)">
+                        <template #info="{ data }">
+                            <div class="name">{{ data.name }}</div>
+                            <div class="last-dialog">上次对话</div>
+                        </template>
+                    </InfoBlock>
                 </el-scrollbar>
             </div>
         </div>
@@ -101,11 +157,13 @@ function openFriendSession(uid = 1) {
     right: 0;
     top: 0;
 }
+
 .container {
     display: flex;
     height: 100vh;
     width: 100%;
     position: relative;
+
     .left-view {
         flex-shrink: 0;
         position: relative;
@@ -113,18 +171,21 @@ function openFriendSession(uid = 1) {
         width: 220px;
         max-width: 450px;
     }
+
     .resize {
         width: 2px;
         height: 100vh;
         background-color: var(--resize-bar-background-color);
         cursor: ew-resize;
     }
+
     .right-view {
         flex: 1;
         height: 100vh;
         min-width: 0;
         background-color: var(--background-gray1-color);
     }
+
     .info-block:hover {
         background-color: var(--background-gray2-color);
     }

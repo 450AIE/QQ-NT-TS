@@ -4,7 +4,8 @@ import { toRefs } from 'vue'
 
 const http = axios.create({
     baseURL: '',
-    timeout: 20000
+    timeout: 20000,
+    adapter: 'fetch'
 })
 http.interceptors.request.use((request) => {
     const { userInfo } = useBaseConfigStore()

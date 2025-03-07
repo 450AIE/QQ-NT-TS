@@ -3,6 +3,7 @@ import http from "@renderer/utils/http/http";
 export function createGroupAPI() {
     return http({
         url: "/v1/group/create",
+        method: 'POST',
     })
 }
 
@@ -10,6 +11,7 @@ export function createGroupAPI() {
 export function setGroupInfoAPI(group_id: string, avatar_url: string, name: string, introduction: string, extra: string, caller_id: string, device_id: string) {
     return http({
         url: '/v1/group/update',
+        method: 'POST',
         data: {
             group_id,
             avatar_url,
@@ -25,6 +27,7 @@ export function setGroupInfoAPI(group_id: string, avatar_url: string, name: stri
 export function getGroupInfoAPI(group_id: string, caller_id: string, device_id: string) {
     return http({
         url: '/v1/group/get',
+        method: 'POST',
         data: {
             group_id,
             caller_id,
@@ -36,6 +39,7 @@ export function getGroupInfoAPI(group_id: string, caller_id: string, device_id: 
 export function getAllGroupsInfoAPI(caller_id: string, device_id: string) {
     return http({
         url: '/v1/group/all',
+        method: 'POST',
         data: {
             caller_id,
             device_id
@@ -46,6 +50,7 @@ export function getAllGroupsInfoAPI(caller_id: string, device_id: string) {
 export function addGroupMemberAPI(group_id: string, user_ids: string[], caller_id: string, device_id: string) {
     return http({
         url: '/v1/group-member/add',
+        method: 'POST',
         data: {
             group_id,
             user_ids,
@@ -58,6 +63,7 @@ export function addGroupMemberAPI(group_id: string, user_ids: string[], caller_i
 export function setGroupMemberAPI(group_id: string, user_id: string, member_type: string, remarks: string, extra: string, caller_id: string, device_id: string) {
     return http({
         url: '/v1/group-member/update',
+        method: 'POST',
         data: {
             group_id,
             user_id,
@@ -73,6 +79,7 @@ export function setGroupMemberAPI(group_id: string, user_id: string, member_type
 export function deleteGroupMemberAPI(group_id: string, user_id: string, caller_id: string, device_id: string) {
     return http({
         url: '/v1/group-member/update',
+        method: 'POST',
         data: {
             group_id,
             user_id,
@@ -85,6 +92,7 @@ export function deleteGroupMemberAPI(group_id: string, user_id: string, caller_i
 export function getGroupMemberInfoAPI(group_id: string, user_id: string, caller_id: string, device_id: string) {
     return http({
         url: "/v1/group-member/get",
+        method: 'POST',
         data: {
             group_id,
             user_id,

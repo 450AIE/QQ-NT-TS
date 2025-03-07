@@ -1,25 +1,27 @@
 <script lang="ts" setup>
 import { useRouter } from 'vue-router'
 import SettingOptions from '@renderer/components/SettingOptions/index.vue'
-import { watch, onBeforeUnmount, onMounted, ref, onActivated } from 'vue'
+import { watch, onBeforeUnmount, onMounted, ref } from 'vue'
 import lightQQLogo from '../../assets/light-QQ-logo.png'
 import darkQQLogo from '../../assets/dark-QQ-logo.png'
 import useBaseConfigStore from '../../store/BaseConfigStore'
 import { storeToRefs } from 'pinia'
 import useUpdatePiniaStateSync from '@renderer/hooks/useUpdatePiniaStateSync'
 import UserInfoMiniCard from '@renderer/components/UserInfoMiniCard/index.vue'
+import useUserInfoStore from '@renderer/store/UserInfoStore'
 // import useBeforeCreateGetUpdatedPiniaState from '@renderer/hooks/useBeforeCreateGetUpdatedPiniaState'
 // 监听pinia更新
 useUpdatePiniaStateSync()
 defineOptions({
     name: 'LeftSubOptions'
 })
-onActivated(() => {
-    console.log('leftsuboptions activated')
-})
+// onActivated(() => {
+//     console.log('leftsuboptions activated')
+// })
 // console.log('全局fontSize:',document.querySelector('#app').setProperty('--global-font-size','30px'))
 // useBeforeCreateGetUpdatedPiniaState()
 const baseConfigStore = useBaseConfigStore()
+const userInfoStore = useUserInfoStore()
 // 控制显示在左边的图标
 const upperIcons = ref([])
 // 控制展示个人信息
@@ -59,6 +61,9 @@ const router = useRouter()
 //路由跳转
 function transRouter(subOptionIndex) {
     let path: string
+    // 如果没变，则不请求return
+    // 切换后去请求所有好友和群聊的信息，拆分用来展示
+    // const allInfo = await Promise.all([getAllFriendsInfoAPI, getAllGroupsInfoAPI])
     if (subOptionIndex === 0) {
         path = '/'
     } else if (subOptionIndex === 1) {
@@ -69,6 +74,7 @@ function transRouter(subOptionIndex) {
 // 监听新窗口的创建，将当前的pinia状态传递给该窗口（但是不敢确定该组件内的pinia状态是否最新）
 ElectronAPI.onListenerNewWindowCreated(() => {
     ElectronAPI.sendUpdatedPiniaStateToNewCreatedWindow(JSON.stringify(baseConfigStore))
+    ElectronAPI.sendUpdatedPiniaStateToNewCreatedWindow(JSON.stringify(userInfoStore))
 })
 //点击底部的操作。最下面是0，从下网上增大
 function bottomOperate(index) {
@@ -140,7 +146,7 @@ watch(
 </script>
 
 <template>
-    <div class="container">
+    <div class="container" :style="{ width: '60px', height: '100vh' }">
         <div class="title">
             <img :src="isDarkTheme ? darkQQLogo : lightQQLogo" alt="" />
         </div>
@@ -148,33 +154,18 @@ watch(
             <img src="../../assets/user.png" alt="" @click="() => (showDetail = !showDetail)" />
             <UserInfoMiniCard v-if="showDetail" class="mini-info-card" />
         </div>
-        <div
-            v-for="(item, index) in upperIcons"
-            :key="index"
-            class="upper-option"
-            @click="transRouter(index)"
-        >
-            <el-popover
-                placement="right"
-                trigger="hover"
-                width="50"
-                :disabled="index !== 4"
-                hide-after="100"
-                popper-class="popper"
-            >
+        <div v-for="(item, index) in upperIcons" :key="index" class="upper-option" @click="transRouter(index)">
+            <el-popover placement="right" trigger="hover" width="50" :disabled="index !== 4" hide-after="100"
+                popper-class="popper">
                 <template #reference>
                     <svg class="icon bg" aria-hidden="true">
                         <use :xlink:href="item"></use>
                     </svg>
                 </template>
                 <div v-if="foldedIcons.length !== 0" @click="showManageLeftSubWindow">
-                    <div
-                        v-for="(itemm, indexx) in foldedIcons"
-                        :key="indexx"
-                        :style="{
-                            margin: '5px 0 5px 0'
-                        }"
-                    >
+                    <div v-for="(itemm, indexx) in foldedIcons" :key="indexx" :style="{
+                        margin: '5px 0 5px 0'
+                    }">
                         <svg aria-hidden="true" width="25" height="30">
                             <use :xlink:href="item"></use>
                         </svg>
@@ -183,13 +174,8 @@ watch(
                 <div v-else @click="showManageLeftSubWindow">管理</div>
             </el-popover>
         </div>
-        <div
-            v-for="(item, index) in bottomIconList"
-            :key="index"
-            class="bottom-option"
-            :style="{ bottom: index * 40 + 'px' }"
-            @click="bottomOperate(index)"
-        >
+        <div v-for="(item, index) in bottomIconList" :key="index" class="bottom-option"
+            :style="{ bottom: index * 40 + 'px' }" @click="bottomOperate(index)">
             <svg class="icon blue" aria-hidden="true">
                 <use :xlink:href="item"></use>
             </svg>
@@ -204,11 +190,9 @@ watch(
 .container {
     position: relative;
     display: flex;
-    width: 60px !important;
     flex-direction: column;
     flex-shrink: 0;
     align-items: center;
-    height: 100vh;
     -webkit-app-region: drag;
     background-color: var(--background-gray1-color);
     overflow: visible;
@@ -273,12 +257,14 @@ watch(
         margin: 10px 5px;
         width: 35px;
         height: 35px;
+
         .mini-info-card {
             position: absolute;
             top: 20px;
             left: 30px;
             z-index: 99;
         }
+
         img {
             width: 100%;
             height: 100%;

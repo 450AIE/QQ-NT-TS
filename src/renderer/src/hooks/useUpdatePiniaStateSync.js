@@ -1,5 +1,6 @@
 import { onBeforeUnmount } from 'vue'
 import useBaseConfigStore from '../store/BaseConfigStore'
+import useUserInfoStore from '../store/UserInfoStore'
 
 /**
  * 调用onListenerPiniaStateUpdate监听pinia状态更新并且更新本窗口的状态，自带onBeforeUnmount移除监听
@@ -16,7 +17,9 @@ function useUpdatePiniaStateSync() {
 function getUpdatedPiniaState(_, func, args) {
     // if(func === 'setSubOptionsManageList')    console.log('调用了',func,'(',...JSON.parse(args),')函数')
     const baseConfigStore = useBaseConfigStore()
-    baseConfigStore[func](...JSON.parse(args))
+    const userInfoStore = useUserInfoStore()
+    baseConfigStore[func]?.(...JSON.parse(args))
+    userInfoStore[func]?.(...JSON.parse(args))
 }
 
 export default useUpdatePiniaStateSync

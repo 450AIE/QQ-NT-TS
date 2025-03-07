@@ -1,7 +1,6 @@
 export interface InfoBlock {
-    username: string
-    time: number
-    avatar?: string
-    lastMsg: string
-    height?: number
+    data: any;
+    avatar_url: string;
+    width?: string;
+    height?: string;
 }

@@ -1,64 +1,59 @@
 <script lang="ts" setup>
-import { InfoBlock } from './type'
+import { InfoBlock } from './type/index'
 
-const { username, time, avatar, height = 80 } = defineProps<InfoBlock>()
+const props = defineProps<InfoBlock>()
 </script>
 
 <template>
-    <div class="container w" :style="{ height: height + 'px' }">
-        <div class="img">放图片这里</div>
-        <div class="info">
-            <div class="upper">
-                <span class="name">{{ 'TH' }}</span>
-                <span class="time">{{ time }}</span>
-            </div>
-            <div class="bottom">消息</div>
+    <div
+        class="container w"
+        :style="{ height: props.height || '100px', width: props.width || '100%' }"
+    >
+        <div class="img-container">{{ props.avatar_url }}</div>
+        <div class="info-container text-overflow-hidden">
+            <slot name="info" :data="props.data"> </slot>
+        </div>
+        <div class="btn-container text-overflow-hidden" v-if="$slots.button">
+            <!-- v-if="$slots.button"实现没有写该插槽就不占空间 -->
+            <slot name="button" :data="props.data"></slot>
         </div>
     </div>
 </template>
 
 <style scoped lang="scss">
 .container {
+    display: flex;
     user-select: none;
+    align-items: center;
+    min-height: 60px;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    position: relative;
     background-color: var(--friend-list-and-relationship-manage-background-color);
 
-    .img {
-        position: absolute;
-        width: 50px;
-        height: 50px;
-        top: 50%;
+    .img-container {
+        width: 60px;
+        height: 60px;
         background-color: #fff;
-        transform: translateY(-50%);
-        margin-left: 10px;
     }
 
-    .info {
+    .info-container {
+        margin: auto 0;
         display: flex;
-        position: absolute;
-        width: 70%;
-        height: 50px;
-        top: 50%;
-        left: 30%;
-        transform: translateY(-50%);
+        flex: 1;
+        height: 60px;
         background-color: #f0f0f0;
-
-        .upper {
-            .time {
-                position: absolute;
-                right: 0;
-            }
-        }
-
-        .bottom {
-            position: absolute;
-            bottom: 0;
-        }
+        flex-direction: column;
+        align-content: center;
+    }
+    .btn-container {
+        width: 100px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 }
 </style>

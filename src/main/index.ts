@@ -30,8 +30,8 @@ function createWindow() {
     })
     loginWindow.on('ready-to-show', () => {
         loginWindow.show()
+        pushThisWindow(windowsStack, LOGIN_WINDOW, loginWindow)
     })
-    pushThisWindow(windowsStack, LOGIN_WINDOW, loginWindow)
     loginWindow.webContents.setWindowOpenHandler((details) => {
         shell.openExternal(details.url)
         return { action: 'deny' }
@@ -112,8 +112,9 @@ ipcMain.on('create-sub-manage-window', () => {
     }
     subWin.on('ready-to-show', () => {
         subWin.show()
+        pushThisWindow(windowsStack, SUBOPTIONS_MANAGE_WINDOW, subWin)
+
     })
-    pushThisWindow(windowsStack, SUBOPTIONS_MANAGE_WINDOW, subWin)
     subWin.on('closed', () => {
         popThisWindow(windowsStack, SUBOPTIONS_MANAGE_WINDOW)
     })
@@ -148,8 +149,8 @@ ipcMain.on('create-main-window', () => {
     }
     mainWindow.on('ready-to-show', () => {
         mainWindow.show()
+        pushThisWindow(windowsStack, MAIN_WINDOW, mainWindow)
     })
-    pushThisWindow(windowsStack, MAIN_WINDOW, mainWindow)
     // 500ms后销毁登陆页，因为要让登录页去同步device_id
     // setTimeout(() => {
 
@@ -157,6 +158,9 @@ ipcMain.on('create-main-window', () => {
     mainWindow.webContents.setWindowOpenHandler((details) => {
         shell.openExternal(details.url)
         return { action: 'deny' }
+    })
+    mainWindow.on('closed', () => {
+        popThisWindow(windowsStack, MAIN_WINDOW)
     })
     // HMR for renderer base on electron-vite cli.
     // Load the remote URL for development or the local html file for production.
@@ -203,8 +207,9 @@ ipcMain.on('create-setting-global-window', () => {
     }
     settingWin.on('ready-to-show', () => {
         settingWin.show()
+        pushThisWindow(windowsStack, SETTING_WINDOW, settingWin)
+
     })
-    pushThisWindow(windowsStack, SETTING_WINDOW, settingWin)
     settingWin.on('closed', () => {
         popThisWindow(windowsStack, SETTING_WINDOW)
     })
@@ -232,9 +237,10 @@ ipcMain.on('create-collect-window', () => {
     } else {
         collectWin.loadFile(join(__dirname, '../renderer/index.html'), { hash: 'collect' })
     }
-    pushThisWindow(windowsStack, COLLECT_WINDOW, collectWin)
     collectWin.on('ready-to-show', () => {
         collectWin.show()
+        pushThisWindow(windowsStack, COLLECT_WINDOW, collectWin)
+
     })
     collectWin.on('closed', () => {
         popThisWindow(windowsStack, COLLECT_WINDOW)
@@ -265,8 +271,9 @@ ipcMain.on('create-add-friend-and-group-window', () => {
     }
     addFriendsAndGroupWindow.on('ready-to-show', () => {
         addFriendsAndGroupWindow.show()
+        pushThisWindow(windowsStack, ADD_FRIENDS_AND_GROUP_WINDOW, addFriendsAndGroupWindow)
+
     })
-    pushThisWindow(windowsStack, ADD_FRIENDS_AND_GROUP_WINDOW, addFriendsAndGroupWindow)
     addFriendsAndGroupWindow.on('closed', () => {
         popThisWindow(windowsStack, ADD_FRIENDS_AND_GROUP_WINDOW)
     })
@@ -296,8 +303,9 @@ ipcMain.on('create-create-note-window', () => {
     }
     createNoteWin.on('ready-to-show', () => {
         createNoteWin.show()
+        pushThisWindow(windowsStack, CREATE_NOTE_WINDOW, createNoteWin)
+
     })
-    pushThisWindow(windowsStack, CREATE_NOTE_WINDOW, createNoteWin)
     createNoteWin.on('closed', () => {
         popThisWindow(windowsStack, CREATE_NOTE_WINDOW)
     })
@@ -319,6 +327,8 @@ ipcMain.on('create-login-window', () => {
     })
     loginWindow.on('ready-to-show', () => {
         loginWindow.show()
+        pushThisWindow(windowsStack, LOGIN_WINDOW, loginWindow)
+
         // 将其他页面都删除掉
         windowsStack.forEach(win => {
             const window = win.window
@@ -328,7 +338,6 @@ ipcMain.on('create-login-window', () => {
             }
         })
     })
-    pushThisWindow(windowsStack, LOGIN_WINDOW, loginWindow)
     loginWindow.webContents.setWindowOpenHandler((details) => {
         shell.openExternal(details.url)
         return { action: 'deny' }
@@ -378,9 +387,9 @@ ipcMain.handle('read-baseConfigStore-files', () => {
 // 监听新窗口的创建，通知其他窗口有新窗口创建。
 ipcMain.on('new-window-created', () => {
     windowsStack.forEach((win) => {
-        if (win && !win.window.isDestroyed) {
-            win.window.webContents.send('new-window-created')
-        }
+        // if (win && !win.window.isDestroyed) {
+        win.window.webContents.send('new-window-created')
+        // }
     })
 })
 // 监听了'new-window-created'事件的窗口可以传递pinia数据同步

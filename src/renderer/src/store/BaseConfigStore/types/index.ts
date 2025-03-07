@@ -5,6 +5,3 @@ export interface subOption {
     status: boolean
 }
 
-export interface UserInfo {
-    token: string
-}

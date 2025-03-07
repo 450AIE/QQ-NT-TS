@@ -1,9 +1,11 @@
 <script setup>
-import axios from 'axios';
-import { onActivated, onMounted, ref } from 'vue';
+import axios from 'axios'
+import { onActivated, onMounted, ref } from 'vue'
 import TextBubble from '@renderer/components/MessageBubble/TextMessage/index.vue'
-import { dragVertical } from '@renderer/utils/dragFunc';
-import { topIconList,bottomIconList } from './iconList';
+import { dragVertical } from '@renderer/utils/dragFunc'
+import { topIconList, bottomIconList } from './iconList'
+import { useRoute } from 'vue-router'
+import { watch } from 'vue'
 const resizeRef = ref(null)
 const bottomRef = ref(null)
 const inpRef = ref(null)
@@ -11,43 +13,58 @@ const inpMsg = ref('')
 const scrollRef = ref(null)
 //存放所有消息的数组
 const msgArr = ref([])
+const route = useRoute()
 defineOptions({
-    name:'FriendSession'
+    name: 'FriendSession'
 })
-onActivated(()=>console.log('FriendSession'))
-onMounted(()=>{
-    dragVertical(resizeRef,bottomRef,140,400)
+onActivated(() => console.log('FriendSession'))
+onMounted(() => {
+    dragVertical(resizeRef, bottomRef, 140, 400)
 })
-async function sendMsg(e){
-    if(e.key === 'Enter')  e.preventDefault()
-    if(inpRef.value.value !== '' && (e.type === 'click' || (e.type === 'keydown' && e.key === 'Enter'))){
+async function sendMsg(e) {
+    if (e.key === 'Enter') e.preventDefault()
+    if (
+        inpRef.value.value !== '' &&
+        (e.type === 'click' || (e.type === 'keydown' && e.key === 'Enter'))
+    ) {
         const sendMsg = inpRef.value.value
-        msgArr.value.push({direction:'row-reverse',msg:sendMsg})
+        msgArr.value.push({ direction: 'row-reverse', msg: sendMsg })
         inpRef.value.value = ''
         // createMsgBubble(inpRef.value,0)
         //这里没有请求接口，于是自己创建DOM显示消息
-        const res = await axios({url:`http://api.qingyunke.com/api.php?key=free&appid=0&msg=${sendMsg}`})
+        const res = await axios({
+            url: `http://api.qingyunke.com/api.php?key=free&appid=0&msg=${sendMsg}`
+        })
         //这就是返回的消息
         const resMsg = res.data.content
         console.log(resMsg)
-        msgArr.value.push({direction:'row',msg:resMsg})
+        msgArr.value.push({ direction: 'row', msg: resMsg })
         // createMsgBubble(resMsg,1)
     }
 }
+watch(
+    () => route.query,
+    (newQuery, oldQuery) => {
+        console.log(newQuery)
+    },
+    {
+        immediate: true
+    }
+)
+
+// query传递type=0代表好友，1代表群聊。通过user_id，group_id代表请求对应数据
 
 //0表示我发的，1表示对方发的
 // function createMsgBubble(msg,who){
 
 // }
-
 </script>
-
 
 <template>
     <div class="container">
         <div class="top ww">
             <div class="username">TH</div>
-            <div class="upper-icons" v-for="(item,index) in topIconList" :key="index">
+            <div class="upper-icons" v-for="(item, index) in topIconList" :key="index">
                 <svg class="icon" aria-hidden="true">
                     <use :xlink:href="item"></use>
                 </svg>
@@ -55,19 +72,29 @@ async function sendMsg(e){
         </div>
         <div class="session-window">
             <el-scrollbar ref="scrollRef">
-                <TextBubble  v-for="(item,index) in msgArr" :key="index" :msg="item.msg" :direction="item.direction"></TextBubble>
+                <TextBubble
+                    v-for="(item, index) in msgArr"
+                    :key="index"
+                    :msg="item.msg"
+                    :direction="item.direction"
+                ></TextBubble>
             </el-scrollbar>
         </div>
         <div class="resize" ref="resizeRef"></div>
         <div class="bottom" ref="bottomRef">
             <div class="bottom-operate ww">
-                <div class="bottom-icon" v-for="(item,index) in bottomIconList" :key="index">
+                <div class="bottom-icon" v-for="(item, index) in bottomIconList" :key="index">
                     <svg class="icon" aria-hidden="true">
                         <use :xlink:href="item"></use>
                     </svg>
                 </div>
             </div>
-                <textarea  class="msg-inp ww" v-model="inpMsg" ref="inpRef" @keydown="sendMsg"></textarea>
+            <textarea
+                class="msg-inp ww"
+                v-model="inpMsg"
+                ref="inpRef"
+                @keydown="sendMsg"
+            ></textarea>
             <div class="bottom-btn-div">
                 <button class="bottom-btn" @click="sendMsg"></button>
                 <span class="arrow">
@@ -77,7 +104,6 @@ async function sendMsg(e){
         </div>
     </div>
 </template>
-
 
 <style scoped lang="scss">
 .container {
@@ -91,7 +117,7 @@ async function sendMsg(e){
         fill: #3db0fc;
     }
     .icon {
-        fill:var(--icon-fill-color)
+        fill: var(--icon-fill-color);
     }
     .resize {
         height: 2px;
@@ -103,16 +129,16 @@ async function sendMsg(e){
         padding: 0 20px;
     }
     .session-window {
-        flex:1;
+        flex: 1;
     }
     .bottom {
-        position:relative;
+        position: relative;
         display: flex;
         flex-direction: column;
         min-height: 120px;
-        max-height:400px;
+        max-height: 400px;
         height: 100px;
-        border-top:1px solid var(--friend-session-bottom-border-top-background-color);
+        border-top: 1px solid var(--friend-session-bottom-border-top-background-color);
         .bottom-operate {
             display: flex;
             align-items: center;
@@ -126,23 +152,23 @@ async function sendMsg(e){
                 height: 22px;
                 width: 22px;
                 flex-shrink: 0;
-                border-radius:5px;
-                margin-right:15px;
+                border-radius: 5px;
+                margin-right: 15px;
             }
         }
         .bottom-btn-div {
             display: flex;
-            position:relative;
+            position: relative;
             height: 40px;
             align-items: center;
-            margin-bottom:5px;
+            margin-bottom: 5px;
             .bottom-btn {
                 position: absolute;
                 width: 100px;
                 height: 25px;
                 right: 20px;
                 outline: none;
-                border:0;
+                border: 0;
                 border-radius: 4px;
                 background-color: $background-blue-color;
                 cursor: pointer;
@@ -154,19 +180,19 @@ async function sendMsg(e){
                 content: '发送';
                 position: absolute;
                 left: 16px;
-                top:50%;
+                top: 50%;
                 transform: translateY(-50%);
                 font-size: 14px;
-                color:#fff;
+                color: #fff;
             }
             .bottom-btn::after {
-                content:'|';
+                content: '|';
                 position: absolute;
                 left: 60px;
-                top:50%;
+                top: 50%;
                 transform: translateY(-50%);
                 font-size: 14px;
-                color:#80ccff;
+                color: #80ccff;
             }
         }
         .msg-inp {
@@ -174,7 +200,7 @@ async function sendMsg(e){
             border: 0;
             resize: none;
             width: 100%;
-            flex:1;
+            flex: 1;
             font-size: 16px;
             font-family: 'Microsoft YaHei';
             background-color: var(--background-gray1-color);
@@ -182,16 +208,16 @@ async function sendMsg(e){
     }
     .top {
         display: flex;
-        position:relative;
+        position: relative;
         height: 70px;
         color: var(--normal-font-color);
         border-bottom: 1px solid var(--friend-session-top-border-bottom-background-color);
         align-items: center;
         justify-content: space-between;
-        padding-top:20px;
+        padding-top: 20px;
         -webkit-app-region: drag;
         .app-operate {
-            position:absolute;
+            position: absolute;
             right: 0;
             top: 0;
         }
