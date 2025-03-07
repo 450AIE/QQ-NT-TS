@@ -67,6 +67,7 @@
     --collect-create-note-background-color: #fff;
     --overflow-hidden: hidden;
     --overflow-visible: visible;
+    --add-friend-and-group-backgr: #f2f2f2;
     font-size: var(--global-font-size, 16px);
     overflow: var(--overflow-hidden);
 }
@@ -113,6 +114,7 @@
     --collect-create-note-background-color: #1b1b1b;
     --overflow-hidden: hidden;
     --overflow-visible: visible;
+    --add-friend-and-group-backgr: #1b1b1b;
     font-size: var(--global-font-size, 16px);
     overflow: var(--overflow-hidden);
 }

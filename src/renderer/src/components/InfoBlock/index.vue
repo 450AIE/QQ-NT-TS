@@ -6,7 +6,7 @@ const props = defineProps<InfoBlock>()
 
 <template>
     <div
-        class="container w"
+        class="container-c w"
         :style="{ height: props.height || '100px', width: props.width || '100%' }"
     >
         <div class="img-container">{{ props.avatar_url }}</div>
@@ -21,7 +21,7 @@ const props = defineProps<InfoBlock>()
 </template>
 
 <style scoped lang="scss">
-.container {
+.container-c {
     display: flex;
     user-select: none;
     align-items: center;

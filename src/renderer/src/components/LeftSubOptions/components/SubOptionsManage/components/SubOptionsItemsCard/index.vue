@@ -1,39 +1,45 @@
 <script setup>
 // import useBeforeCreateGetUpdatedPiniaState from '@/renderer/src/hooks/useBeforeCreateGetUpdatedPiniaState';
-import useUpdatePiniaStateSync from '@renderer/hooks/useUpdatePiniaStateSync.js';
-import useBaseConfigStore from '@renderer/store/BaseConfigStore';
-import { Minus, Plus } from '@element-plus/icons-vue';
-import { storeToRefs } from 'pinia';
+import useBaseConfigStore from '@renderer/store/BaseConfigStore'
+import { Minus, Plus } from '@element-plus/icons-vue'
+import { storeToRefs } from 'pinia'
 // useUpdatePiniaStateSync()
 // useBeforeCreateGetUpdatedPiniaState()
-const {isDarkTheme} = storeToRefs(useBaseConfigStore())
+const { isDarkTheme } = storeToRefs(useBaseConfigStore())
 const props = defineProps({
-    option:{
-        required:true,
-        type:Object
+    option: {
+        required: true,
+        type: Object
     }
 })
 
-function operateOption(){
+function operateOption() {
     props.option.status = !props.option.status
 }
 </script>
 
-
 <template>
     <div class="container">
-        <div class="icon-plus"  :style="{backgroundColor: option.status === false ? '#e5f5ff' : '#f4e4e1'}"
-         @click="operateOption" v-if="!isDarkTheme">
+        <div
+            class="icon-plus"
+            :style="{ backgroundColor: option.status === false ? '#e5f5ff' : '#f4e4e1' }"
+            @click="operateOption"
+            v-if="!isDarkTheme"
+        >
             <el-icon :color="option.status === false ? '#2cabff' : '#f18f80'">
-                <Plus v-if="option.status === false"/>
-                <Minus  v-else />
+                <Plus v-if="option.status === false" />
+                <Minus v-else />
             </el-icon>
         </div>
-        <div class="icon-plus"  :style="{backgroundColor: option.status === false ? '#2e3843' : '#473633'}"
-        @click="operateOption" v-else>
+        <div
+            class="icon-plus"
+            :style="{ backgroundColor: option.status === false ? '#2e3843' : '#473633' }"
+            @click="operateOption"
+            v-else
+        >
             <el-icon :color="option.status === false ? '#095cb1' : '#aa4331'">
-                <Plus v-if="option.status === false"/>
-                <Minus  v-else />
+                <Plus v-if="option.status === false" />
+                <Minus v-else />
             </el-icon>
         </div>
         <div class="item">
@@ -49,7 +55,6 @@ function operateOption(){
     </div>
 </template>
 
-
 <style scoped lang="scss">
 .container {
     position: relative;
@@ -61,14 +66,14 @@ function operateOption(){
     align-content: center;
     border-radius: 6px;
     .text {
-        position:absolute;
+        position: absolute;
         display: flex;
         justify-content: center;
         width: 100%;
         bottom: 0;
         left: 0;
         font-size: 12px;
-        margin-bottom:10px;
+        margin-bottom: 10px;
         color: #9c9c9c;
     }
     .icon-item {
@@ -78,7 +83,7 @@ function operateOption(){
         height: 100%;
         justify-content: center;
         align-items: center;
-        padding:0 20px 23px 20px;
+        padding: 0 20px 23px 20px;
         background-color: var(--sub-options-manage-item-card-background-color);
         border-radius: 10px;
         .icon {
@@ -96,8 +101,8 @@ function operateOption(){
         top: 3px;
         width: 14px;
         height: 14px;
-        z-index:99;
-        border-radius :4px;
+        z-index: 99;
+        border-radius: 4px;
     }
 }
 </style>

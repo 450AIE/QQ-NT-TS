@@ -9,6 +9,7 @@ import { storeToRefs } from 'pinia'
 import useUpdatePiniaStateSync from '@renderer/hooks/useUpdatePiniaStateSync'
 import UserInfoMiniCard from '@renderer/components/UserInfoMiniCard/index.vue'
 import useUserInfoStore from '@renderer/store/UserInfoStore'
+import SubOptionsManage from '@renderer/components/LeftSubOptions/components/SubOptionsManage/index.vue'
 // import useBeforeCreateGetUpdatedPiniaState from '@renderer/hooks/useBeforeCreateGetUpdatedPiniaState'
 // 监听pinia更新
 useUpdatePiniaStateSync()
@@ -21,6 +22,8 @@ defineOptions({
 // console.log('全局fontSize:',document.querySelector('#app').setProperty('--global-font-size','30px'))
 // useBeforeCreateGetUpdatedPiniaState()
 const baseConfigStore = useBaseConfigStore()
+// 展示侧边栏管理的图标
+const isShowSubOptionsManageModal = ref<boolean>(false)
 const userInfoStore = useUserInfoStore()
 // 控制显示在左边的图标
 const upperIcons = ref([])
@@ -29,9 +32,9 @@ const showDetail = ref(false)
 // 控制被收纳的图标
 const foldedIcons = ref([])
 const { bottomIconList, upperIconList, isDarkTheme } = storeToRefs(baseConfigStore)
-const showManageLeftSubWindow = () => {
-    ElectronAPI.showManageLeftSubWindow()
-}
+// const showManageLeftSubWindow = () => {
+// ElectronAPI.showManageLeftSubWindow()
+// }
 // 一进入就要读取baseConfigStore的设置，注意，只有第一次才读取，之后切换到这个路由就不读取
 // 了，否则会读取旧的状态。或者卸载前就写入配置，这样每次读取就读取新的。
 // 当前选择：卸载前写入配置
@@ -154,28 +157,54 @@ watch(
             <img src="../../assets/user.png" alt="" @click="() => (showDetail = !showDetail)" />
             <UserInfoMiniCard v-if="showDetail" class="mini-info-card" />
         </div>
-        <div v-for="(item, index) in upperIcons" :key="index" class="upper-option" @click="transRouter(index)">
-            <el-popover placement="right" trigger="hover" width="50" :disabled="index !== 4" hide-after="100"
-                popper-class="popper">
+        <div
+            v-for="(item, index) in upperIcons"
+            :key="index"
+            class="upper-option"
+            @click="transRouter(index)"
+        >
+            <!-- hover管理左侧icons -->
+            <el-popover
+                placement="right"
+                trigger="hover"
+                width="50"
+                :disabled="index !== 4"
+                hide-after="100"
+                popper-class="popper"
+            >
                 <template #reference>
                     <svg class="icon bg" aria-hidden="true">
                         <use :xlink:href="item"></use>
                     </svg>
                 </template>
-                <div v-if="foldedIcons.length !== 0" @click="showManageLeftSubWindow">
-                    <div v-for="(itemm, indexx) in foldedIcons" :key="indexx" :style="{
-                        margin: '5px 0 5px 0'
-                    }">
+                <!-- <div v-if="foldedIcons.length !== 0" @click="showManageLeftSubWindow"> -->
+                <div
+                    v-if="foldedIcons.length !== 0"
+                    @click="() => (isShowSubOptionsManageModal = true)"
+                >
+                    <div
+                        v-for="(itemm, indexx) in foldedIcons"
+                        :key="indexx"
+                        :style="{
+                            margin: '5px 0 5px 0'
+                        }"
+                    >
                         <svg aria-hidden="true" width="25" height="30">
                             <use :xlink:href="item"></use>
                         </svg>
                     </div>
                 </div>
-                <div v-else @click="showManageLeftSubWindow">管理</div>
+                <!-- <div v-else @click="showManageLeftSubWindow">管理</div> -->
+                <div v-else @click="() => (isShowSubOptionsManageModal = true)">管理</div>
             </el-popover>
         </div>
-        <div v-for="(item, index) in bottomIconList" :key="index" class="bottom-option"
-            :style="{ bottom: index * 40 + 'px' }" @click="bottomOperate(index)">
+        <div
+            v-for="(item, index) in bottomIconList"
+            :key="index"
+            class="bottom-option"
+            :style="{ bottom: index * 40 + 'px' }"
+            @click="bottomOperate(index)"
+        >
             <svg class="icon blue" aria-hidden="true">
                 <use :xlink:href="item"></use>
             </svg>
@@ -183,6 +212,16 @@ watch(
         <keep-alive>
             <component :is="settingOptionsComponent" class="setting" />
         </keep-alive>
+        <el-dialog
+            v-model="isShowSubOptionsManageModal"
+            width="500"
+            class="sub-options-manage-dialog-header"
+            :show-close="false"
+        >
+            <template #default>
+                <SubOptionsManage :close="() => (isShowSubOptionsManageModal = false)" />
+            </template>
+        </el-dialog>
     </div>
 </template>
 
@@ -284,6 +323,15 @@ watch(
             position: absolute;
             width: 100%;
             height: 100%;
+        }
+    }
+    :deep() {
+        .el-dialog {
+            padding: 0;
+            border-radius: 10px;
+        }
+        .el-dialog__header {
+            padding: 0;
         }
     }
 }

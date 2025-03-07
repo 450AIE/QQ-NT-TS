@@ -19,56 +19,56 @@ const friendsList = [
         latestTime: '' //时间戳
     },
     {
-        user_id: 1,
+        user_id: 2,
 
         name: '死于死于安乐死',
         avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
         latestTime: '' //时间戳
     },
     {
-        user_id: 1,
+        user_id: 3,
 
         name: '死于死于安乐死',
         avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
         latestTime: '' //时间戳
     },
     {
-        user_id: 1,
+        user_id: 4,
 
         name: '死于死于安乐死',
         avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
         latestTime: '' //时间戳
     },
     {
-        user_id: 1,
+        user_id: 5,
 
         name: '死于死于安乐死',
         avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
         latestTime: '' //时间戳
     },
     {
-        user_id: 1,
+        user_id: 6,
 
         name: '死于死于安乐死',
         avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
         latestTime: '' //时间戳
     },
     {
-        user_id: 1,
+        user_id: 7,
 
         name: '死于死于安乐死',
         avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
         latestTime: '' //时间戳
     },
     {
-        user_id: 1,
+        user_id: 8,
 
         name: '死于死于安乐死',
         avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
         latestTime: '' //时间戳
     },
     {
-        user_id: 1,
+        user_id: 9,
 
         name: '死于死于安乐死',
         avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
@@ -84,7 +84,8 @@ const router = useRouter()
 //ref元素
 const left = ref(null)
 const resize = ref(null)
-
+// 当前正在对话的user_id或者group_id
+const isSessionID = ref('')
 //水平拖拽函数
 onMounted(() => {
     dragHorizontal(resize, left, 220, 450)
@@ -118,6 +119,7 @@ onUnmounted(() => {
 
 // 根据传递的参数判断是用户还是群聊
 function openFriendSession(user_id = 1) {
+    isSessionID.value = user_id
     router.push({ path: '/session', query: { type: 'user', user_id } })
 }
 </script>
@@ -129,8 +131,16 @@ function openFriendSession(user_id = 1) {
             <SearchBar />
             <div class="scroll">
                 <el-scrollbar :max-height="scrollHeight">
-                    <InfoBlock v-for="(item, index) in friendsList" :key="index" :data="item" class="info-block"
-                        @click="() => openFriendSession(item.user_id)">
+                    <InfoBlock
+                        v-for="(item, index) in friendsList"
+                        :key="index"
+                        :data="item"
+                        :style="{
+                            backgroundColor: isSessionID === item.user_id ? '#0090F0' : ''
+                        }"
+                        class="info-block"
+                        @click="() => openFriendSession(item.user_id)"
+                    >
                         <template #info="{ data }">
                             <div class="name">{{ data.name }}</div>
                             <div class="last-dialog">上次对话</div>

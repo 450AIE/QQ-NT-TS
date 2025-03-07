@@ -17,7 +17,8 @@ function useBeforeCreateGetUpdatedPiniaState(isSettingViews = false) {
 function getUpdatedPiniaState(_, jsonStore, isSettingViews = false) {
     // 同步仓库属性
     let store
-    const { storeName } = JSON.parse(jsonStore)
+    const newStateStore = JSON.parse(jsonStore)
+    const { storeName } = newStateStore
     if (storeName === 'baseConfigStore') {
         store = useBaseConfigStore()
     } else if (storeName === 'userInfoStore') {
@@ -33,7 +34,7 @@ function getUpdatedPiniaState(_, jsonStore, isSettingViews = false) {
                 // 获取首字母
                 const dataNameFirstChar = key.slice(3, 4).toLowerCase()
                 const dataName = dataNameFirstChar + dataNameWithoutFirstChar
-                store[key](store[dataName])
+                store[key](newStateStore[dataName])
             }
         }
     }

@@ -10,7 +10,8 @@ const account = ref('')
 const password = ref('')
 
 async function login() {
-    // const systemInfo = await ElectronAPI.getDeviceInfo()
+    const systemInfo = await ElectronAPI.getDeviceInfo()
+    localStorage.setItem('device', JSON.stringify(systemInfo))
     // const response = await registerAPI(systemInfo)
     // 注意将收到的device_id存储好
     // 这里要去请求接口获取设备号，然后打开主页面

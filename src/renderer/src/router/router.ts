@@ -15,10 +15,6 @@ const router = createRouter({
             ]
         },
         {
-            path: '/sub_options_manage',
-            component: () => import('@renderer/views/SubOptionsManage/index.vue')
-        },
-        {
             path: '/relationship_manage',
             component: () => import('@renderer/views/RelationshipManage/index.vue'),
             children: [

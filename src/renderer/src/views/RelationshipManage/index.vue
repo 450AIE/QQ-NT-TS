@@ -64,18 +64,29 @@ function openNotificationPage(type) {
             <el-scrollbar :max-height="scrollHeight" class="scroll">
                 <div class="friend-manage w">好友管理器</div>
                 <div class="informs">
-                    <div class="friend-inform w" @click="() => openNotificationPage('user')">好友通知</div>
-                    <div class="group-inform w" @click="() => openNotificationPage('group')">群通知</div>
+                    <div class="friend-inform w" @click="() => openNotificationPage('user')">
+                        好友通知
+                    </div>
+                    <div class="group-inform w" @click="() => openNotificationPage('group')">
+                        群通知
+                    </div>
                 </div>
                 <div class="seg-div">
-                    <el-segmented :options="['好友', '群聊']" class="seg"
-                        @change="() => (chooseRelationship = chooseRelationship === 1 ? 0 : 1)"></el-segmented>
+                    <el-segmented
+                        :options="['好友', '群聊']"
+                        class="seg"
+                        @change="() => (chooseRelationship = chooseRelationship === 1 ? 0 : 1)"
+                    ></el-segmented>
                 </div>
                 <div class="el-collapse-div">
                     <el-collapse class="el-collapse">
                         <div v-if="chooseRelationship === 0">
-                            <el-collapse-item :title="item" class="item" v-for="(item, index) in menuFriendArr"
-                                :key="index">
+                            <el-collapse-item
+                                :title="item"
+                                class="item"
+                                v-for="(item, index) in menuFriendArr"
+                                :key="index"
+                            >
                                 <!-- <InfoBlock v-for="item in 2" class="info-block"></InfoBlock> -->
                                 <InfoBlock v-for="(item, idx) in 2" class="info-block" :key="idx">
                                     <template #info> 22 </template>
@@ -83,8 +94,12 @@ function openNotificationPage(type) {
                             </el-collapse-item>
                         </div>
                         <div v-else>
-                            <el-collapse-item :title="item" class="item" v-for="(item, index) in menuGroupArr"
-                                :key="index">
+                            <el-collapse-item
+                                :title="item"
+                                class="item"
+                                v-for="(item, index) in menuGroupArr"
+                                :key="index"
+                            >
                                 <InfoBlock v-for="(item, idx) in 2" class="info-block" :key="idx">
                                     <template #info> 22 </template>
                                 </InfoBlock>
@@ -200,7 +215,9 @@ function openNotificationPage(type) {
                     .item {
                         :deep() {
                             .el-collapse-item__header {
-                                background-color: var(--friend-list-and-relationship-manage-background-color);
+                                background-color: var(
+                                    --friend-list-and-relationship-manage-background-color
+                                );
                                 position: relative;
                                 border: 0;
                                 color: var(--friend-list-and-relationship-manage-font-color);

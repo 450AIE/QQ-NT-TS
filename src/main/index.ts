@@ -4,40 +4,37 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import fs from 'fs/promises'
 import os from 'os'
 import { resolve } from 'path'
-import { pushThisWindow, isHasTheWindow, getWindow, popThisWindow } from './utils/WindowStackFunc'
-import { COLLECT_WINDOW, ADD_FRIENDS_AND_GROUP_WINDOW, CREATE_NOTE_WINDOW, MAIN_WINDOW, SETTING_WINDOW, SUBOPTIONS_MANAGE_WINDOW } from './window-type'
-import { QQWindow } from './types'
+import { pushThisWindow, isHasTheWindow, getWindow, popThisWindow, windowsStack } from './utils/window/windowStackFunc'
+import { QQWindow, WindowsType } from './types'
 import systemInfo from './utils/getDeviceInfo'
-import { LOGIN_WINDOW } from './window-type'
+import { createWindow } from './utils/window/createWindow'
 
 //存放各个窗口的栈，第一个肯定是主窗口
-const windowsStack: Array<QQWindow> = []
-function createWindow() {
-    // Create the browser window.
-    const loginWindow = new BrowserWindow({
-        width: 350,
-        height: 500,
-        show: false,
-        frame: false,
-        resizable: false,
-        autoHideMenuBar: true,
-        alwaysOnTop: true,
-        webPreferences: {
-            preload: join(__dirname, '../preload/index.js'),
-            sandbox: false,
-            webSecurity: false
-        }
+
+
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+app.whenReady().then(() => {
+    // Set app user model id for windows
+    electronApp.setAppUserModelId('com.electron')
+    // Default open or close DevTools by F12 in development
+    // and ignore CommandOrControl + R in production.
+    // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
+    app.on('browser-window-created', (_, window) => {
+        optimizer.watchWindowShortcuts(window)
     })
+    const loginWindow = createWindow(WindowsType.LOGIN_WINDOW)
     loginWindow.on('ready-to-show', () => {
         loginWindow.show()
-        pushThisWindow(windowsStack, LOGIN_WINDOW, loginWindow)
+        pushThisWindow(windowsStack, WindowsType.LOGIN_WINDOW, loginWindow)
     })
     loginWindow.webContents.setWindowOpenHandler((details) => {
         shell.openExternal(details.url)
         return { action: 'deny' }
     })
     loginWindow.on('closed', () => {
-        popThisWindow(windowsStack, LOGIN_WINDOW)
+        popThisWindow(windowsStack, WindowsType.LOGIN_WINDOW)
     })
     // HMR for renderer base on electron-vite cli.
     // Load the remote URL for development or the local html file for production.
@@ -47,32 +44,33 @@ function createWindow() {
     } else {
         loginWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/login' })
     }
-}
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-    // Set app user model id for windows
-    electronApp.setAppUserModelId('com.electron')
-
-    // Default open or close DevTools by F12 in development
-    // and ignore CommandOrControl + R in production.
-    // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-    app.on('browser-window-created', (_, window) => {
-        optimizer.watchWindowShortcuts(window)
-    })
-
-    createWindow()
-
     app.on('activate', function () {
         // On macOS it's common to re-create a window in the app when the
         // dock icon is clicked and there are no other windows open.
-        if (BrowserWindow.getAllWindows().length === 0) createWindow()
+        if (BrowserWindow.getAllWindows().length === 0) {
+            const loginWindow = createWindow(WindowsType.LOGIN_WINDOW)
+            loginWindow.on('ready-to-show', () => {
+                loginWindow.show()
+                pushThisWindow(windowsStack, WindowsType.LOGIN_WINDOW, loginWindow)
+            })
+            loginWindow.webContents.setWindowOpenHandler((details) => {
+                shell.openExternal(details.url)
+                return { action: 'deny' }
+            })
+            loginWindow.on('closed', () => {
+                popThisWindow(windowsStack, WindowsType.LOGIN_WINDOW)
+            })
+            // HMR for renderer base on electron-vite cli.
+            // Load the remote URL for development or the local html file for production.
+            if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+                loginWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/login')
+                console.log('这个是electron渲染进程所在的URL', process.env['ELECTRON_RENDERER_URL'] + '/#/login')
+            } else {
+                loginWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/login' })
+            }
+        }
     })
 })
-
-
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -83,84 +81,23 @@ app.on('window-all-closed', () => {
     }
 })
 
-// // In this file you can include the rest of your app"s specific main process
-// // code. You can also put them in separate files and require them here.
-
-//开启某个好友的对话窗口
-
-//展现侧边栏设置窗口
-ipcMain.on('create-sub-manage-window', () => {
-    if (isHasTheWindow(windowsStack, SUBOPTIONS_MANAGE_WINDOW)) return
-    const subWin = new BrowserWindow({
-        parent: windowsStack[windowsStack.length - 1].window,
-        width: 500,
-        height: 500,
-        resizable: false,
-        alwaysOnTop: true,
-        show: false,
-        // modal:true,
-        frame: false,
-        webPreferences: {
-            preload: join(__dirname, '../preload/index.js'),
-            webSecurity: false
-        }
-    })
-    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-        subWin.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/sub_options_manage')
-    } else {
-        subWin.loadFile(join(__dirname, '../renderer/index.html'), { hash: 'sub_options_manage' })
-    }
-    subWin.on('ready-to-show', () => {
-        subWin.show()
-        pushThisWindow(windowsStack, SUBOPTIONS_MANAGE_WINDOW, subWin)
-
-    })
-    subWin.on('closed', () => {
-        popThisWindow(windowsStack, SUBOPTIONS_MANAGE_WINDOW)
-    })
-})
-//关闭侧边栏设置窗口
-ipcMain.on('close-sub-manage-window', () => {
-    const subWin = getWindow(windowsStack, SUBOPTIONS_MANAGE_WINDOW)
-    if (subWin) {
-        subWin.destroy()
-    }
-})
 // 登陆结束，进入主页面
 ipcMain.on('create-main-window', () => {
-    const mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        minHeight: 600,
-        minWidth: 600,
-        show: false,
-        frame: false,
-        autoHideMenuBar: true,
-        alwaysOnTop: true,
-        webPreferences: {
-            preload: join(__dirname, '../preload/index.js'),
-            sandbox: false,
-            webSecurity: false
-        }
-    })
-    const loginWindow = getWindow(windowsStack, LOGIN_WINDOW)
+    const mainWindow = createWindow(WindowsType.MAIN_WINDOW)
+    const loginWindow = getWindow(windowsStack, WindowsType.LOGIN_WINDOW)
     if (loginWindow) {
         loginWindow.destroy()
     }
     mainWindow.on('ready-to-show', () => {
         mainWindow.show()
-        pushThisWindow(windowsStack, MAIN_WINDOW, mainWindow)
+        pushThisWindow(windowsStack, WindowsType.MAIN_WINDOW, mainWindow)
     })
-    // 500ms后销毁登陆页，因为要让登录页去同步device_id
-    // setTimeout(() => {
-
-    // }, 500)
     mainWindow.webContents.setWindowOpenHandler((details) => {
         shell.openExternal(details.url)
         return { action: 'deny' }
     })
     mainWindow.on('closed', () => {
-        popThisWindow(windowsStack, MAIN_WINDOW)
+        popThisWindow(windowsStack, WindowsType.MAIN_WINDOW)
     })
     // HMR for renderer base on electron-vite cli.
     // Load the remote URL for development or the local html file for production.
@@ -184,22 +121,8 @@ ipcMain.on('maximize', () => {
 ipcMain.on('closeWindow', () => BrowserWindow.getFocusedWindow()!.close())
 //进入设置界面
 ipcMain.on('create-setting-global-window', () => {
-    if (isHasTheWindow(windowsStack, SETTING_WINDOW)) return
-    const settingWin = new BrowserWindow({
-        parent: windowsStack[windowsStack.length - 1].window,
-        width: 700,
-        height: 800,
-        minWidth: 700,
-        show: false,
-        minHeight: 800,
-        resizable: true,
-        alwaysOnTop: true,
-        frame: false,
-        webPreferences: {
-            preload: join(__dirname, '../preload/index.js'),
-            webSecurity: false
-        }
-    })
+    if (isHasTheWindow(windowsStack, WindowsType.SETTING_WINDOW)) return
+    const settingWin = createWindow(WindowsType.SETTING_WINDOW)
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
         settingWin.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/setting_global')
     } else {
@@ -207,31 +130,17 @@ ipcMain.on('create-setting-global-window', () => {
     }
     settingWin.on('ready-to-show', () => {
         settingWin.show()
-        pushThisWindow(windowsStack, SETTING_WINDOW, settingWin)
+        pushThisWindow(windowsStack, WindowsType.SETTING_WINDOW, settingWin)
 
     })
     settingWin.on('closed', () => {
-        popThisWindow(windowsStack, SETTING_WINDOW)
+        popThisWindow(windowsStack, WindowsType.SETTING_WINDOW)
     })
 })
 // 创建收藏页面
 ipcMain.on('create-collect-window', () => {
-    if (isHasTheWindow(windowsStack, COLLECT_WINDOW)) return
-    const collectWin = new BrowserWindow({
-        parent: windowsStack[windowsStack.length - 1].window,
-        width: 1000,
-        height: 800,
-        minWidth: 700,
-        show: false,
-        minHeight: 800,
-        resizable: true,
-        alwaysOnTop: true,
-        frame: false,
-        webPreferences: {
-            preload: join(__dirname, '../preload/index.js'),
-            webSecurity: false
-        }
-    })
+    if (isHasTheWindow(windowsStack, WindowsType.COLLECT_WINDOW)) return
+    const collectWin = createWindow(WindowsType.COLLECT_WINDOW)
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
         collectWin.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/collect')
     } else {
@@ -239,31 +148,17 @@ ipcMain.on('create-collect-window', () => {
     }
     collectWin.on('ready-to-show', () => {
         collectWin.show()
-        pushThisWindow(windowsStack, COLLECT_WINDOW, collectWin)
+        pushThisWindow(windowsStack, WindowsType.COLLECT_WINDOW, collectWin)
 
     })
     collectWin.on('closed', () => {
-        popThisWindow(windowsStack, COLLECT_WINDOW)
+        popThisWindow(windowsStack, WindowsType.COLLECT_WINDOW)
     })
 })
 // 创建添加好友，群聊的页面
 ipcMain.on('create-add-friend-and-group-window', () => {
-    if (isHasTheWindow(windowsStack, ADD_FRIENDS_AND_GROUP_WINDOW)) return
-    const addFriendsAndGroupWindow = new BrowserWindow({
-        // parent: windowsStack[windowsStack.length - 1].window,
-        width: 1000,
-        height: 800,
-        minWidth: 700,
-        show: false,
-        minHeight: 800,
-        resizable: true,
-        alwaysOnTop: true,
-        frame: false,
-        webPreferences: {
-            preload: join(__dirname, '../preload/index.js'),
-            webSecurity: false
-        }
-    })
+    if (isHasTheWindow(windowsStack, WindowsType.ADD_FRIENDS_AND_GROUP_WINDOW)) return
+    const addFriendsAndGroupWindow = createWindow(WindowsType.ADD_FRIENDS_AND_GROUP_WINDOW)
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
         addFriendsAndGroupWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/add_friend_and_group')
     } else {
@@ -271,31 +166,16 @@ ipcMain.on('create-add-friend-and-group-window', () => {
     }
     addFriendsAndGroupWindow.on('ready-to-show', () => {
         addFriendsAndGroupWindow.show()
-        pushThisWindow(windowsStack, ADD_FRIENDS_AND_GROUP_WINDOW, addFriendsAndGroupWindow)
-
+        pushThisWindow(windowsStack, WindowsType.ADD_FRIENDS_AND_GROUP_WINDOW, addFriendsAndGroupWindow)
     })
     addFriendsAndGroupWindow.on('closed', () => {
-        popThisWindow(windowsStack, ADD_FRIENDS_AND_GROUP_WINDOW)
+        popThisWindow(windowsStack, WindowsType.ADD_FRIENDS_AND_GROUP_WINDOW)
     })
 })
 ipcMain.on('create-create-note-window', () => {
     // 如果存在当前窗口就不再创建
-    if (isHasTheWindow(windowsStack, CREATE_NOTE_WINDOW)) return
-    const createNoteWin = new BrowserWindow({
-        parent: windowsStack[windowsStack.length - 1].window,
-        width: 1000,
-        height: 800,
-        minWidth: 700,
-        show: false,
-        minHeight: 800,
-        resizable: true,
-        alwaysOnTop: true,
-        frame: false,
-        webPreferences: {
-            preload: join(__dirname, '../preload/index.js'),
-            webSecurity: false
-        }
-    })
+    if (isHasTheWindow(windowsStack, WindowsType.CREATE_NOTE_WINDOW)) return
+    const createNoteWin = createWindow(WindowsType.CREATE_NOTE_WINDOW)
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
         createNoteWin.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/create_note')
     } else {
@@ -303,31 +183,18 @@ ipcMain.on('create-create-note-window', () => {
     }
     createNoteWin.on('ready-to-show', () => {
         createNoteWin.show()
-        pushThisWindow(windowsStack, CREATE_NOTE_WINDOW, createNoteWin)
+        pushThisWindow(windowsStack, WindowsType.CREATE_NOTE_WINDOW, createNoteWin)
 
     })
     createNoteWin.on('closed', () => {
-        popThisWindow(windowsStack, CREATE_NOTE_WINDOW)
+        popThisWindow(windowsStack, WindowsType.CREATE_NOTE_WINDOW)
     })
 })
 ipcMain.on('create-login-window', () => {
-    const loginWindow = new BrowserWindow({
-        width: 350,
-        height: 500,
-        show: false,
-        frame: false,
-        resizable: false,
-        autoHideMenuBar: true,
-        alwaysOnTop: true,
-        webPreferences: {
-            preload: join(__dirname, '../preload/index.js'),
-            sandbox: false,
-            webSecurity: false
-        }
-    })
+    const loginWindow = createWindow(WindowsType.LOGIN_WINDOW)
     loginWindow.on('ready-to-show', () => {
         loginWindow.show()
-        pushThisWindow(windowsStack, LOGIN_WINDOW, loginWindow)
+        pushThisWindow(windowsStack, WindowsType.LOGIN_WINDOW, loginWindow)
 
         // 将其他页面都删除掉
         windowsStack.forEach(win => {
@@ -343,7 +210,7 @@ ipcMain.on('create-login-window', () => {
         return { action: 'deny' }
     })
     loginWindow.on('closed', () => {
-        popThisWindow(windowsStack, LOGIN_WINDOW)
+        popThisWindow(windowsStack, WindowsType.LOGIN_WINDOW)
     })
     // HMR for renderer base on electron-vite cli.
     // Load the remote URL for development or the local html file for production.
@@ -360,8 +227,9 @@ ipcMain.on('create-login-window', () => {
  */
 ipcMain.on('notify-others-update-pinia-state', (e, func, args) => {
     windowsStack.forEach((win) => {
+        // console.log(`通知${win.$windowName}更新pinia:${func}${args}`)
         // 已经销毁了的窗口就不发送了
-        if (!win || win.window.isDestroyed()) return
+        // if (!win || win.window.isDestroyed()) return
         // 如果是自己窗口，不发送
         if (e.sender === win.window.webContents) return
         win.window.webContents.send('update-pinia-state', func, args)
@@ -385,8 +253,10 @@ ipcMain.handle('read-baseConfigStore-files', () => {
     }
 })
 // 监听新窗口的创建，通知其他窗口有新窗口创建。
-ipcMain.on('new-window-created', () => {
+ipcMain.on('new-window-created', (e) => {
     windowsStack.forEach((win) => {
+        if (e.sender === win.window.webContents) return
+        // console.log(`通知${win.$windowName}新窗口创建`)
         // if (win && !win.window.isDestroyed) {
         win.window.webContents.send('new-window-created')
         // }
@@ -394,6 +264,7 @@ ipcMain.on('new-window-created', () => {
 })
 // 监听了'new-window-created'事件的窗口可以传递pinia数据同步
 ipcMain.on('send-new-created-window-updated-pinia-state', (_, store) => {
+    // console.log(`新创建的窗口是${windowsStack[windowsStack.length - 1].$windowName}`)
     windowsStack[windowsStack.length - 1].window.webContents.send('receive-new-created-window-updated-pinia-state', store)
 })
 // 将撰写的笔记保存到本地

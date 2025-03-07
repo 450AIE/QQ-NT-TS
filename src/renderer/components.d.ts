@@ -34,6 +34,9 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     SearchBar: typeof import('./src/components/SearchBar/index.vue')['default']
     SettingOptions: typeof import('./src/components/SettingOptions/index.vue')['default']
+    SubIconsManage: typeof import('./src/components/LeftSubOptions/components/SubIconsManage/index.vue')['default']
+    SubOptionsItemsCard: typeof import('./src/components/LeftSubOptions/components/SubOptionsManage/components/SubOptionsItemsCard/index.vue')['default']
+    SubOptionsManage: typeof import('./src/components/LeftSubOptions/components/SubOptionsManage/index.vue')['default']
     TextMessage: typeof import('./src/components/MessageBubble/TextMessage/index.vue')['default']
     UserInfoMiniCard: typeof import('./src/components/UserInfoMiniCard/index.vue')['default']
   }
