@@ -20,6 +20,10 @@ const fs = {
      */
     readAllNoteFiles: () => ipcRenderer.invoke('read-all-note-files'),
     getDeviceInfo: () => ipcRenderer.invoke('get-system-info')
+    /**
+     * 获取protobuf的message类型信息
+     */
+    // getProtoBuf: (cb) => ipcRenderer.invoke('get-protobuf-object', cb)
 }
 
 export default fs

@@ -31,17 +31,15 @@ async function sendMsg(e) {
         msgArr.value.push({ direction: 'row-reverse', msg: sendMsg })
         inpRef.value.value = ''
         // createMsgBubble(inpRef.value,0)
-        //这里没有请求接口，于是自己创建DOM显示消息
-        const res = await axios({
-            url: `http://api.qingyunke.com/api.php?key=free&appid=0&msg=${sendMsg}`
-        })
+        //这里让主进程通知通信进程发送消息
+        ElectronAPI.sendCommunicationMsg(JSON.stringify({ uplink_body: sendMsg, user_id: 1 }))
         //这就是返回的消息
-        const resMsg = res.data.content
-        console.log(resMsg)
-        msgArr.value.push({ direction: 'row', msg: resMsg })
-        // createMsgBubble(resMsg,1)
     }
 }
+// 监听来自通信进程传递的消息响应
+ElectronAPI.listenReceiveCommunicationResponse((_, response) => {
+    console.log('收到了响应的response', response)
+})
 watch(
     () => route.query,
     (newQuery, oldQuery) => {

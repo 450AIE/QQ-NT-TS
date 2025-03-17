@@ -1,27 +1,36 @@
 <script setup>
 import AppOperate from '@components/AppOperate/index.vue'
 import UserAvatar from '../../assets/user.png'
-// import useUpdatePiniaStateSync from '@renderer/hooks/useUpdatePiniaStateSync'
+import useUpdatePiniaStateSync from '@renderer/hooks/useUpdatePiniaStateSync'
 import { ref } from 'vue'
-import { registerAPI } from '@renderer/api/login'
+import { loginAPI, registerAPI } from '@renderer/api/login'
 
-// useUpdatePiniaStateSync()
+useUpdatePiniaStateSync()
 const account = ref('')
 const password = ref('')
 
 async function login() {
     const systemInfo = await ElectronAPI.getDeviceInfo()
     localStorage.setItem('device', JSON.stringify(systemInfo))
-    // const response = await registerAPI(systemInfo)
     // 注意将收到的device_id存储好
-    // 这里要去请求接口获取设备号，然后打开主页面
+    // 这里要去请求接口获取设备号
+    let response = await registerAPI(systemInfo)
+    // 先实现聊天功能，后迁移状态管理
+    const { device_id } = response
+    localStorage.setItem('device_id', device_id)
+    response = await loginAPI(account.value, password.value, device_id)
+    const { token, user_id } = response
+    localStorage.setItem('token', token)
+    localStorage.setItem('user_id', user_id)
+    // 登陆
+    // 然后打开主页面
     ElectronAPI.createMainWindow()
 }
 </script>
 
 <template>
-    <AppOperate class="operate" />
     <div class="container background-gradient">
+        <AppOperate class="operate" :type="2" />
         <div class="avatar-container">
             <el-avatar class="avatar" :src="UserAvatar" />
         </div>
@@ -44,19 +53,16 @@ async function login() {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-
     .avatar-container {
         position: absolute;
         top: 50px;
         left: 50%;
         transform: translateX(-50%);
-
         .avatar {
             height: 120px;
             width: 120px;
         }
     }
-
     .account-inp {
         position: absolute;
         top: 200px;
@@ -66,7 +72,6 @@ async function login() {
         left: 50%;
         transform: translateX(-50%);
     }
-
     .password-inp {
         position: absolute;
         top: 270px;
@@ -76,7 +81,6 @@ async function login() {
         left: 50%;
         transform: translateX(-50%);
     }
-
     .login-btn {
         position: absolute;
         left: 50%;
@@ -91,8 +95,10 @@ async function login() {
 }
 
 .operate {
+    -webkit-app-region: no-drag;
     position: absolute;
     top: 0;
     right: 0;
+    z-index: 120;
 }
 </style>

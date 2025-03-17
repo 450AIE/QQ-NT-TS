@@ -1,16 +1,18 @@
 <script lang="ts" setup>
 import { onBeforeUpdate, ref } from 'vue'
-import { normalIconList, normalIconListWithFold } from './iconList'
+import { normalIconList, normalIconListWithFold, normalIconListWithoutMaximize } from './iconList'
 import { AppOprateProps } from './types'
 
-//0普通，1带折叠
+//0普通，1带折叠，2只有关闭和最小化
 const { type = 0 } = defineProps<AppOprateProps>()
 let len = 0
 const operateIconList = ref([])
-if (type === 0) {
+if (type == 0) {
     operateIconList.value = normalIconList
-} else if (type === 1) {
+} else if (type == 1) {
     operateIconList.value = normalIconListWithFold
+} else if (type == 2) {
+    operateIconList.value = normalIconListWithoutMaximize
 }
 len = operateIconList.value.length
 onBeforeUpdate(() => {

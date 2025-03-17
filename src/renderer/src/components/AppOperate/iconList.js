@@ -6,3 +6,5 @@ export const normalIconListWithFold = [
     '#icon-zuidahua',
     '#icon-guanbi'
 ]
+
+export const normalIconListWithoutMaximize = ['#icon-zuixiaohua', '#icon-guanbi']

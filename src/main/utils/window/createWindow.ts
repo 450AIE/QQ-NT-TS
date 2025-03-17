@@ -1,7 +1,7 @@
-import { BrowserWindow } from "electron";
-import { WindowsType } from "../../types";
-import { join } from "path";
-import { windowsStack } from "./windowStackFunc";
+import { BrowserWindow } from 'electron'
+import { WindowsType } from '../../types'
+import { join } from 'path'
+import { windowsStack } from './windowStackFunc'
 
 // 工厂模式创建窗口
 export function createWindow(windowName: WindowsType) {
@@ -101,6 +101,35 @@ export function createWindow(windowName: WindowsType) {
                     webSecurity: false
                 }
             })
-
+        case WindowsType.COMMUNICATION_WINDOW:
+            return createCommunicationWindow()
+        case WindowsType.STATE_MANAGE:
+            return createStateManageWindow()
     }
+}
+
+function createCommunicationWindow() {
+    return new BrowserWindow({
+        width: 100,
+        height: 100,
+        show: true,
+        resizable: false,
+        webPreferences: {
+            preload: join(__dirname, '../preload/index.js'),
+            webSecurity: false
+        }
+    })
+}
+
+function createStateManageWindow() {
+    return new BrowserWindow({
+        width: 100,
+        height: 100,
+        show: true,
+        resizable: false,
+        webPreferences: {
+            preload: join(__dirname, '../preload/index.js'),
+            webSecurity: false
+        }
+    })
 }

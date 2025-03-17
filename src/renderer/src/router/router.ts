@@ -1,5 +1,8 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Login from '@renderer/views/Login/index.vue'
+import Communication from '@renderer/views/Communication/index.vue'
+import StateManage from '@renderer/views/StateMange/index.vue'
+
 
 const router = createRouter({
     history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -50,6 +53,14 @@ const router = createRouter({
         {
             path: '/login',
             component: Login
+        },
+        {
+            path: '/communication',
+            component: Communication
+        },
+        {
+            path: '/state_manage',
+            component: StateManage
         }
     ]
 })

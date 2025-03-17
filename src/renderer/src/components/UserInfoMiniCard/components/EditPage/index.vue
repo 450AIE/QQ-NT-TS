@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { updateUserInfoAPI } from '@renderer/api/user'
+import { ref } from 'vue'
 const props = defineProps<{ closeEditPage: Function }>()
 const formData = ref({
     nickanme: '',
@@ -12,13 +13,28 @@ const formRef = ref(null)
 function setAvatarURL(response) {
     formData.value.avatar_url = response.data.url
 }
+function updateUserInfo() {
+    const { nickanme, sex, avatar_url, extra } = formData.value
+    const user_id = localStorage.get('user_id')
+    const device_id = localStorage.get('device_id')
+    await updateUserInfoAPI(nickanme, sex, avatar_url, extra, user_id, device_id)
+    props.closeEditPage()
+}
 </script>
 
 <template>
-    <div class='container-v'>
+    <!-- 一进入页面时就应该用已有的信息填入 -->
+    <div class="container-v">
         <div class="avatar-container">
-            <el-upload action='http://geek.itheima.net/v1_0/upload' name="image" :limit="1" accept="jpg,webp,png"
-                list-type="picture" :show-file-list="false" :on-success="setAvatarURL">
+            <el-upload
+                action="http://geek.itheima.net/v1_0/upload"
+                name="image"
+                :limit="1"
+                accept="jpg,webp,png"
+                list-type="picture"
+                :show-file-list="false"
+                :on-success="setAvatarURL"
+            >
                 <el-avatar :src="formData.avatar_url" alt="" class="avatar" />
             </el-upload>
         </div>
@@ -27,25 +43,29 @@ function setAvatarURL(response) {
                 <el-input v-model="formData.nickanme" />
             </el-form-item>
             <el-form-item label="性别">
-                <el-input v-model="formData.sex" />
+                <el-radio-group v-model="form.sex">
+                    <el-radio :value="1">男</el-radio>
+                    <el-radio :value="2">女</el-radio>
+                    <el-radio :value="0">不便透露</el-radio>
+                </el-radio-group>
             </el-form-item>
             <el-form-item label="自我介绍">
                 <el-input v-model="formData.extra" />
             </el-form-item>
         </el-form>
-        <el-button type="primary" class="save">保存</el-button>
+        <el-button type="primary" class="save" @click="updateUserInfo">保存</el-button>
         <el-button class="cancel" @click="closeEditPage">取消</el-button>
     </div>
 </template>
 
-
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 .container-v {
     position: relative;
-    width: 100%;
+    width: 90%;
     height: 100%;
+    margin: 0 auto;
+    padding-top: 25px;
     box-shadow: none;
-
     .avatar-container {
         display: flex;
         align-items: center;

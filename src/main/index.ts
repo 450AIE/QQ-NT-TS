@@ -4,23 +4,32 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import fs from 'fs/promises'
 import os from 'os'
 import { resolve } from 'path'
-import { pushThisWindow, isHasTheWindow, getWindow, popThisWindow, windowsStack } from './utils/window/windowStackFunc'
-import { QQWindow, WindowsType } from './types'
+import {
+    pushThisWindow,
+    isHasTheWindow,
+    getWindow,
+    popThisWindow,
+    windowsStack
+} from './utils/window/windowStackFunc'
+import { WindowsType } from './types'
 import systemInfo from './utils/getDeviceInfo'
+import {
+    makeDataProtoBuf,
+    makeAckMsgbuffer,
+    makeDatabuffer,
+    makeDownlinkMsgbuffer,
+    makeHeartbeatMsgbuffer,
+    makeLoginMsgbuffer,
+    makeReconnMsgbuffer,
+    makeUplinkMsgbuffer
+} from './utils/protobuf/protobuf'
 import { createWindow } from './utils/window/createWindow'
-
-//存放各个窗口的栈，第一个肯定是主窗口
-
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-    // Set app user model id for windows
     electronApp.setAppUserModelId('com.electron')
-    // Default open or close DevTools by F12 in development
-    // and ignore CommandOrControl + R in production.
-    // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
     app.on('browser-window-created', (_, window) => {
         optimizer.watchWindowShortcuts(window)
     })
@@ -36,13 +45,34 @@ app.whenReady().then(() => {
     loginWindow.on('closed', () => {
         popThisWindow(windowsStack, WindowsType.LOGIN_WINDOW)
     })
+
+    const communicationWindow = createWindow(WindowsType.COMMUNICATION_WINDOW)
+    communicationWindow.on('ready-to-show', () => {
+        loginWindow.show()
+        pushThisWindow(windowsStack, WindowsType.COMMUNICATION_WINDOW, communicationWindow)
+    })
+    communicationWindow.webContents.setWindowOpenHandler((details) => {
+        shell.openExternal(details.url)
+        return { action: 'deny' }
+    })
+    communicationWindow.on('closed', () => {
+        popThisWindow(windowsStack, WindowsType.COMMUNICATION_WINDOW)
+    })
+
     // HMR for renderer base on electron-vite cli.
     // Load the remote URL for development or the local html file for production.
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
         loginWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/login')
-        console.log('这个是electron渲染进程所在的URL', process.env['ELECTRON_RENDERER_URL'] + '/#/login')
+        console.log(
+            '这个是electron渲染进程所在的URL',
+            process.env['ELECTRON_RENDERER_URL'] + '/#/login'
+        )
+        communicationWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/communication')
     } else {
         loginWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/login' })
+        communicationWindow.loadFile(join(__dirname, '../renderer/index.html'), {
+            hash: '/communication'
+        })
     }
     app.on('activate', function () {
         // On macOS it's common to re-create a window in the app when the
@@ -64,7 +94,10 @@ app.whenReady().then(() => {
             // Load the remote URL for development or the local html file for production.
             if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
                 loginWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/login')
-                console.log('这个是electron渲染进程所在的URL', process.env['ELECTRON_RENDERER_URL'] + '/#/login')
+                console.log(
+                    '这个是electron渲染进程所在的URL',
+                    process.env['ELECTRON_RENDERER_URL'] + '/#/login'
+                )
             } else {
                 loginWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/login' })
             }
@@ -131,7 +164,6 @@ ipcMain.on('create-setting-global-window', () => {
     settingWin.on('ready-to-show', () => {
         settingWin.show()
         pushThisWindow(windowsStack, WindowsType.SETTING_WINDOW, settingWin)
-
     })
     settingWin.on('closed', () => {
         popThisWindow(windowsStack, WindowsType.SETTING_WINDOW)
@@ -149,7 +181,6 @@ ipcMain.on('create-collect-window', () => {
     collectWin.on('ready-to-show', () => {
         collectWin.show()
         pushThisWindow(windowsStack, WindowsType.COLLECT_WINDOW, collectWin)
-
     })
     collectWin.on('closed', () => {
         popThisWindow(windowsStack, WindowsType.COLLECT_WINDOW)
@@ -160,13 +191,21 @@ ipcMain.on('create-add-friend-and-group-window', () => {
     if (isHasTheWindow(windowsStack, WindowsType.ADD_FRIENDS_AND_GROUP_WINDOW)) return
     const addFriendsAndGroupWindow = createWindow(WindowsType.ADD_FRIENDS_AND_GROUP_WINDOW)
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-        addFriendsAndGroupWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/add_friend_and_group')
+        addFriendsAndGroupWindow.loadURL(
+            process.env['ELECTRON_RENDERER_URL'] + '/#/add_friend_and_group'
+        )
     } else {
-        addFriendsAndGroupWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: 'add_friend_and_group' })
+        addFriendsAndGroupWindow.loadFile(join(__dirname, '../renderer/index.html'), {
+            hash: 'add_friend_and_group'
+        })
     }
     addFriendsAndGroupWindow.on('ready-to-show', () => {
         addFriendsAndGroupWindow.show()
-        pushThisWindow(windowsStack, WindowsType.ADD_FRIENDS_AND_GROUP_WINDOW, addFriendsAndGroupWindow)
+        pushThisWindow(
+            windowsStack,
+            WindowsType.ADD_FRIENDS_AND_GROUP_WINDOW,
+            addFriendsAndGroupWindow
+        )
     })
     addFriendsAndGroupWindow.on('closed', () => {
         popThisWindow(windowsStack, WindowsType.ADD_FRIENDS_AND_GROUP_WINDOW)
@@ -184,7 +223,6 @@ ipcMain.on('create-create-note-window', () => {
     createNoteWin.on('ready-to-show', () => {
         createNoteWin.show()
         pushThisWindow(windowsStack, WindowsType.CREATE_NOTE_WINDOW, createNoteWin)
-
     })
     createNoteWin.on('closed', () => {
         popThisWindow(windowsStack, WindowsType.CREATE_NOTE_WINDOW)
@@ -197,7 +235,7 @@ ipcMain.on('create-login-window', () => {
         pushThisWindow(windowsStack, WindowsType.LOGIN_WINDOW, loginWindow)
 
         // 将其他页面都删除掉
-        windowsStack.forEach(win => {
+        windowsStack.forEach((win) => {
             const window = win.window
             if (window === loginWindow) return
             if (window && !window.isDestroyed()) {
@@ -216,7 +254,10 @@ ipcMain.on('create-login-window', () => {
     // Load the remote URL for development or the local html file for production.
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
         loginWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/login')
-        console.log('这个是electron渲染进程所在的URL', process.env['ELECTRON_RENDERER_URL'] + '/#/login')
+        console.log(
+            '这个是electron渲染进程所在的URL',
+            process.env['ELECTRON_RENDERER_URL'] + '/#/login'
+        )
     } else {
         loginWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/login' })
     }
@@ -232,6 +273,7 @@ ipcMain.on('notify-others-update-pinia-state', (e, func, args) => {
         // if (!win || win.window.isDestroyed()) return
         // 如果是自己窗口，不发送
         if (e.sender === win.window.webContents) return
+        if (win.$windowName === WindowsType.COMMUNICATION_WINDOW) return
         win.window.webContents.send('update-pinia-state', func, args)
     })
 })
@@ -240,7 +282,11 @@ ipcMain.on('write-baseConfigStore-files', (_, fileData) => {
         // console.log(resolve(__dirname,'./baseConfigStore.json'))
         // console.log(resolve(app.getPath('userData'),'./baseConfigStore.json'))
         // console.log('写文件')
-        return fs.writeFile(resolve(app.getPath('userData'), './baseConfigStore.DAT'), fileData, 'utf-8')
+        return fs.writeFile(
+            resolve(app.getPath('userData'), './baseConfigStore.DAT'),
+            fileData,
+            'utf-8'
+        )
     } catch (error) {
         console.dir(error)
     }
@@ -265,7 +311,10 @@ ipcMain.on('new-window-created', (e) => {
 // 监听了'new-window-created'事件的窗口可以传递pinia数据同步
 ipcMain.on('send-new-created-window-updated-pinia-state', (_, store) => {
     // console.log(`新创建的窗口是${windowsStack[windowsStack.length - 1].$windowName}`)
-    windowsStack[windowsStack.length - 1].window.webContents.send('receive-new-created-window-updated-pinia-state', store)
+    windowsStack[windowsStack.length - 1].window.webContents.send(
+        'receive-new-created-window-updated-pinia-state',
+        store
+    )
 })
 // 将撰写的笔记保存到本地
 // ipcMain.on('write-note-files',(_,fileData)=>{
@@ -294,10 +343,25 @@ ipcMain.handle('read-all-note-files', async () => {
 })
 // 获取系统信息
 ipcMain.handle('get-system-info', () => systemInfo)
+// 获取protobuf相关的方法
+// ipcMain.handle('get-protobuf', () => ({
+//     makeDataProtoBuf,
+//     makeAckMsgbuffer,
+//     makeDatabuffer,
+//     makeDownlinkMsgbuffer,
+//     makeHeartbeatMsgbuffer,
+//     makeLoginMsgbuffer,
+//     makeReconnMsgbuffer,
+//     makeUplinkMsgbuffer
+// }))
 // 将撰写的笔记保存到本地
 ipcMain.on('append-note-files', (_, fileData) => {
     try {
-        return fs.appendFile(resolve(app.getPath('userData'), './notes.DAT'), fileData + os.EOL, 'utf-8')
+        return fs.appendFile(
+            resolve(app.getPath('userData'), './notes.DAT'),
+            fileData + os.EOL,
+            'utf-8'
+        )
     } catch (error) {
         console.dir(error)
     }
@@ -306,3 +370,20 @@ ipcMain.on('append-note-files', (_, fileData) => {
 // ipcMain.handle('tcp',()=>{
 
 // })
+// 接收渲染进程传递的信息，发送给通信进程
+ipcMain.on('send-communication-msg', (e, msg) => {
+    // 找到通信进程并发送
+    const win = getWindow(windowsStack, WindowsType.COMMUNICATION_WINDOW)
+    console.log('main发送给通信进程信息', msg)
+    if (win) {
+        win.webContents.send('receive-communication-msg', msg)
+    }
+})
+ipcMain.on('emit-communication-response', (e, response) => {
+    //将对应的响应返回给聊天的主窗口
+    const win = getWindow(windowsStack, WindowsType.MAIN_WINDOW)
+    console.log('通信进程发送给main的响应', response)
+    if (win) {
+        win.webContents.send('receive-communication-response', response)
+    }
+})

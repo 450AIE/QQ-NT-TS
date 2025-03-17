@@ -11,7 +11,11 @@ export function isHasTheWindow(windowStack: Array<QQWindow>, windowName: Windows
     return false
 }
 
-export function pushThisWindow(windowStack: Array<QQWindow>, windowName: WindowsType, window: BrowserWindow) {
+export function pushThisWindow(
+    windowStack: Array<QQWindow>,
+    windowName: WindowsType,
+    window: BrowserWindow
+) {
     windowStack.push({
         $windowName: windowName,
         window
@@ -27,11 +31,14 @@ export function popThisWindow(windowStack: Array<QQWindow>, windowName: WindowsT
     }
 }
 
-export function getWindow(windowStack: Array<QQWindow>, windowName: WindowsType) {
+export function getWindow(
+    windowStack: Array<QQWindow>,
+    windowName: WindowsType
+): BrowserWindow | null {
     for (let i = 0; i < windowStack.length; ++i) {
         if (windowStack[i].$windowName === windowName) {
             return windowStack[i].window
         }
     }
-    return false
+    return null
 }
