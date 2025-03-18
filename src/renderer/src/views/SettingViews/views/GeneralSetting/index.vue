@@ -1,42 +1,41 @@
 <script setup>
-import useUpdatePiniaStateSync from '@renderer/hooks/useUpdatePiniaStateSync';
-import useBeforeCreateGetUpdatedPiniaState from '@renderer/hooks/useBeforeCreateGetUpdatedPiniaState';
-import useBaseConfigStore from '@renderer/store/BaseConfigStore';
+import useUpdatePiniaStateSync from '@renderer/hooks/useUpdatePiniaStateSync'
+import useBeforeCreateGetUpdatedPiniaState from '@renderer/hooks/useBeforeCreateGetUpdatedPiniaState'
+import useBaseConfigStore from '@renderer/store/BaseConfigStore'
 import SettingOptionDetailCard from '@renderer/views/SettingViews/components/SettingOptionDetailCard/index.vue'
-import { storeToRefs } from 'pinia';
-import {  ref } from 'vue';
+import { storeToRefs } from 'pinia'
+import { ref } from 'vue'
 //切换白天黑夜
 const dayRef = ref(null)
 const nightRef = ref(null)
-function changeTheme(e){
-    if(e.target.dataset.id === '0'){
+function changeTheme(e) {
+    if (e.target.dataset.id === '0') {
         dayRef.value.classList.add('active')
         nightRef.value.classList.remove('active')
-    }else if(e.target.dataset.id === '1'){
+    } else if (e.target.dataset.id === '1') {
         dayRef.value.classList.remove('active')
         nightRef.value.classList.add('active')
     }
     shiftTheme(e)
 }
 const baseConfigStore = useBaseConfigStore()
-function shiftTheme(e){
+function shiftTheme(e) {
     // 白天
-    if(e.target.dataset.id === '0' && baseConfigStore.isDarkTheme){
+    if (e.target.dataset.id === '0' && baseConfigStore.isDarkTheme) {
         baseConfigStore.setIsDarkTheme(false)
-    // 黑夜
-    }else if(e.target.dataset.id === '1' && !baseConfigStore.isDarkTheme){
+        // 黑夜
+    } else if (e.target.dataset.id === '1' && !baseConfigStore.isDarkTheme) {
         baseConfigStore.setIsDarkTheme(true)
     }
 }
 // onActivated(()=>console.log('general setting'))
 // 字体大小
-const {globalFontSize} = storeToRefs(baseConfigStore)
-function changeGlobalFontSize(newFontSize){
-    baseConfigStore.setGlobalFontSize(newFontSize,true)
+const { globalFontSize } = storeToRefs(baseConfigStore)
+function changeGlobalFontSize(newFontSize) {
+    baseConfigStore.setGlobalFontSize(newFontSize)
 }
 // onBeforeUnmount(()=>ElectronAPI.writeBaseConfigStoreFiles(JSON.stringify(baseConfigStore)))
 </script>
-
 
 <template>
     <div class="container">
@@ -45,23 +44,37 @@ function changeGlobalFontSize(newFontSize){
         </div>
         <div class="scroll">
             <SettingOptionDetailCard title="外观设置" :height="150">
-                <template  class="theme-card" @click="changeTheme">
-                    <div class="theme" ref="dayRef" :class="{'active':!baseConfigStore.isDarkTheme}">
-                        <img src="../../../../assets/dayTheme.png" data-id="0" alt="">
+                <template class="theme-card" @click="changeTheme">
+                    <div
+                        class="theme"
+                        ref="dayRef"
+                        :class="{ active: !baseConfigStore.isDarkTheme }"
+                    >
+                        <img src="../../../../assets/dayTheme.png" data-id="0" alt="" />
                         <span>白天模式</span>
                     </div>
-                    <div class="theme" ref="nightRef" :class="{'active':baseConfigStore.isDarkTheme}">
-                        <img src="../../../../assets/nightTheme.png" data-id="1" alt="">
+                    <div
+                        class="theme"
+                        ref="nightRef"
+                        :class="{ active: baseConfigStore.isDarkTheme }"
+                    >
+                        <img src="../../../../assets/nightTheme.png" data-id="1" alt="" />
                         <span>夜间模式</span>
                     </div>
                 </template>
             </SettingOptionDetailCard>
             <SettingOptionDetailCard title="字体大小" :height="80">
                 <template #default>
-                    <div  class="font-size-card">
-                        <el-slider :step="2" v-model="globalFontSize"
-                         show-stops :min="12" :max="24" class="font-size-slider"
-                         @change="changeGlobalFontSize" />
+                    <div class="font-size-card">
+                        <el-slider
+                            :step="2"
+                            v-model="globalFontSize"
+                            show-stops
+                            :min="12"
+                            :max="24"
+                            class="font-size-slider"
+                            @change="changeGlobalFontSize"
+                        />
                         <span class="font-size-small">小</span>
                         <span class="font-size-normal">标准</span>
                         <span class="font-size-big">大</span>
@@ -72,17 +85,16 @@ function changeGlobalFontSize(newFontSize){
     </div>
 </template>
 
-
 <style scoped lang="scss">
 .container {
     display: flex;
     flex-direction: column;
     width: 100%;
     .scroll {
-        flex:1;
-        padding:20px 20px 0 20px;
+        flex: 1;
+        padding: 20px 20px 0 20px;
         .theme-card {
-            padding:0 10px;
+            padding: 0 10px;
             height: 100%;
             flex-shrink: 0;
             display: flex;
@@ -95,14 +107,14 @@ function changeGlobalFontSize(newFontSize){
                 // position:relative;
                 width: 120px;
                 height: 100px;
-                margin-right:15px;
-                margin-top:10px;
+                margin-right: 15px;
+                margin-top: 10px;
                 // overflow: visible;
                 img {
                     width: 100px;
                     height: 80px;
                     border-radius: 4px;
-                    margin-bottom:6px;
+                    margin-bottom: 6px;
                 }
                 span {
                     // font-size: 24px;
@@ -123,11 +135,11 @@ function changeGlobalFontSize(newFontSize){
             position: relative;
             display: flex;
             align-items: center;
-            padding:10px 20px 20px 20px;
+            padding: 10px 20px 20px 20px;
             height: 100%;
             .font-size-slider {
                 overflow: visible;
-                :deep(){
+                :deep() {
                     .el-slider__runway {
                         overflow: visible;
                         .el-slider__button-wrapper {
@@ -141,29 +153,29 @@ function changeGlobalFontSize(newFontSize){
             .font-size-small {
                 position: absolute;
                 left: 14px;
-                top:30px;
+                top: 30px;
             }
             .font-size-normal {
                 position: absolute;
                 left: 148px;
-                top:30px;
+                top: 30px;
             }
             .font-size-big {
                 position: absolute;
-                right:16px;
-                top:30px;
+                right: 16px;
+                top: 30px;
             }
         }
     }
     .title {
-        position:relative;
-        width:100%;
+        position: relative;
+        width: 100%;
         height: 70px;
         color: var(--setting-font-color);
         // background-color: orange;
         border-bottom: 1px solid var(--setting-top-border-bottom-background-color);
         .title-text {
-            position:absolute;
+            position: absolute;
             left: 20px;
             bottom: 10px;
         }

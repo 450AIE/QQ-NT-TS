@@ -1,19 +1,20 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { isEqual } from 'lodash-es'
+import { isEmpty, isEqual } from 'lodash-es'
 import { subOption } from './types'
 import { DeviceInfo } from '@utils/types/device'
 
 const useBaseConfigStore = defineStore('baseConfigStore', () => {
-    const storeName = 'baseConfigStore'
+    const storeKey = 'baseConfigStore'
     // 全局字体大小
     const globalFontSize = ref(0)
     // 是否暗夜模式
     const isDarkTheme = ref(false)
-    const setIsDarkTheme = (flag: boolean) => {
-        if (isDarkTheme.value === flag) return false
+    const setIsDarkTheme = (flag: boolean, isPositive: boolean = true) => {
+        // if (isDarkTheme.value === flag) return false
         isDarkTheme.value = flag
-        return true
+        // 是主动更新为true，才触发通知更新。
+        return isPositive
     }
     const upperFixedIconList = [
         '#icon-xiazai16',
@@ -23,10 +24,10 @@ const useBaseConfigStore = defineStore('baseConfigStore', () => {
         '#icon-diandiandian'
     ]
     const deviceInfo: DeviceInfo = ref({})
-    const setDeviceInfo = (newInfo: DeviceInfo) => {
-        if (isEqual(deviceInfo.value, newInfo)) return false
+    const setDeviceInfo = (newInfo: DeviceInfo, isPositive: boolean = true) => {
+        if (isEmpty(newInfo)) return false
         deviceInfo.value = newInfo
-        return true
+        return isPositive
     }
     // 最左侧图标
     const upperIconList = ref(upperFixedIconList)
@@ -75,32 +76,28 @@ const useBaseConfigStore = defineStore('baseConfigStore', () => {
             status: false
         }
     ])
-    // 数组内对象的顺序不同会影响isEqual，要排序
-    const setSubOptionsManageList = (newList, isSubOptionsManageStrike = false) => {
-        const newArr = newList.sort((cur, nex) => cur.id - nex.id)
-        const oldArr = subOptionsManageList.value.sort((cur, nex) => cur.id - nex.id)
-        if (isSubOptionsManageStrike) return true
-        if (isEqual(newArr, oldArr)) return false
-        subOptionsManageList.value = newArr
-        return true
+    const setSubOptionsManageList = (newList, isPositive: boolean = true) => {
+        if (isEmpty(newList)) return false
+        subOptionsManageList.value = newList
+        return isPositive
     }
-    const setUpperIconList = (newIconList) => {
+    const setUpperIconList = (newIconList, isPositive: boolean = true) => {
+        if (isEmpty(newIconList)) return false
         const arr = Array.from(new Set([...upperFixedIconList, ...newIconList]))
-        if (isEqual(arr, upperIconList.value)) return false
         upperIconList.value = arr
-        return true
+        return isPositive
     }
-    const setGlobalFontSize = (newFontSize: number, directlyUpdate = false) => {
-        if (globalFontSize.value === newFontSize && !directlyUpdate) return false
+    const setGlobalFontSize = (newFontSize: number, isPositive: boolean = true) => {
+        if (newFontSize <= 0) return false
         globalFontSize.value = newFontSize
         // 并且应用
         document
             .querySelector('.app')
             .style.setProperty('--global-font-size', globalFontSize.value + 'px')
-        return true
+        return isPositive
     }
     return {
-        storeName,
+        storeKey,
         deviceInfo,
         globalFontSize,
         setGlobalFontSize,

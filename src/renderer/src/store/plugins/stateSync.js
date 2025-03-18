@@ -1,3 +1,5 @@
+import { createUpdate } from '../../../../utils/updateMap'
+
 /**
  * 拦截pinia的action调用，通知各窗口同步状态
  */
@@ -11,16 +13,35 @@ function stateSync({ store }) {
         if (name.startsWith('set')) {
             // res为该action函数的返回值
             after((res) => {
-                // 如果传递的数据和原数据一样，那么不会调用通知更新，
-                // res是bool，不一样返回true
+                // 如果返回true，代表是主动更新的，要触发其他窗口更新
                 if (res) {
                     // console.log('args[0]',[args[0]])
                     // console.log('args',args)
-                    ElectronAPI.notifyAllWindowUpdatePiniaState(name, JSON.stringify([args[0]]))
+                    // ElectronAPI.notifyAllWindowUpdatePiniaState(name, JSON.stringify([args[0]]))
+                    // 通知状态管理窗口有窗口更新了状态
+                    const update = createUpdate(
+                        store.storeKey,
+                        getFieldNameFromFunctionName(name),
+                        name,
+                        args[0],
+                        new Date().getTime(),
+                        true
+                    )
+                    ElectronAPI.notifyHasWindowStateUpdate(JSON.stringify(update))
                 }
             })
         }
     })
+}
+
+function getFieldNameFromFunctionName(functionName) {
+    // 检查函数名是否以 "set" 或 "get" 开头
+    if (functionName.startsWith('set')) {
+        // 去掉前缀（"set" 或 "get"），并将首字母小写
+        return functionName.slice(3).charAt(0).toLowerCase() + functionName.slice(4)
+    }
+    // 如果不符合命名规范，返回 null 或抛出错误
+    return null
 }
 
 export default stateSync

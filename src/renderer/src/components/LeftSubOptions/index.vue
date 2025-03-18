@@ -52,7 +52,7 @@ async function readBaseConfigStoreFiles() {
                 // 获取首字母
                 const dataNameFirstChar = key.slice(3, 4).toLowerCase()
                 const dataName = dataNameFirstChar + dataNameWithoutFirstChar
-                baseConfigStore[key](res[dataName])
+                baseConfigStore[key](res[dataName], true)
             }
         }
     }
@@ -75,10 +75,10 @@ function transRouter(subOptionIndex) {
     router.push(path!)
 }
 // 监听新窗口的创建，将当前的pinia状态传递给该窗口（但是不敢确定该组件内的pinia状态是否最新）
-ElectronAPI.onListenerNewWindowCreated(() => {
-    ElectronAPI.sendUpdatedPiniaStateToNewCreatedWindow(JSON.stringify(baseConfigStore))
-    ElectronAPI.sendUpdatedPiniaStateToNewCreatedWindow(JSON.stringify(userInfoStore))
-})
+// ElectronAPI.onListenNewWindowCreated(() => {
+//     ElectronAPI.sendUpdatedPiniaStateToNewCreatedWindow(JSON.stringify(baseConfigStore))
+//     ElectronAPI.sendUpdatedPiniaStateToNewCreatedWindow(JSON.stringify(userInfoStore))
+// })
 //点击底部的操作。最下面是0，从下网上增大
 function bottomOperate(index) {
     if (index === 0) {
@@ -97,7 +97,7 @@ function bottomOperate(index) {
 onBeforeUnmount(() => {
     // console.log('卸载前的store:',baseConfigStore)
     ElectronAPI.writeBaseConfigStoreFiles(JSON.stringify(baseConfigStore))
-    ElectronAPI.removeListenerNewWindowCreated()
+    // ElectronAPI.removeListenerNewWindowCreated()
     window.removeEventListener('resize', onListenerWindowHeightToUnfoldIcons)
 })
 // 刚创建就要获取设备信息

@@ -13,16 +13,6 @@ import {
 } from './utils/window/windowStackFunc'
 import { WindowsType } from './types'
 import systemInfo from './utils/getDeviceInfo'
-import {
-    makeDataProtoBuf,
-    makeAckMsgbuffer,
-    makeDatabuffer,
-    makeDownlinkMsgbuffer,
-    makeHeartbeatMsgbuffer,
-    makeLoginMsgbuffer,
-    makeReconnMsgbuffer,
-    makeUplinkMsgbuffer
-} from './utils/protobuf/protobuf'
 import { createWindow } from './utils/window/createWindow'
 
 // This method will be called when Electron has finished
@@ -48,7 +38,7 @@ app.whenReady().then(() => {
 
     const communicationWindow = createWindow(WindowsType.COMMUNICATION_WINDOW)
     communicationWindow.on('ready-to-show', () => {
-        loginWindow.show()
+        communicationWindow.show()
         pushThisWindow(windowsStack, WindowsType.COMMUNICATION_WINDOW, communicationWindow)
     })
     communicationWindow.webContents.setWindowOpenHandler((details) => {
@@ -57,6 +47,19 @@ app.whenReady().then(() => {
     })
     communicationWindow.on('closed', () => {
         popThisWindow(windowsStack, WindowsType.COMMUNICATION_WINDOW)
+    })
+
+    const stateManageWindow = createWindow(WindowsType.STATE_MANAGE_WINDOW)
+    stateManageWindow.on('ready-to-show', () => {
+        stateManageWindow.show()
+        pushThisWindow(windowsStack, WindowsType.STATE_MANAGE_WINDOW, stateManageWindow)
+    })
+    stateManageWindow.webContents.setWindowOpenHandler((details) => {
+        shell.openExternal(details.url)
+        return { action: 'deny' }
+    })
+    stateManageWindow.on('closed', () => {
+        popThisWindow(windowsStack, WindowsType.STATE_MANAGE_WINDOW)
     })
 
     // HMR for renderer base on electron-vite cli.
@@ -68,11 +71,14 @@ app.whenReady().then(() => {
             process.env['ELECTRON_RENDERER_URL'] + '/#/login'
         )
         communicationWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/communication')
+        stateManageWindow?.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/state_manage')
+
     } else {
         loginWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/login' })
         communicationWindow.loadFile(join(__dirname, '../renderer/index.html'), {
             hash: '/communication'
         })
+        stateManageWindow?.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/state_manage' })
     }
     app.on('activate', function () {
         // On macOS it's common to re-create a window in the app when the
@@ -262,21 +268,6 @@ ipcMain.on('create-login-window', () => {
         loginWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/login' })
     }
 })
-
-/**
- * func是触发更新的函数，args是形参，相当于把触发pinia状态更新的函数传递了过来
- */
-ipcMain.on('notify-others-update-pinia-state', (e, func, args) => {
-    windowsStack.forEach((win) => {
-        // console.log(`通知${win.$windowName}更新pinia:${func}${args}`)
-        // 已经销毁了的窗口就不发送了
-        // if (!win || win.window.isDestroyed()) return
-        // 如果是自己窗口，不发送
-        if (e.sender === win.window.webContents) return
-        if (win.$windowName === WindowsType.COMMUNICATION_WINDOW) return
-        win.window.webContents.send('update-pinia-state', func, args)
-    })
-})
 ipcMain.on('write-baseConfigStore-files', (_, fileData) => {
     try {
         // console.log(resolve(__dirname,'./baseConfigStore.json'))
@@ -297,24 +288,6 @@ ipcMain.handle('read-baseConfigStore-files', () => {
     } catch (error) {
         console.dir(error)
     }
-})
-// 监听新窗口的创建，通知其他窗口有新窗口创建。
-ipcMain.on('new-window-created', (e) => {
-    windowsStack.forEach((win) => {
-        if (e.sender === win.window.webContents) return
-        // console.log(`通知${win.$windowName}新窗口创建`)
-        // if (win && !win.window.isDestroyed) {
-        win.window.webContents.send('new-window-created')
-        // }
-    })
-})
-// 监听了'new-window-created'事件的窗口可以传递pinia数据同步
-ipcMain.on('send-new-created-window-updated-pinia-state', (_, store) => {
-    // console.log(`新创建的窗口是${windowsStack[windowsStack.length - 1].$windowName}`)
-    windowsStack[windowsStack.length - 1].window.webContents.send(
-        'receive-new-created-window-updated-pinia-state',
-        store
-    )
 })
 // 将撰写的笔记保存到本地
 // ipcMain.on('write-note-files',(_,fileData)=>{
@@ -343,17 +316,6 @@ ipcMain.handle('read-all-note-files', async () => {
 })
 // 获取系统信息
 ipcMain.handle('get-system-info', () => systemInfo)
-// 获取protobuf相关的方法
-// ipcMain.handle('get-protobuf', () => ({
-//     makeDataProtoBuf,
-//     makeAckMsgbuffer,
-//     makeDatabuffer,
-//     makeDownlinkMsgbuffer,
-//     makeHeartbeatMsgbuffer,
-//     makeLoginMsgbuffer,
-//     makeReconnMsgbuffer,
-//     makeUplinkMsgbuffer
-// }))
 // 将撰写的笔记保存到本地
 ipcMain.on('append-note-files', (_, fileData) => {
     try {
@@ -387,3 +349,54 @@ ipcMain.on('emit-communication-response', (e, response) => {
         win.webContents.send('receive-communication-response', response)
     }
 })
+/**
+ * 重构
+ */
+ipcMain.on('has-window-state-update', (_, update: string) => {
+    const win = getWindow(windowsStack, WindowsType.STATE_MANAGE_WINDOW)
+    console.log('render给statemanage')
+    if (win) {
+        win.webContents.send('notify-update-updateMap', update)
+    }
+})
+
+ipcMain.on('notify-window-update-state', (_, update: string) => {
+    console.log('statemanage传递的update为')
+    windowsStack.forEach(win => {
+        // 通信和状态管理窗口略过
+        if (win.$windowName === WindowsType.COMMUNICATION_WINDOW || win.$windowName === WindowsType.STATE_MANAGE_WINDOW) {
+            return
+        }
+        if (win.window) {
+            win.window.webContents.send('receive-update-state', update)
+        }
+    })
+})
+
+ipcMain.on('notify-new-window-created', (e) => {
+    // console.log('新窗口创建了')
+    const stateWin = getWindow(windowsStack, WindowsType.STATE_MANAGE_WINDOW)
+    if (stateWin) {
+        stateWin.webContents.send('new-window-created', e.processId)
+    }
+})
+
+ipcMain.on('emit-full-pinia-state', (e, jsonStore, targetId) => {
+    console.log('statemanage传递full pinia给新创建的窗口')
+    const win = findRendererProcessById(targetId)
+    console.log('找到的win', !!win, targetId)
+    if (win) {
+        win.webContents.send('receive-full-pinia-update', jsonStore)
+    }
+})
+
+function findRendererProcessById(processId) {
+    const windows = BrowserWindow.getAllWindows();
+    for (const win of windows) {
+        const webContents = win.webContents;
+        if (webContents && webContents.getProcessId() === processId) {
+            return win; // 返回匹配的渲染进程
+        }
+    }
+    return null; // 如果未找到匹配的渲染进程，返回 null
+}

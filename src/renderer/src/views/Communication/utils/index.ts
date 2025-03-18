@@ -1,6 +1,6 @@
 import { ackProtobuf, heaetBeatProtobuf, LoginProtobuf, UplinkProtobuf } from '@renderer/api/communication'
 import TaskQueue from '../../../../../utils/taskQueue/index'
-import { TimeoutError } from "./../../../../../utils/Error/index";
+import { TimeoutError } from "../../../../../utils/error/index";
 // 定期加入任务队列，自动发送心跳包
 export function startHeartBeatAutomacally(time = 100000) {
     let stopHeartTimes = 0

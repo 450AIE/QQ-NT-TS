@@ -10,6 +10,15 @@ ElectronAPI.listenReceiveCommunicationMsg(async (_, data: string) => {
 })
 </script>
 
-<template></template>
+<template>
+    <div class="container">通信</div>
+</template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.caontainer {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    -webkit-app-region: drag;
+}
+</style>

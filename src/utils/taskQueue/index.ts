@@ -1,6 +1,6 @@
 // 负责让发送消息加入该并发任务队列，然后为这个回调开启定时器id，没收到ACK自动重发。
 
-import { TimeoutError } from "../Error"
+import { TimeoutError } from "../error"
 
 // 同时在网络不佳的时候，这里面可以存储挂起的任务，在网络恢复后重新执行
 class ConcurrentTaskQueue {

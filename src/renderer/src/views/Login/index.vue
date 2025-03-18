@@ -18,10 +18,10 @@ async function login() {
     // 先实现聊天功能，后迁移状态管理
     const { device_id } = response
     localStorage.setItem('device_id', device_id)
-    response = await loginAPI(account.value, password.value, device_id)
-    const { token, user_id } = response
-    localStorage.setItem('token', token)
-    localStorage.setItem('user_id', user_id)
+    // response = await loginAPI(account.value, password.value, device_id)
+    // const { token, user_id } = response
+    // localStorage.setItem('token', token)
+    // localStorage.setItem('user_id', user_id)
     // 登陆
     // 然后打开主页面
     ElectronAPI.createMainWindow()

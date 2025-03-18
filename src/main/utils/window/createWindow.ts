@@ -103,17 +103,18 @@ export function createWindow(windowName: WindowsType) {
             })
         case WindowsType.COMMUNICATION_WINDOW:
             return createCommunicationWindow()
-        case WindowsType.STATE_MANAGE:
+        case WindowsType.STATE_MANAGE_WINDOW:
             return createStateManageWindow()
     }
 }
 
 function createCommunicationWindow() {
     return new BrowserWindow({
-        width: 100,
-        height: 100,
+        width: 200,
+        height: 200,
         show: true,
         resizable: false,
+        frame: false,
         webPreferences: {
             preload: join(__dirname, '../preload/index.js'),
             webSecurity: false
@@ -123,10 +124,11 @@ function createCommunicationWindow() {
 
 function createStateManageWindow() {
     return new BrowserWindow({
-        width: 100,
-        height: 100,
+        width: 200,
+        height: 200,
         show: true,
         resizable: false,
+        frame: false,
         webPreferences: {
             preload: join(__dirname, '../preload/index.js'),
             webSecurity: false

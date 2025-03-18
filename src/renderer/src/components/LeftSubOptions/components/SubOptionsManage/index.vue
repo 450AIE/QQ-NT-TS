@@ -15,7 +15,8 @@ const unselectedList = ref(subOptionsManageList.value.filter((opt) => opt.status
 function exitSubManageWindow(e) {
     //确定，将当前的状态保存给subOptionsManageList
     if (e.target.dataset.id === '0') {
-        setSubOptionsManageList([...selectedList.value, ...unselectedList.value], true)
+        // setSubOptionsManageList([...selectedList.value, ...unselectedList.value], true)
+        setSubOptionsManageList([...selectedList.value, ...unselectedList.value])
         setUpperIconList([...selectedList.value.map((item) => item.icon)])
         ElectronAPI.writeBaseConfigStoreFiles(JSON.stringify(baseConfigStore))
         // console.log('改变后的upperIconList.value:',upperIconList.value)

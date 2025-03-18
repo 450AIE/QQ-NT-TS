@@ -11,6 +11,7 @@ module.exports = {
         '@vue/eslint-config-prettier'
     ],
     rules: {
+        'semi': 'off',
         'vue/require-default-prop': 'off',
         'vue/multi-word-component-names': 'off',
         '@typescript-eslint/no-explicit-any': 'off'

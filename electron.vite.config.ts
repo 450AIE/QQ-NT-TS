@@ -1,7 +1,7 @@
 import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
-import { viteStaticCopy } from 'vite-plugin-static-copy'
-import protoPlugin from 'vite-plugin-proto'
+// import { viteStaticCopy } from 'vite-plugin-static-copy'
+// import protoPlugin from 'vite-plugin-proto'
 import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
@@ -11,15 +11,15 @@ export default defineConfig({
     main: {
         plugins: [
             externalizeDepsPlugin(),
-            protoPlugin(),
-            viteStaticCopy({
-                targets: [
-                    {
-                        src: 'src/main/utils/protobuf/message.proto',
-                        dest: ''
-                    }
-                ]
-            })
+            // protoPlugin(),
+            // viteStaticCopy({
+            //     targets: [
+            //         {
+            //             src: 'src/main/utils/protobuf/message.proto',
+            //             dest: ''
+            //         }
+            //     ]
+            // })
         ],
         resolve: {
             alias: {

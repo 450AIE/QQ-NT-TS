@@ -1,8 +1,9 @@
+import { BrowserWindow } from 'electron'
 import { WindowsType } from '../window-type'
 
 export interface QQWindow {
-    $windowName: string
-    window: WindowsType
+    $windowName: WindowsType
+    window: BrowserWindow
 }
 export enum WindowsType {
     COLLECT_WINDOW,
@@ -12,5 +13,5 @@ export enum WindowsType {
     ADD_FRIENDS_AND_GROUP_WINDOW,
     LOGIN_WINDOW,
     COMMUNICATION_WINDOW,
-    STATE_MANAGE
+    STATE_MANAGE_WINDOW
 }

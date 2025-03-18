@@ -13,7 +13,7 @@ const formRef = ref(null)
 function setAvatarURL(response) {
     formData.value.avatar_url = response.data.url
 }
-function updateUserInfo() {
+async function updateUserInfo() {
     const { nickanme, sex, avatar_url, extra } = formData.value
     const user_id = localStorage.get('user_id')
     const device_id = localStorage.get('device_id')

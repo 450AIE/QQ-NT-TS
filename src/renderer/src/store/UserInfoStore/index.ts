@@ -1,18 +1,18 @@
 import { ref } from "vue";
 import { UserInfo } from "./../../../../utils/types/user";
 import { defineStore } from "pinia";
-import { isEqual } from "lodash";
+import { isEmpty } from "lodash";
 
 const useUserInfoStore = defineStore('userInfoStore', () => {
-    const storeName = 'userInfoStore'
+    const storeKey = 'userInfoStore'
     const userInfo: UserInfo = ref({})
-    const setUserInfo = (newUserInfo: UserInfo) => {
-        if (isEqual(userInfo.value, newUserInfo)) return false
+    const setUserInfo = (newUserInfo: UserInfo, isPositive: boolean) => {
+        if (isEmpty(newUserInfo)) return false
         userInfo.value = newUserInfo
-        return true
+        return isPositive
     }
     return {
-        storeName,
+        storeKey,
         userInfo,
         setUserInfo
     }
