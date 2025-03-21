@@ -112,11 +112,12 @@ function createCommunicationWindow() {
     return new BrowserWindow({
         width: 200,
         height: 200,
-        show: true,
+        show: false,
         resizable: false,
         frame: false,
         webPreferences: {
-            preload: join(__dirname, '../preload/index.js'),
+            // preload: join(__dirname, '../preload/index.js'),
+            nodeIntegration: true,
             webSecurity: false
         }
     })
@@ -126,7 +127,7 @@ function createStateManageWindow() {
     return new BrowserWindow({
         width: 200,
         height: 200,
-        show: true,
+        show: false,
         resizable: false,
         frame: false,
         webPreferences: {

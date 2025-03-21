@@ -9,6 +9,9 @@ const props = defineProps<InfoBlock>()
         class="container-c w"
         :style="{ height: props.height || '100px', width: props.width || '100%' }"
     >
+        <div class="prefix-container text-overflow-hidden" v-if="$slots.prefix">
+            <slot name="prefix" :data="props.data"></slot>
+        </div>
         <div class="img-container">{{ props.avatar_url }}</div>
         <div class="info-container text-overflow-hidden">
             <slot name="info" :data="props.data"> </slot>
@@ -50,6 +53,13 @@ const props = defineProps<InfoBlock>()
     }
     .btn-container {
         width: 100px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .prefix-container {
+        width: 40px;
         height: 100%;
         display: flex;
         align-items: center;

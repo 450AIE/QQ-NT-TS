@@ -9,18 +9,22 @@ const http = axios.create({
     adapter: 'fetch'
 })
 http.interceptors.request.use((request) => {
-    // const { userInfo } = useUserInfoStore()
-    // const { deviceInfo } = useBaseConfigStore()
-    // const userInfoRef = toRefs(userInfo)
-    // 自动带上token
-    // request.headers.token = userInfoRef.value.token
+    // const userInfoStore = useUserInfoStore()
     // 自动带上device_id和caller_id
-    // request.data.device_id = deviceInfo.device_id
-    // request.data.caller_id = userInfoRef.value.user_id
-    //
+    if (request.data) {
+        const user_id = localStorage.getItem('user_id')
+        if (user_id) {
+            request.data.caller_id = Number(user_id)
+        }
+        const device_id = localStorage.getItem('device_id')
+        if (device_id) {
+            request.data.device_id = Number(device_id)
+        }
+    }
+    // 自动带上token
     const token = localStorage.getItem('token')
     if (token) {
-        request.headers['token'] = `Bearer ${token}`
+        request.headers.Authorization = `Bearer ${token}`
     }
     return request
 })

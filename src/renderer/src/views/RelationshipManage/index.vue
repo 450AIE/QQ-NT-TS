@@ -8,7 +8,15 @@ import { menuFriendArr, menuGroupArr } from './menuList'
 import { dragHorizontal } from '../../utils/dragFunc'
 import AppOperate from '@renderer/components/AppOperate/index.vue'
 import SearchBar from '@renderer/components/SearchBar/index.vue'
+import { getAllFriendsInfoAPI } from '@renderer/api/friends'
+import { getAllGroupsInfoAPI } from '@renderer/api/groups'
 const scrollHeight = ref(window.innerHeight - 70)
+getAllFriendsInfoAPI().then((res) => {
+    console.log('所有好友信息', res)
+})
+getAllGroupsInfoAPI().then((res) => {
+    console.log('所有群组消息', res)
+})
 window.addEventListener('resize', () => {
     scrollHeight.value = window.innerHeight - 70
 })
@@ -139,7 +147,6 @@ function openNotificationPage(type) {
         width: 220px;
         max-width: 450px;
         float: left;
-
         .friend-manage {
             display: flex;
             align-items: center;

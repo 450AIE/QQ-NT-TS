@@ -22,8 +22,13 @@ const props = defineProps({
         type: Boolean,
         default: true
     },
-    onEnter: Function
+    onEnter: {
+        required: false,
+        type: Function,
+        default: () => {}
+    }
 })
+const openCreateGroupWindow = ref(false)
 defineOptions({
     name: 'SearchBar'
 })
@@ -37,15 +42,32 @@ function openAddFriendAndGroupWindow() {
     <div
         class="search w"
         :style="{
-            borderBottom: props.bottomBorder ? '1px solid var(--search-bar-border-bottom-color)' : 'none'
+            borderBottom: props.bottomBorder
+                ? '1px solid var(--search-bar-border-bottom-color)'
+                : 'none'
         }"
     >
-        <el-input v-model="props.value" placeholder="搜索" class="inp" :prefix-icon="Search" @input="(val) => props.setValue(val)" />
+        <el-input
+            v-model="props.value"
+            placeholder="搜索"
+            class="inp"
+            :prefix-icon="Search"
+            @input="(val) => props.setValue(val)"
+            @keydown.enter="props.onEnter"
+        />
         <div v-if="props.withIcon" class="plus-icon-div">
+            <el-dialog v-model="openCreateGroupWindow" width="500" :show-close="false">
+                <CreateGroup :close="() => (openCreateGroupWindow = !openCreateGroupWindow)" />
+            </el-dialog>
             <el-icon class="plus-icon" @click="() => (showDetail = !showDetail)"><Plus /></el-icon>
             <!--  加好友，加群聊 -->
             <ul v-if="showDetail" class="detail">
-                <li class="detail-item">创建群聊</li>
+                <li
+                    class="detail-item"
+                    @click="() => (openCreateGroupWindow = !openCreateGroupWindow)"
+                >
+                    创建群聊
+                </li>
                 <li class="detail-item" @click="openAddFriendAndGroupWindow">加好友/群</li>
             </ul>
         </div>

@@ -7,13 +7,29 @@ import InfoBlock from '@renderer/components/InfoBlock/index.vue'
 import { useReactiveHeight } from '@renderer/hooks/useReactiveHeight'
 // import GroupInfoBlock from '@renderer/views/AddFriendAndGroup/components/GroupInfoBlock/index.vue'
 import { ref } from 'vue'
+import { searchUserAPI } from '@renderer/api/user'
+import { UserInfo } from 'src/utils/types/user'
+import { GroupInfo } from 'src/utils/types/group'
+import { applyForBeingFriendAPI } from '@renderer/api/friends'
 
 useBeforeCreateGetUpdatedPiniaState()
 useUpdatePiniaStateSync()
+// 请求到的所哟数据，用来渲染
+const userRenderList = ref<UserInfo[]>([])
+const groupRenderList = ref<GroupInfo[]>([])
 // 控制选择的标签
-const selectedLabelID = ref<string>('user')
+const selectedLabelID = ref<'user' | 'group'>('user')
 const inputValue = ref<string>('')
 const scrollHeight = useReactiveHeight(140)
+async function search() {
+    if (selectedLabelID.value === 'user') {
+        userRenderList.value = await searchUserAPI(inputValue.value)
+    } else if (selectedLabelID.value === 'group') {
+    }
+}
+async function applyToAddFriend(user_id: string, remarks?: string = '', desc?: string = '') {
+    await applyForBeingFriendAPI(user_id, remarks, desc)
+}
 </script>
 
 <template>
@@ -25,6 +41,7 @@ const scrollHeight = useReactiveHeight(140)
                 :set-value="(val) => (inputValue = val)"
                 :with-icon="false"
                 :bottom-border="false"
+                :on-enter="search"
             />
         </div>
         <el-tabs
@@ -35,12 +52,22 @@ const scrollHeight = useReactiveHeight(140)
             <el-tab-pane label="用户" name="user">
                 <el-scrollbar :height="scrollHeight">
                     <!-- <GroupInfoBlock /> -->
-                    <InfoBlock v-for="(item, idx) in 11" :key="idx" class="info-block">
+                    <InfoBlock
+                        v-for="(item, idx) in userRenderList"
+                        :key="item.username"
+                        class="info-block"
+                    >
                         <template #info>
-                            <span>用户名称</span>
+                            <div class="info">
+                                <el-avatar :src="item.avatar_url" class="avatar" />
+                                <span class="username">{{ item.username }}</span>
+                                <span class="userid">{{ item.user_id || '暂无' }}</span>
+                            </div>
                         </template>
                         <template #button>
-                            <el-button>加入</el-button>
+                            <el-button @click="() => applyToAddFriend(item.user_id)"
+                                >添加</el-button
+                            >
                         </template>
                     </InfoBlock>
                 </el-scrollbar>
@@ -48,9 +75,13 @@ const scrollHeight = useReactiveHeight(140)
             <el-tab-pane label="群聊" name="group">
                 <el-scrollbar :height="scrollHeight">
                     <!-- <GroupInfoBlock /> -->
-                    <InfoBlock v-for="(item, idx) in 11" :key="idx" class="info-block">
+                    <InfoBlock
+                        v-for="(item, idx) in groupRenderList"
+                        :key="item.group_id"
+                        class="info-block"
+                    >
                         <template #info>
-                            <span>群聊名称</span>
+                            <span>{{ item.name }}</span>
                         </template>
                         <template #button>
                             <el-button>加入</el-button>
@@ -91,6 +122,29 @@ const scrollHeight = useReactiveHeight(140)
         .info-block {
             margin-bottom: 10px;
             border-radius: 10px;
+            .info {
+                position: relative;
+                height: 100%;
+                .avatar {
+                    position: absolute;
+                    top: 50%;
+                    height: 45px;
+                    width: 45px;
+                    transform: translateY(-50%);
+                    left: 5px;
+                    margin: auto 0;
+                }
+                .username {
+                    position: absolute;
+                    left: 55px;
+                    top: 8px;
+                }
+                .userid {
+                    position: absolute;
+                    left: 55px;
+                    bottom: 8px;
+                }
+            }
         }
     }
 }

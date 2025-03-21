@@ -15,9 +15,7 @@ function setAvatarURL(response) {
 }
 async function updateUserInfo() {
     const { nickanme, sex, avatar_url, extra } = formData.value
-    const user_id = localStorage.get('user_id')
-    const device_id = localStorage.get('device_id')
-    await updateUserInfoAPI(nickanme, sex, avatar_url, extra, user_id, device_id)
+    await updateUserInfoAPI(nickanme, sex, avatar_url, extra)
     props.closeEditPage()
 }
 </script>
@@ -43,7 +41,7 @@ async function updateUserInfo() {
                 <el-input v-model="formData.nickanme" />
             </el-form-item>
             <el-form-item label="性别">
-                <el-radio-group v-model="form.sex">
+                <el-radio-group v-model="formData.sex">
                     <el-radio :value="1">男</el-radio>
                     <el-radio :value="2">女</el-radio>
                     <el-radio :value="0">不便透露</el-radio>

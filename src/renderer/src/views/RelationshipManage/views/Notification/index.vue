@@ -1,24 +1,50 @@
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue'
 import InfoBlock from '@renderer/components/InfoBlock/index.vue'
 import { useRoute } from 'vue-router'
 import { useReactiveHeight } from '@renderer/hooks/useReactiveHeight'
+import { agreeFriendApplicationAPI, getFriendApplicationListAPI } from '@renderer/api/friends'
+import { getAllGroupsInfoAPI } from '@renderer/api/groups'
+import { UserInfo } from 'src/utils/types/user'
+import { GroupInfo } from 'src/utils/types/group'
 
-let notificationList = ref([{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}])
+let notificationList = ref<UserInfo[] | GroupInfo[]>([])
 const scrollbarHeight = useReactiveHeight(80)
 const route = useRoute()
 // 根据params判断当前是好友通知还是群通知
 if (route.params.type == 'user') {
     // 获取全部通知，并展示
+    getFriendApplicationListAPI().then((res) => {
+        notificationList.value = res
+    })
 } else if (route.params.type == 'group') {
+    getAllGroupsInfoAPI().then((res) => {})
 }
 // 监听query值的变化
 watch(
     () => route.params.type,
     (newType, oldType) => {
-        console.log(newType, oldType)
+        if (route.params.type == 'user') {
+            // 获取全部通知，并展示
+            getFriendApplicationListAPI().then((res) => {
+                console.log('查看', res)
+            })
+        } else if (route.params.type == 'group') {
+            getAllGroupsInfoAPI().then((res) => {})
+        }
     }
 )
+
+// function agreeFriendApplication(user_id: string, remarks?: string = '') {
+//     agreeFriendApplicationAPI(user_id)
+// }
+
+function agreeApplication(id) {
+    if (route.params.type === 'user') {
+        agreeFriendApplicationAPI(id)
+    } else if (route.params.type == 'group') {
+    }
+}
 </script>
 
 <template>
@@ -37,9 +63,11 @@ watch(
                         :key="idx"
                         class="info-block"
                     >
-                        <template #info> 222 </template>
+                        <template #info> {{ item.nickname }} </template>
                         <template #button>
-                            <el-button>同意</el-button>
+                            <el-button @click="() => agreeApplication(item.friend_id)"
+                                >同意</el-button
+                            >
                         </template>
                     </InfoBlock>
                 </el-scrollbar>

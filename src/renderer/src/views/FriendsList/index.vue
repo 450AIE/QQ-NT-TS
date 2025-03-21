@@ -1,80 +1,22 @@
-<script setup>
+<script lang="ts" setup>
 import InfoBlock from '@renderer/components/InfoBlock/index.vue'
 import { onActivated, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { dragHorizontal } from '../../utils/dragFunc'
 import AppOerate from '@renderer/components/AppOperate/index.vue'
 import SearchBar from '@renderer/components/SearchBar/index.vue'
+import { getAllFriendsInfoAPI } from '@renderer/api/friends'
+import { UserInfo } from 'src/utils/types/user'
+import { getAllGroupsInfoAPI } from '@renderer/api/groups'
+import { GroupInfo } from 'src/utils/types/group'
 
 defineOptions({
     name: 'FriendList'
 })
 onActivated(() => console.log('friend'))
 //这个不确定是否写成响应式
-const friendsList = [
-    {
-        user_id: 1,
-        name: '死于死于安乐死',
-        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
-        latestTime: '' //时间戳
-    },
-    {
-        user_id: 2,
-
-        name: '死于死于安乐死',
-        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
-        latestTime: '' //时间戳
-    },
-    {
-        user_id: 3,
-
-        name: '死于死于安乐死',
-        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
-        latestTime: '' //时间戳
-    },
-    {
-        user_id: 4,
-
-        name: '死于死于安乐死',
-        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
-        latestTime: '' //时间戳
-    },
-    {
-        user_id: 5,
-
-        name: '死于死于安乐死',
-        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
-        latestTime: '' //时间戳
-    },
-    {
-        user_id: 6,
-
-        name: '死于死于安乐死',
-        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
-        latestTime: '' //时间戳
-    },
-    {
-        user_id: 7,
-
-        name: '死于死于安乐死',
-        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
-        latestTime: '' //时间戳
-    },
-    {
-        user_id: 8,
-
-        name: '死于死于安乐死',
-        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
-        latestTime: '' //时间戳
-    },
-    {
-        user_id: 9,
-
-        name: '死于死于安乐死',
-        avatar_url: 'https://s2.loli.net/2024/08/11/TNzyaPnfDLY9utC.jpg',
-        latestTime: '' //时间戳
-    }
-]
+const friendsList = ref<UserInfo[]>([])
+const groupsList = ref<GroupInfo[]>([])
 const right = ref(null)
 //计算好友列表的滚动条出现邻接值
 const scrollHeight = ref(window.innerHeight - 70)
@@ -86,6 +28,15 @@ const left = ref(null)
 const resize = ref(null)
 // 当前正在对话的user_id或者group_id
 const isSessionID = ref('')
+const userId = localStorage.getItem('user_id')
+// const deviceId = localStorage.getItem('device_id')
+getAllFriendsInfoAPI().then((res) => {
+    // 不能和自己聊天
+    friendsList.value = res.filter((i) => i.friend_id !== userId)
+})
+getAllGroupsInfoAPI().then((res) => {
+    groupsList.value = res
+})
 //水平拖拽函数
 onMounted(() => {
     dragHorizontal(resize, left, 220, 450)
@@ -118,9 +69,13 @@ onUnmounted(() => {
 })
 
 // 根据传递的参数判断是用户还是群聊
-function openFriendSession(user_id = 1) {
-    isSessionID.value = user_id
+function openFriendSession(user_id) {
+    isSessionID.value = 'user' + user_id
     router.push({ path: '/session', query: { type: 'user', user_id } })
+}
+function openGroupSession(group_id) {
+    isSessionID.value = 'group' + group_id
+    router.push({ path: '/session', query: { type: 'group', group_id } })
 }
 </script>
 
@@ -133,16 +88,37 @@ function openFriendSession(user_id = 1) {
                 <el-scrollbar :max-height="scrollHeight">
                     <InfoBlock
                         v-for="(item, index) in friendsList"
-                        :key="index"
+                        :key="item.friend_id"
                         :data="item"
                         :style="{
-                            backgroundColor: isSessionID === item.user_id ? '#0090F0' : ''
+                            backgroundColor:
+                                isSessionID === 'user' + item.friend_id ? '#0090F0' : ''
                         }"
                         class="info-block"
-                        @click="() => openFriendSession(item.user_id)"
+                        @click="() => openFriendSession(item.friend_id)"
                     >
                         <template #info="{ data }">
-                            <div class="name">{{ data.name }}</div>
+                            <div class="name">
+                                {{ data }}
+                            </div>
+                            <div class="last-dialog">上次对话</div>
+                        </template>
+                    </InfoBlock>
+                    <InfoBlock
+                        v-for="(item, index) in groupsList"
+                        :key="item.group_id"
+                        :data="item"
+                        :style="{
+                            backgroundColor:
+                                isSessionID === 'group' + item.group_id ? '#0090F0' : ''
+                        }"
+                        class="info-block"
+                        @click="() => openGroupSession(item.group_id)"
+                    >
+                        <template #info="{ data }">
+                            <div class="name">
+                                {{ data }}
+                            </div>
                             <div class="last-dialog">上次对话</div>
                         </template>
                     </InfoBlock>

@@ -32,9 +32,6 @@ const showDetail = ref(false)
 // 控制被收纳的图标
 const foldedIcons = ref([])
 const { bottomIconList, upperIconList, isDarkTheme } = storeToRefs(baseConfigStore)
-// const showManageLeftSubWindow = () => {
-// ElectronAPI.showManageLeftSubWindow()
-// }
 // 一进入就要读取baseConfigStore的设置，注意，只有第一次才读取，之后切换到这个路由就不读取
 // 了，否则会读取旧的状态。或者卸载前就写入配置，这样每次读取就读取新的。
 // 当前选择：卸载前写入配置
@@ -74,11 +71,6 @@ function transRouter(subOptionIndex) {
     }
     router.push(path!)
 }
-// 监听新窗口的创建，将当前的pinia状态传递给该窗口（但是不敢确定该组件内的pinia状态是否最新）
-// ElectronAPI.onListenNewWindowCreated(() => {
-//     ElectronAPI.sendUpdatedPiniaStateToNewCreatedWindow(JSON.stringify(baseConfigStore))
-//     ElectronAPI.sendUpdatedPiniaStateToNewCreatedWindow(JSON.stringify(userInfoStore))
-// })
 //点击底部的操作。最下面是0，从下网上增大
 function bottomOperate(index) {
     if (index === 0) {
@@ -103,7 +95,7 @@ onBeforeUnmount(() => {
 // 刚创建就要获取设备信息
 onMounted(() => {
     // 更新设备信息
-    ElectronAPI.getDeviceInfo().then((info) => baseConfigStore.setDeviceInfo(info))
+    ElectronAPI.getDeviceInfo().then((info) => userInfoStore.setDeviceInfo(info))
     window.addEventListener('resize', onListenerWindowHeightToUnfoldIcons)
     // console.log(
     //     getComputedStyle(document.querySelector('.app')).getPropertyValue('--global-font-size')
@@ -171,6 +163,11 @@ watch(
                 :disabled="index !== 4"
                 hide-after="100"
                 popper-class="popper"
+                :popper-style="{
+                    minWidth: '60px',
+                    display: 'flex',
+                    justifyContent: 'center'
+                }"
             >
                 <template #reference>
                     <svg class="icon bg" aria-hidden="true">
@@ -183,7 +180,7 @@ watch(
                     @click="() => (isShowSubOptionsManageModal = true)"
                 >
                     <div
-                        v-for="(itemm, indexx) in foldedIcons"
+                        v-for="(item, indexx) in foldedIcons"
                         :key="indexx"
                         :style="{
                             margin: '5px 0 5px 0'

@@ -1,5 +1,5 @@
-import useUserInfoStore from "./../../renderer/src/store/UserInfoStore/index";
-import useBaseConfigStore from "./../../../../qq-nt/src/renderer/src/store/baseConfigStore";
+// import useUserInfoStore from "./../../renderer/src/store/UserInfoStore/index";
+// import useBaseConfigStore from "./../../../../qq-nt/src/renderer/src/store/baseConfigStore";
 class UpdateMap {
     updateMap: WeakMap<any, Map<string, { latestTime: number, latestValue: any }>>
     constructor(stores: any[]) {

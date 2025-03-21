@@ -24,6 +24,7 @@ export function loginAPI(username: string, password: string, device_id: string |
             username,
             password,
             device_id: String(device_id)
-        }
+        },
+        headers: { 'content-type': 'application/x-www-form-urlencoded' }
     })
 }

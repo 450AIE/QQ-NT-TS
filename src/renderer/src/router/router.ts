@@ -55,10 +55,6 @@ const router = createRouter({
             component: Login
         },
         {
-            path: '/communication',
-            component: Communication
-        },
-        {
             path: '/state_manage',
             component: StateManage
         }

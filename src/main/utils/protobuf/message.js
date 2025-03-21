@@ -1,10 +1,10 @@
 /*eslint-disable block-scoped-var, id-length, no-control-regex, no-magic-numbers, no-prototype-builtins, no-redeclare, no-shadow, no-var, sort-vars*/
-import * as $protobuf from 'protobufjs/light'
+import * as $protobuf from "protobufjs/light";
 
-const $root = ($protobuf.roots['default'] || ($protobuf.roots['default'] = new $protobuf.Root()))
+const $root = ($protobuf.roots["default"] || ($protobuf.roots["default"] = new $protobuf.Root()))
     .setOptions({
-        syntax: 'proto3',
-        go_package: 'pkg/protocol/pb'
+        syntax: "proto3",
+        go_package: "pkg/protocol/pb"
     })
     .addJSON({
         pb: {
@@ -22,11 +22,11 @@ const $root = ($protobuf.roots['default'] || ($protobuf.roots['default'] = new $
                 Data: {
                     fields: {
                         cmd: {
-                            type: 'CMD',
+                            type: "CMD",
                             id: 1
                         },
                         payload: {
-                            type: 'bytes',
+                            type: "bytes",
                             id: 2
                         }
                     }
@@ -34,15 +34,15 @@ const $root = ($protobuf.roots['default'] || ($protobuf.roots['default'] = new $
                 LoginMsg: {
                     fields: {
                         deviceId: {
-                            type: 'int64',
+                            type: "int64",
                             id: 1
                         },
                         userId: {
-                            type: 'int64',
+                            type: "int64",
                             id: 2
                         },
                         loginBody: {
-                            type: 'bytes',
+                            type: "bytes",
                             id: 3
                         }
                     }
@@ -50,23 +50,23 @@ const $root = ($protobuf.roots['default'] || ($protobuf.roots['default'] = new $
                 UplinkMsg: {
                     fields: {
                         deviceId: {
-                            type: 'int64',
+                            type: "int64",
                             id: 1
                         },
                         userId: {
-                            type: 'int64',
+                            type: "int64",
                             id: 2
                         },
                         clientId: {
-                            type: 'int64',
+                            type: "int64",
                             id: 3
                         },
                         sessionId: {
-                            type: 'uint64',
+                            type: "uint64",
                             id: 4
                         },
                         uplinkBody: {
-                            type: 'bytes',
+                            type: "bytes",
                             id: 5
                         }
                     }
@@ -74,19 +74,19 @@ const $root = ($protobuf.roots['default'] || ($protobuf.roots['default'] = new $
                 DownlinkMsg: {
                     fields: {
                         seq: {
-                            type: 'int64',
+                            type: "int64",
                             id: 1
                         },
                         senderId: {
-                            type: 'int64',
+                            type: "int64",
                             id: 2
                         },
                         sessionId: {
-                            type: 'uint64',
+                            type: "uint64",
                             id: 3
                         },
                         downlinkBody: {
-                            type: 'bytes',
+                            type: "bytes",
                             id: 4
                         }
                     }
@@ -94,7 +94,7 @@ const $root = ($protobuf.roots['default'] || ($protobuf.roots['default'] = new $
                 HeartbeatMsg: {
                     fields: {
                         heartbeatBody: {
-                            type: 'bytes',
+                            type: "bytes",
                             id: 2
                         }
                     }
@@ -102,11 +102,11 @@ const $root = ($protobuf.roots['default'] || ($protobuf.roots['default'] = new $
                 ReconnMsg: {
                     fields: {
                         connId: {
-                            type: 'int64',
+                            type: "int64",
                             id: 1
                         },
                         reconnBody: {
-                            type: 'bytes',
+                            type: "bytes",
                             id: 2
                         }
                     }
@@ -114,45 +114,45 @@ const $root = ($protobuf.roots['default'] || ($protobuf.roots['default'] = new $
                 AckMsg: {
                     fields: {
                         code: {
-                            type: 'int64',
+                            type: "int64",
                             id: 1
                         },
                         message: {
-                            type: 'string',
+                            type: "string",
                             id: 2
                         },
                         toType: {
-                            type: 'CMD',
+                            type: "CMD",
                             id: 3
                         },
                         connId: {
-                            type: 'int64',
+                            type: "int64",
                             id: 4
                         },
                         userId: {
-                            type: 'int64',
+                            type: "int64",
                             id: 5
                         },
                         deviceId: {
-                            type: 'int64',
+                            type: "int64",
                             id: 6
                         },
                         clientId: {
-                            type: 'int64',
+                            type: "int64",
                             id: 7
                         },
                         messageId: {
-                            type: 'int64',
+                            type: "int64",
                             id: 8
                         },
                         sessionId: {
-                            type: 'uint64',
+                            type: "uint64",
                             id: 9
                         }
                     }
                 }
             }
         }
-    })
+    });
 
-export { $root as default }
+export { $root as default };

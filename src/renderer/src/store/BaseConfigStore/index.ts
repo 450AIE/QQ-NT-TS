@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { isEmpty, isEqual } from 'lodash-es'
+import { isEmpty } from 'lodash-es'
 import { subOption } from './types'
-import { DeviceInfo } from '@utils/types/device'
+// import { DeviceInfo } from '@utils/types/device'
 
 const useBaseConfigStore = defineStore('baseConfigStore', () => {
     const storeKey = 'baseConfigStore'
@@ -23,12 +23,12 @@ const useBaseConfigStore = defineStore('baseConfigStore', () => {
         '#icon-youxi',
         '#icon-diandiandian'
     ]
-    const deviceInfo: DeviceInfo = ref({})
-    const setDeviceInfo = (newInfo: DeviceInfo, isPositive: boolean = true) => {
-        if (isEmpty(newInfo)) return false
-        deviceInfo.value = newInfo
-        return isPositive
-    }
+    // const deviceInfo: DeviceInfo = ref({})
+    // const setDeviceInfo = (newInfo: DeviceInfo, isPositive: boolean = true) => {
+    //     if (isEmpty(newInfo)) return false
+    //     deviceInfo.value = newInfo
+    //     return isPositive
+    // }
     // 最左侧图标
     const upperIconList = ref(upperFixedIconList)
     const bottomIconList = ref([
@@ -98,10 +98,10 @@ const useBaseConfigStore = defineStore('baseConfigStore', () => {
     }
     return {
         storeKey,
-        deviceInfo,
+        // deviceInfo,
         globalFontSize,
         setGlobalFontSize,
-        setDeviceInfo,
+        // setDeviceInfo,
         isDarkTheme,
         setIsDarkTheme,
         upperIconList,

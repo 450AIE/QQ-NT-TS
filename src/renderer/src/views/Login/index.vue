@@ -4,24 +4,35 @@ import UserAvatar from '../../assets/user.png'
 import useUpdatePiniaStateSync from '@renderer/hooks/useUpdatePiniaStateSync'
 import { ref } from 'vue'
 import { loginAPI, registerAPI } from '@renderer/api/login'
+import { getUserInfoAPI } from '@renderer/api/user'
+import useUserInfoStore from '@renderer/store/UserInfoStore'
 
 useUpdatePiniaStateSync()
 const account = ref('')
 const password = ref('')
-
+const userInfoStore = useUserInfoStore()
 async function login() {
     const systemInfo = await ElectronAPI.getDeviceInfo()
     localStorage.setItem('device', JSON.stringify(systemInfo))
     // 注意将收到的device_id存储好
     // 这里要去请求接口获取设备号
     let response = await registerAPI(systemInfo)
-    // 先实现聊天功能，后迁移状态管理
+    // // 先实现聊天功能，后迁移状态管理
     const { device_id } = response
     localStorage.setItem('device_id', device_id)
-    // response = await loginAPI(account.value, password.value, device_id)
-    // const { token, user_id } = response
-    // localStorage.setItem('token', token)
-    // localStorage.setItem('user_id', user_id)
+    response = await loginAPI(account.value, password.value, device_id)
+    const { token, user_id } = response
+    localStorage.setItem('token', token)
+    localStorage.setItem('user_id', user_id)
+    // 发送protobuf登陆
+    ElectronAPI.login(JSON.stringify({ userId: user_id, deviceId: device_id }))
+    //
+    // 还要获取自己的用户信息
+    response = await getUserInfoAPI(user_id, user_id, device_id)
+    const { username } = response
+    userInfoStore.setUserInfo({
+        nickname: username
+    })
     // 登陆
     // 然后打开主页面
     ElectronAPI.createMainWindow()

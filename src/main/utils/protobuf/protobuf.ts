@@ -13,6 +13,7 @@ const AckMsg = $root.lookupType('pb.AckMsg')
 type ProtoBuf = CMD | Data | LoginMsg | UplinkMsg | DownlinkMsg | HeartbeatMsg | ReconnMsg | AckMsg
 
 const makeBufferMap = new Map()
+const decodeMap = new Map()
 // function verifyMaker(type: ProtoBuf) {
 //     const errMsg: string = type.verify.bind(null, type)
 //     if (errMsg) {
@@ -61,4 +62,38 @@ export function makeDataProtoBuf(cmd: CMD, payload: any) {
         payload: makeBuffer(payload)
     }
     return makeDatabuffer(data)
+}
+
+function decodeMaker(type: ProtoBuf) {
+    return (payload: unknown) => {
+        return type.decode(payload)
+    }
+}
+
+// 解析器
+const decodeDatabufferOrigin = decodeMaker(Data)
+const decodeLoginMsgbuffer = decodeMaker(LoginMsg)
+const decodeUplinkMsgbuffer = decodeMaker(UplinkMsg)
+const decodeDownlinkMsgbuffer = decodeMaker(DownlinkMsg)
+const decodeHeartbeatMsgbuffer = decodeMaker(HeartbeatMsg)
+const decodeReconnMsgbuffer = decodeMaker(ReconnMsg)
+const decodeAckMsgbuffer = decodeMaker(AckMsg)
+
+decodeMap.set(CMD.Login, decodeLoginMsgbuffer)
+decodeMap.set(CMD.Ack, decodeAckMsgbuffer)
+decodeMap.set(CMD.Downlink, decodeDownlinkMsgbuffer)
+decodeMap.set(CMD.Heartbeat, decodeHeartbeatMsgbuffer)
+decodeMap.set(CMD.Reconn, decodeReconnMsgbuffer)
+decodeMap.set(CMD.Uplink, decodeUplinkMsgbuffer)
+
+// 解析器
+export function decodeDataBuffer(buffer) {
+    const data = decodeDatabufferOrigin(buffer)
+    const cmd = data.cmd
+    const decoder = decodeMap.get(cmd)
+    const payload = decoder(data.payload)
+    return {
+        cmd,
+        payload
+    }
 }

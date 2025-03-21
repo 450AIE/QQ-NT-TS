@@ -14,7 +14,32 @@ import {
 import { WindowsType } from './types'
 import systemInfo from './utils/getDeviceInfo'
 import { createWindow } from './utils/window/createWindow'
+// import net from 'net'
+import { CMD } from './types/protobuf'
+import { Connection } from "./../utils/tcp/index";
+import { WindowPoll } from "./../utils/windowPool/index";
 
+/**
+ * 不管这么多了，连接起来TCP再说
+ */
+const connection = new Connection()
+// protobuf必须传递驼峰
+ipcMain.on('send-communication-msg', (_, uplinkMsg) => {
+    uplinkMsg = JSON.parse(uplinkMsg)
+    connection.send(CMD.Uplink, uplinkMsg)
+})
+ipcMain.on('login', (_, msg) => {
+    msg = JSON.parse(msg)
+    connection.send(CMD.Login, msg)
+})
+/**
+ * 
+ */
+
+/**
+ * 
+ */
+const windowPool = new WindowPoll(5)
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -35,23 +60,9 @@ app.whenReady().then(() => {
     loginWindow.on('closed', () => {
         popThisWindow(windowsStack, WindowsType.LOGIN_WINDOW)
     })
-
-    const communicationWindow = createWindow(WindowsType.COMMUNICATION_WINDOW)
-    communicationWindow.on('ready-to-show', () => {
-        communicationWindow.show()
-        pushThisWindow(windowsStack, WindowsType.COMMUNICATION_WINDOW, communicationWindow)
-    })
-    communicationWindow.webContents.setWindowOpenHandler((details) => {
-        shell.openExternal(details.url)
-        return { action: 'deny' }
-    })
-    communicationWindow.on('closed', () => {
-        popThisWindow(windowsStack, WindowsType.COMMUNICATION_WINDOW)
-    })
-
     const stateManageWindow = createWindow(WindowsType.STATE_MANAGE_WINDOW)
     stateManageWindow.on('ready-to-show', () => {
-        stateManageWindow.show()
+        // stateManageWindow.show()
         pushThisWindow(windowsStack, WindowsType.STATE_MANAGE_WINDOW, stateManageWindow)
     })
     stateManageWindow.webContents.setWindowOpenHandler((details) => {
@@ -70,14 +81,13 @@ app.whenReady().then(() => {
             '这个是electron渲染进程所在的URL',
             process.env['ELECTRON_RENDERER_URL'] + '/#/login'
         )
-        communicationWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/communication')
+        // communicationWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/communication')
         stateManageWindow?.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/state_manage')
-
     } else {
         loginWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/login' })
-        communicationWindow.loadFile(join(__dirname, '../renderer/index.html'), {
-            hash: '/communication'
-        })
+        // communicationWindow.loadFile(join(__dirname, '../renderer/index.html'), {
+        //     hash: '/communication'
+        // })
         stateManageWindow?.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/state_manage' })
     }
     app.on('activate', function () {
@@ -332,15 +342,6 @@ ipcMain.on('append-note-files', (_, fileData) => {
 // ipcMain.handle('tcp',()=>{
 
 // })
-// 接收渲染进程传递的信息，发送给通信进程
-ipcMain.on('send-communication-msg', (e, msg) => {
-    // 找到通信进程并发送
-    const win = getWindow(windowsStack, WindowsType.COMMUNICATION_WINDOW)
-    console.log('main发送给通信进程信息', msg)
-    if (win) {
-        win.webContents.send('receive-communication-msg', msg)
-    }
-})
 ipcMain.on('emit-communication-response', (e, response) => {
     //将对应的响应返回给聊天的主窗口
     const win = getWindow(windowsStack, WindowsType.MAIN_WINDOW)
@@ -354,17 +355,17 @@ ipcMain.on('emit-communication-response', (e, response) => {
  */
 ipcMain.on('has-window-state-update', (_, update: string) => {
     const win = getWindow(windowsStack, WindowsType.STATE_MANAGE_WINDOW)
-    console.log('render给statemanage')
+    // console.log('render给statemanage')
     if (win) {
         win.webContents.send('notify-update-updateMap', update)
     }
 })
 
 ipcMain.on('notify-window-update-state', (_, update: string) => {
-    console.log('statemanage传递的update为')
+    // console.log('statemanage传递的update为')
     windowsStack.forEach(win => {
-        // 通信和状态管理窗口略过
-        if (win.$windowName === WindowsType.COMMUNICATION_WINDOW || win.$windowName === WindowsType.STATE_MANAGE_WINDOW) {
+        // 通状态管理窗口略过
+        if (win.$windowName === WindowsType.STATE_MANAGE_WINDOW) {
             return
         }
         if (win.window) {
@@ -382,13 +383,14 @@ ipcMain.on('notify-new-window-created', (e) => {
 })
 
 ipcMain.on('emit-full-pinia-state', (e, jsonStore, targetId) => {
-    console.log('statemanage传递full pinia给新创建的窗口')
+    // console.log('statemanage传递full pinia给新创建的窗口')
     const win = findRendererProcessById(targetId)
-    console.log('找到的win', !!win, targetId)
+    // console.log('找到的win', !!win, targetId)
     if (win) {
         win.webContents.send('receive-full-pinia-update', jsonStore)
     }
 })
+
 
 function findRendererProcessById(processId) {
     const windows = BrowserWindow.getAllWindows();
@@ -400,3 +402,6 @@ function findRendererProcessById(processId) {
     }
     return null; // 如果未找到匹配的渲染进程，返回 null
 }
+
+
+

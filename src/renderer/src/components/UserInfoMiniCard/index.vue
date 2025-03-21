@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref } from 'vue'
 import EditPage from './components/EditPage/index.vue'
 const openUpdateUserInfoPage = ref<boolean>(false)
 </script>
@@ -31,10 +31,16 @@ const openUpdateUserInfoPage = ref<boolean>(false)
             <el-button class="btn" @click="openUpdateUserInfoPage = true">编辑资料</el-button>
             <el-button class="btn">发消息</el-button>
         </div>
-        <el-dialog v-model="openUpdateUserInfoPage" width="600" modal :close-on-click-modal="false" :style="{
-            height: '400px'
-        }">
-            <EditPage :close-edit-page="() => openUpdateUserInfoPage = false" />
+        <el-dialog
+            v-model="openUpdateUserInfoPage"
+            width="600"
+            modal
+            :close-on-click-modal="false"
+            :style="{
+                height: '400px'
+            }"
+        >
+            <EditPage :close-edit-page="() => (openUpdateUserInfoPage = false)" />
         </el-dialog>
     </div>
 </template>
