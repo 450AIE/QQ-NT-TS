@@ -10,7 +10,8 @@ import useUpdatePiniaStateSync from '@renderer/hooks/useUpdatePiniaStateSync'
 import UserInfoMiniCard from '@renderer/components/UserInfoMiniCard/index.vue'
 import useUserInfoStore from '@renderer/store/UserInfoStore'
 import SubOptionsManage from '@renderer/components/LeftSubOptions/components/SubOptionsManage/index.vue'
-// import useBeforeCreateGetUpdatedPiniaState from '@renderer/hooks/useBeforeCreateGetUpdatedPiniaState'
+import useBeforeCreateGetUpdatedPiniaState from '@renderer/hooks/useBeforeCreateGetUpdatedPiniaState'
+import { getUserInfoAPI } from '@renderer/api/user'
 // 监听pinia更新
 useUpdatePiniaStateSync()
 defineOptions({
@@ -20,11 +21,15 @@ defineOptions({
 //     console.log('leftsuboptions activated')
 // })
 // console.log('全局fontSize:',document.querySelector('#app').setProperty('--global-font-size','30px'))
-// useBeforeCreateGetUpdatedPiniaState()
+useBeforeCreateGetUpdatedPiniaState()
 const baseConfigStore = useBaseConfigStore()
 // 展示侧边栏管理的图标
 const isShowSubOptionsManageModal = ref<boolean>(false)
 const userInfoStore = useUserInfoStore()
+// 获取用户信息
+getUserInfoAPI(localStorage.getItem('user_id')).then((res) => {
+    userInfoStore.setUserInfo(res)
+})
 // 控制显示在左边的图标
 const upperIcons = ref([])
 // 控制展示个人信息
@@ -87,9 +92,7 @@ function bottomOperate(index) {
 }
 // 卸载前清除IPC的监听，避免内存泄漏，并且写入配置
 onBeforeUnmount(() => {
-    // console.log('卸载前的store:',baseConfigStore)
     ElectronAPI.writeBaseConfigStoreFiles(JSON.stringify(baseConfigStore))
-    // ElectronAPI.removeListenerNewWindowCreated()
     window.removeEventListener('resize', onListenerWindowHeightToUnfoldIcons)
 })
 // 刚创建就要获取设备信息
@@ -97,9 +100,6 @@ onMounted(() => {
     // 更新设备信息
     ElectronAPI.getDeviceInfo().then((info) => userInfoStore.setDeviceInfo(info))
     window.addEventListener('resize', onListenerWindowHeightToUnfoldIcons)
-    // console.log(
-    //     getComputedStyle(document.querySelector('.app')).getPropertyValue('--global-font-size')
-    // )
 })
 // 监听窗口高度，控制收纳左侧多余的图标
 // 同时要watch变化
@@ -121,7 +121,7 @@ function onListenerWindowHeightToUnfoldIcons() {
     // selectedIconsSum === 0的话slice(5,5)得到的也是[]
     foldedIcons.value = [...upperIconList.value.slice(5, 5 + foldedIconsSum)]
 }
-// 实现见监听upperIconList改变从而改变左侧的显示
+// 实现监听upperIconList改变从而改变左侧的显示
 watch(
     upperIconList,
     () => {
@@ -147,7 +147,11 @@ watch(
         </div>
         <div class="img">
             <img src="../../assets/user.png" alt="" @click="() => (showDetail = !showDetail)" />
-            <UserInfoMiniCard v-if="showDetail" class="mini-info-card" />
+            <UserInfoMiniCard
+                v-if="showDetail"
+                class="mini-info-card"
+                :user-info="userInfoStore.userInfo"
+            />
         </div>
         <div
             v-for="(item, index) in upperIcons"

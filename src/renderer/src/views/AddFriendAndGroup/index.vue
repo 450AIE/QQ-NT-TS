@@ -11,9 +11,11 @@ import { searchUserAPI } from '@renderer/api/user'
 import { UserInfo } from 'src/utils/types/user'
 import { GroupInfo } from 'src/utils/types/group'
 import { applyForBeingFriendAPI } from '@renderer/api/friends'
+import FixedVirtualList from '@renderer/components/FixedVirtualList/index.vue'
 
 useBeforeCreateGetUpdatedPiniaState()
 useUpdatePiniaStateSync()
+const userId = localStorage.getItem('user_id')
 // 请求到的所哟数据，用来渲染
 const userRenderList = ref<UserInfo[]>([])
 const groupRenderList = ref<GroupInfo[]>([])
@@ -23,7 +25,11 @@ const inputValue = ref<string>('')
 const scrollHeight = useReactiveHeight(140)
 async function search() {
     if (selectedLabelID.value === 'user') {
-        userRenderList.value = await searchUserAPI(inputValue.value)
+        const res = await searchUserAPI(inputValue.value)
+        // 过滤掉自己
+        if (res) {
+            userRenderList.value = res.filter((i) => i.user_id != userId)
+        }
     } else if (selectedLabelID.value === 'group') {
     }
 }
@@ -50,44 +56,60 @@ async function applyToAddFriend(user_id: string, remarks?: string = '', desc?: s
             @tab-click="(tab) => (selectedLabelID = tab.props.name)"
         >
             <el-tab-pane label="用户" name="user">
-                <el-scrollbar :height="scrollHeight">
-                    <!-- <GroupInfoBlock /> -->
-                    <InfoBlock
-                        v-for="(item, idx) in userRenderList"
-                        :key="item.username"
-                        class="info-block"
-                    >
-                        <template #info>
-                            <div class="info">
-                                <el-avatar :src="item.avatar_url" class="avatar" />
-                                <span class="username">{{ item.username }}</span>
-                                <span class="userid">{{ item.user_id || '暂无' }}</span>
-                            </div>
-                        </template>
-                        <template #button>
-                            <el-button @click="() => applyToAddFriend(item.user_id)"
-                                >添加</el-button
-                            >
-                        </template>
-                    </InfoBlock>
-                </el-scrollbar>
+                <FixedVirtualList
+                    :height="scrollHeight + 'px'"
+                    :list-data="userRenderList"
+                    :item-size="100"
+                    :item-count="userRenderList.length"
+                    :buffer="5"
+                    width="100%"
+                    class="virtual-list"
+                >
+                    <template #default="{ data }">
+                        <InfoBlock class="info-block">
+                            <template #info>
+                                <div class="info">
+                                    <el-avatar :src="data.avatar_url" class="avatar" />
+                                    <span class="username">{{ data.username }}</span>
+                                    <span class="userid">{{ data.user_id || '暂无' }}</span>
+                                </div>
+                            </template>
+                            <template #button>
+                                <el-button @click="() => applyToAddFriend(data.user_id)"
+                                    >添加</el-button
+                                >
+                            </template>
+                        </InfoBlock>
+                    </template>
+                </FixedVirtualList>
             </el-tab-pane>
             <el-tab-pane label="群聊" name="group">
-                <el-scrollbar :height="scrollHeight">
-                    <!-- <GroupInfoBlock /> -->
-                    <InfoBlock
-                        v-for="(item, idx) in groupRenderList"
-                        :key="item.group_id"
-                        class="info-block"
-                    >
-                        <template #info>
-                            <span>{{ item.name }}</span>
-                        </template>
-                        <template #button>
-                            <el-button>加入</el-button>
-                        </template>
-                    </InfoBlock>
-                </el-scrollbar>
+                <FixedVirtualList
+                    :height="scrollHeight + 'px'"
+                    :list-data="groupRenderList"
+                    :item-size="100"
+                    :item-count="groupRenderList.length"
+                    :buffer="5"
+                    width="100%"
+                    class="virtual-list"
+                >
+                    <template #default="{ data }">
+                        <InfoBlock class="info-block">
+                            <template #info>
+                                <div class="info">
+                                    <el-avatar :src="data.avatar_url" class="avatar" />
+                                    <span class="username">{{ data.username }}</span>
+                                    <span class="userid">{{ data.user_id || '暂无' }}</span>
+                                </div>
+                            </template>
+                            <template #button>
+                                <el-button @click="() => applyToAddFriend(data.user_id)"
+                                    >添加</el-button
+                                >
+                            </template>
+                        </InfoBlock>
+                    </template>
+                </FixedVirtualList>
             </el-tab-pane>
         </el-tabs>
     </div>
@@ -118,6 +140,8 @@ async function applyToAddFriend(user_id: string, remarks?: string = '', desc?: s
                     height: 0px;
                 }
             }
+        }
+        .virtual-list {
         }
         .info-block {
             margin-bottom: 10px;

@@ -19,7 +19,7 @@ function useBeforeCreateGetUpdatedPiniaState() {
 function getUpdatedPiniaState(_, jsonStore) {
     // 同步仓库属性
     const [newUserInfoStore, newBaseConfigStore] = JSON.parse(jsonStore)
-    console.log('收到的', newBaseConfigStore, newUserInfoStore)
+    // console.log('收到的', newBaseConfigStore, newUserInfoStore)
     const baseConfigStore = useBaseConfigStore()
     const userInfoStore = useUserInfoStore()
     for (const key in baseConfigStore) {
@@ -31,7 +31,7 @@ function getUpdatedPiniaState(_, jsonStore) {
                 // 获取首字母
                 const dataNameFirstChar = key.slice(3, 4).toLowerCase()
                 const dataName = dataNameFirstChar + dataNameWithoutFirstChar
-                console.log('进入调用了', key, newBaseConfigStore[dataName])
+                // console.log('进入调用了', key, newBaseConfigStore[dataName])
                 baseConfigStore[key](newBaseConfigStore[dataName], false)
             }
         }

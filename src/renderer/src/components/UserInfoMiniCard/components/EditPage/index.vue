@@ -1,23 +1,53 @@
 <script lang="ts" setup>
 import { updateUserInfoAPI } from '@renderer/api/user'
-import { ref } from 'vue'
-const props = defineProps<{ closeEditPage: Function }>()
-const formData = ref({
-    nickanme: '',
-    sex: '',
-    avatar_url: '',
-    extra: ''
-})
+import { UserInfo } from 'src/utils/types/user'
+import { ref, toRefs, watch } from 'vue'
+const props = defineProps<{ closeEditPage: Function; userInfo: UserInfo }>()
+const formData = ref<UserInfo>(props.userInfo)
+console.log('info', props.userInfo, formData.value)
 const formRef = ref(null)
+const canUpdate = ref(false)
 // 这个会被axios拦截吗？注意
 function setAvatarURL(response) {
     formData.value.avatar_url = response.data.url
 }
 async function updateUserInfo() {
-    const { nickanme, sex, avatar_url, extra } = formData.value
+    const { useranme, sex, avatar_url, extra } = formData.value
     await updateUserInfoAPI(nickanme, sex, avatar_url, extra)
     props.closeEditPage()
 }
+function isObjectEmpty(obj) {
+    for (let key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            const value = obj[key]
+            // 检查值是否为 null、undefined、空字符串或空数组
+            if (
+                value !== null &&
+                value !== undefined &&
+                value !== '' &&
+                !(Array.isArray(value) && value.length === 0)
+            ) {
+                return false // 如果有一个字段不满足条件，返回 false
+            }
+        }
+    }
+    return true // 所有字段都满足条件，返回 true
+}
+watch(
+    () => formData.value,
+    () => {
+        console.log('data', formData.value)
+        if (isObjectEmpty(formData.value)) {
+            canUpdate.value = false
+        } else {
+            canUpdate.value = true
+        }
+    },
+    {
+        immediate: true,
+        deep: true
+    }
+)
 </script>
 
 <template>
@@ -38,7 +68,7 @@ async function updateUserInfo() {
         </div>
         <el-form v-model="formData" ref="formRef">
             <el-form-item label="昵称">
-                <el-input v-model="formData.nickanme" />
+                <el-input v-model="formData.username" />
             </el-form-item>
             <el-form-item label="性别">
                 <el-radio-group v-model="formData.sex">
@@ -51,7 +81,9 @@ async function updateUserInfo() {
                 <el-input v-model="formData.extra" />
             </el-form-item>
         </el-form>
-        <el-button type="primary" class="save" @click="updateUserInfo">保存</el-button>
+        <el-button type="primary" class="save" @click="updateUserInfo" :disabled="!canUpdate"
+            >保存</el-button
+        >
         <el-button class="cancel" @click="closeEditPage">取消</el-button>
     </div>
 </template>

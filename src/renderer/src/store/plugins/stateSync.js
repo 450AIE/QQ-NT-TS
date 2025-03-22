@@ -15,7 +15,7 @@ function stateSync({ store }) {
             after((res) => {
                 // 如果返回true，代表是主动更新的，要触发其他窗口更新
                 if (res) {
-                    // console.log('args[0]',[args[0]])
+                    // console.log('args[0]', args[0])
                     // console.log('args',args)
                     // ElectronAPI.notifyAllWindowUpdatePiniaState(name, JSON.stringify([args[0]]))
                     // 通知状态管理窗口有窗口更新了状态

@@ -1,22 +1,35 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, toRefs } from 'vue'
 import EditPage from './components/EditPage/index.vue'
+import { UserInfo } from 'src/utils/types/user'
 const openUpdateUserInfoPage = ref<boolean>(false)
+const props = defineProps<{ userInfo: UserInfo }>()
+const propsRef = toRefs(props.userInfo)
 </script>
 
 <template>
-    <div class="container">
+    <div class="container-1">
         <div class="header">
             <div class="avatar-container">
                 <el-avatar />
             </div>
-            <div class="content">秋风起·琴瑟里</div>
+            <div class="content">
+                {{
+                    propsRef.nickname
+                        ? propsRef.nickname
+                        : propsRef.username
+                          ? propsRef.username
+                          : 'GO高手'
+                }}
+            </div>
             <div class="thumbs-up">点赞</div>
         </div>
         <ul class="content-container">
             <li class="signature">
                 <span class="field">签名</span>
-                <span class="detail">人不要脸，天下无敌</span>
+                <span class="detail">{{
+                    propsRef.extra ? propsRef.extra : '人不要脸，天下无敌'
+                }}</span>
             </li>
             <li class="address">
                 <span class="field">所在地</span>
@@ -24,7 +37,7 @@ const openUpdateUserInfoPage = ref<boolean>(false)
             </li>
             <li class="space">
                 <span class="field">QQ空间</span>
-                <span class="detail">ABCD</span>
+                <span class="detail">装甲恶鬼村正</span>
             </li>
         </ul>
         <div class="btn-container">
@@ -40,13 +53,16 @@ const openUpdateUserInfoPage = ref<boolean>(false)
                 height: '400px'
             }"
         >
-            <EditPage :close-edit-page="() => (openUpdateUserInfoPage = false)" />
+            <EditPage
+                :close-edit-page="() => (openUpdateUserInfoPage = false)"
+                :user-info="userInfo"
+            />
         </el-dialog>
     </div>
 </template>
 
 <style lang="scss" scoped>
-.container {
+.container-1 {
     display: flex;
     flex-direction: column;
     padding: 20px;
@@ -58,12 +74,26 @@ const openUpdateUserInfoPage = ref<boolean>(false)
     box-shadow: 0 0 10px 1px #ccc;
 
     .header {
+        position: absolute;
         width: 100%;
         display: flex;
         justify-content: space-around;
+        .avatar-container {
+            position: absolute;
+            left: 12px;
+        }
     }
-
+    .content {
+        position: absolute;
+        left: 90px;
+    }
+    .thumbs-up {
+        position: absolute;
+        right: 64px;
+    }
     .content-container {
+        position: absolute;
+        top: 70px;
         display: flex;
         flex-direction: column;
         width: 100%;
@@ -90,8 +120,8 @@ const openUpdateUserInfoPage = ref<boolean>(false)
     }
 
     .btn-container {
-        margin-top: 10px;
-
+        position: absolute;
+        bottom: 20px;
         .btn {
             width: 115px;
 

@@ -12,7 +12,7 @@ const props = defineProps<InfoBlock>()
         <div class="prefix-container text-overflow-hidden" v-if="$slots.prefix">
             <slot name="prefix" :data="props.data"></slot>
         </div>
-        <div class="img-container">{{ props.avatar_url }}</div>
+        <!-- <div class="img-container">{{ props.avatar_url }}</div> -->
         <div class="info-container text-overflow-hidden">
             <slot name="info" :data="props.data"> </slot>
         </div>

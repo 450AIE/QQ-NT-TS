@@ -7,8 +7,9 @@ import { agreeFriendApplicationAPI, getFriendApplicationListAPI } from '@rendere
 import { getAllGroupsInfoAPI } from '@renderer/api/groups'
 import { UserInfo } from 'src/utils/types/user'
 import { GroupInfo } from 'src/utils/types/group'
+import FixedVirtualList from '@renderer/components/FixedVirtualList/index.vue'
 
-let notificationList = ref<UserInfo[] | GroupInfo[]>([])
+const notificationList = ref<UserInfo[] | GroupInfo[]>([])
 const scrollbarHeight = useReactiveHeight(80)
 const route = useRoute()
 // 根据params判断当前是好友通知还是群通知
@@ -56,21 +57,26 @@ function agreeApplication(id) {
         </div>
         <div class="content-container">
             <div class="virtual-list-container">
-                <!-- 先无限滚动，后虚拟列表 -->
-                <el-scrollbar :height="scrollbarHeight">
-                    <InfoBlock
-                        v-for="(item, idx) in notificationList"
-                        :key="idx"
-                        class="info-block"
-                    >
-                        <template #info> {{ item.nickname }} </template>
-                        <template #button>
-                            <el-button @click="() => agreeApplication(item.friend_id)"
-                                >同意</el-button
-                            >
-                        </template>
-                    </InfoBlock>
-                </el-scrollbar>
+                <FixedVirtualList
+                    :height="scrollbarHeight + 'px'"
+                    :list-data="notificationList"
+                    :item-size="100"
+                    :item-count="notificationList.length"
+                    :buffer="1"
+                    width="100%"
+                    class="virtual-list"
+                >
+                    <template #default="{ data }">
+                        <InfoBlock class="info-block">
+                            <template #info> {{ data.nickname }} </template>
+                            <template #button>
+                                <el-button @click="() => agreeApplication(data.friend_id)"
+                                    >同意</el-button
+                                >
+                            </template>
+                        </InfoBlock>
+                    </template>
+                </FixedVirtualList>
             </div>
         </div>
     </div>

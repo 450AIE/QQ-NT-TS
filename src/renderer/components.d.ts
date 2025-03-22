@@ -33,6 +33,7 @@ declare module 'vue' {
     ElTabs: typeof import('element-plus/es')['ElTabs']
     ElUpdate: typeof import('element-plus/es')['ElUpdate']
     ElUpload: typeof import('element-plus/es')['ElUpload']
+    FixedVirtualList: typeof import('./src/components/FixedVirtualList/index.vue')['default']
     InfoBlock: typeof import('./src/components/InfoBlock/index.vue')['default']
     InfoBlock2: typeof import('./src/components/InfoBlock2/index.vue')['default']
     LeftSubOptions: typeof import('./src/components/LeftSubOptions/index.vue')['default']

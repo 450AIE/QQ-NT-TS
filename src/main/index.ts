@@ -9,9 +9,7 @@ import { CMD } from './types/protobuf'
 import { Connection } from "./../utils/tcp/index";
 import { WindowPoll } from "./../utils/windowPool/index";
 
-/**
- * 不管这么多了，连接起来TCP再说
- */
+let windowPool: WindowPoll
 const connection = new Connection()
 // protobuf必须传递驼峰
 ipcMain.on('send-communication-msg', (_, uplinkMsg) => {
@@ -22,10 +20,6 @@ ipcMain.on('login', (_, msg) => {
     msg = JSON.parse(msg)
     connection.send(CMD.Login, msg)
 })
-/**
- *
- */
-let windowPool: WindowPoll
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -70,7 +64,14 @@ ipcMain.on('maximize', () => {
 })
 //只剩一个页面了会退出app
 // ipcMain.on('closeWindow', () => BrowserWindow.getFocusedWindow()!.close())
-ipcMain.on('closeWindow', () => BrowserWindow.getFocusedWindow()!.hide())
+ipcMain.on('closeWindow', () => {
+    BrowserWindow.getFocusedWindow()!.hide()
+    const allWindows = windowPool.getAllUsedWindow()
+    // 如果只有状态管理窗口了，那么就关闭app
+    if (allWindows.length === 1 && allWindows[0].type === WindowsType.STATE_MANAGE_WINDOW) {
+        app.exit()
+    }
+})
 //进入设置界面
 ipcMain.on('create-setting-global-window', () => {
     windowPool.borrowWindow(WindowsType.SETTING_WINDOW)
@@ -86,8 +87,8 @@ ipcMain.on('create-add-friend-and-group-window', () => {
 ipcMain.on('create-create-note-window', () => {
     windowPool.borrowWindow(WindowsType.CREATE_NOTE_WINDOW)
 })
-ipcMain.on('create-login-window', () => {
-    windowPool.borrowWindow(WindowsType.LOGIN_WINDOW)
+ipcMain.on('create-login-window', async () => {
+    await windowPool.borrowWindow(WindowsType.LOGIN_WINDOW)
     windowPool.hideWindowExcept([WindowsType.LOGIN_WINDOW])
 })
 ipcMain.on('write-baseConfigStore-files', (_, fileData) => {
@@ -150,17 +151,12 @@ ipcMain.on('append-note-files', (_, fileData) => {
         console.dir(error)
     }
 })
-// // 调试专用监听
-// ipcMain.handle('tcp',()=>{
-
-// })
 /**
  * 重构
  */
 ipcMain.on('has-window-state-update', (_, update: string) => {
-    // const win = getWindow(windowsStack, WindowsType.STATE_MANAGE_WINDOW)
-    const win = windowPool.getWindow(WindowsType.STATE_MANAGE_WINDOW)
-    // console.log('render给statemanage')
+    const { window: win } = windowPool.getWindow(WindowsType.STATE_MANAGE_WINDOW)
+    // console.log('render给状态管理进程')
     if (win) {
         win.webContents.send('notify-update-updateMap', update)
     }
@@ -182,15 +178,14 @@ ipcMain.on('notify-window-update-state', (_, update: string) => {
 
 ipcMain.on('notify-new-window-created', (e) => {
     // console.log('新窗口创建了')
-    // const stateWin = getWindow(windowsStack, WindowsType.STATE_MANAGE_WINDOW)
-    const stateWin = windowPool.getWindow(WindowsType.STATE_MANAGE_WINDOW)
+    const { window: stateWin } = windowPool.getWindow(WindowsType.STATE_MANAGE_WINDOW)
     if (stateWin) {
         stateWin.webContents.send('new-window-created', e.processId)
     }
 })
 
 ipcMain.on('emit-full-pinia-state', (e, jsonStore, targetId) => {
-    // console.log('statemanage传递full pinia给新创建的窗口')
+    // console.log('statemanage传递full pinia给新创建的窗口', jsonStore)
     const win = findRendererProcessById(targetId)
     // console.log('找到的win', !!win, targetId)
     if (win) {

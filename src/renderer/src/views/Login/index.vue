@@ -28,11 +28,10 @@ async function login() {
     ElectronAPI.login(JSON.stringify({ userId: user_id, deviceId: device_id }))
     //
     // 还要获取自己的用户信息
-    response = await getUserInfoAPI(user_id, user_id, device_id)
-    const { username } = response
-    userInfoStore.setUserInfo({
-        nickname: username
-    })
+    // response = await getUserInfoAPI(user_id, user_id, device_id)
+    // const { username } = response
+    // userInfoStore.setUserInfo(response)
+    // console.log(response)
     // 登陆
     // 然后打开主页面
     ElectronAPI.createMainWindow()
