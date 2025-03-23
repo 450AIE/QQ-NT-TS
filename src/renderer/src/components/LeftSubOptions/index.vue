@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import SettingOptions from '@renderer/components/SettingOptions/index.vue'
 import { watch, onBeforeUnmount, onMounted, ref } from 'vue'
 import lightQQLogo from '../../assets/light-QQ-logo.png'
@@ -63,6 +63,7 @@ readBaseConfigStoreFiles()
 //设置界面的组件
 const settingOptionsComponent = ref(null)
 const router = useRouter()
+const route = useRoute()
 //路由跳转
 function transRouter(subOptionIndex) {
     let path: string
@@ -74,7 +75,13 @@ function transRouter(subOptionIndex) {
     } else if (subOptionIndex === 1) {
         path = '/relationship_manage'
     }
-    router.push(path!)
+    const { fullPath } = route
+    if (fullPath === path) {
+        return
+    } else if (path !== '/' && fullPath.startsWith(path)) {
+        return
+    }
+    router.push(path)
 }
 //点击底部的操作。最下面是0，从下网上增大
 function bottomOperate(index) {

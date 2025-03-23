@@ -47,7 +47,7 @@ function updateVirtualListContent() {
 
 <template>
     <div
-        class="container"
+        class="container beautify-scrollbar"
         :style="{ width: props.width, height: props.height }"
         ref="containerRef"
         @scroll="updateVirtualListContent"

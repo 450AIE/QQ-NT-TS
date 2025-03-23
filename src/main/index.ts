@@ -12,7 +12,7 @@ import { WindowPoll } from "./../utils/windowPool/index";
 let windowPool: WindowPoll
 const connection = new Connection()
 // protobuf必须传递驼峰
-ipcMain.on('send-communication-msg', (_, uplinkMsg) => {
+ipcMain.on('send-uplink-msg', (_, uplinkMsg) => {
     uplinkMsg = JSON.parse(uplinkMsg)
     connection.send(CMD.Uplink, uplinkMsg)
 })
@@ -29,6 +29,7 @@ app.whenReady().then(() => {
         optimizer.watchWindowShortcuts(window)
     })
     windowPool = new WindowPoll(5)
+    connection.windowPool = windowPool
     app.on('activate', function () {
         // On macOS it's common to re-create a window in the app when the
         // dock icon is clicked and there are no other windows open.

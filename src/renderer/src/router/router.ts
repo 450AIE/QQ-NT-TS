@@ -24,6 +24,14 @@ const router = createRouter({
                 {
                     path: 'notification/:type',
                     component: () => import('@renderer/views/RelationshipManage/views/Notification/index.vue')
+                },
+                {
+                    path: 'friend_info/:friendId',
+                    component: () => import('@renderer/views/RelationshipManage/views/FriendInfo/index.vue')
+                },
+                {
+                    path: 'group_info/:groupId',
+                    component: () => import('@renderer/views/RelationshipManage/views/GroupInfo/index.vue')
                 }
             ]
         },

@@ -12,27 +12,26 @@ import FixedVirtualList from '@renderer/components/FixedVirtualList/index.vue'
 const notificationList = ref<UserInfo[] | GroupInfo[]>([])
 const scrollbarHeight = useReactiveHeight(80)
 const route = useRoute()
-// 根据params判断当前是好友通知还是群通知
-if (route.params.type == 'user') {
-    // 获取全部通知，并展示
-    getFriendApplicationListAPI().then((res) => {
-        notificationList.value = res
-    })
-} else if (route.params.type == 'group') {
-    getAllGroupsInfoAPI().then((res) => {})
-}
 // 监听query值的变化
 watch(
     () => route.params.type,
     (newType, oldType) => {
+        // 根据params判断当前是好友通知还是群通知
+
         if (route.params.type == 'user') {
             // 获取全部通知，并展示
+
             getFriendApplicationListAPI().then((res) => {
-                console.log('查看', res)
+                notificationList.value = res
             })
         } else if (route.params.type == 'group') {
-            getAllGroupsInfoAPI().then((res) => {})
+            getAllGroupsInfoAPI().then((res) => {
+                notificationList.value = []
+            })
         }
+    },
+    {
+        immediate: true
     }
 )
 

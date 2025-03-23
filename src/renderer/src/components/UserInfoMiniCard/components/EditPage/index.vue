@@ -4,7 +4,6 @@ import { UserInfo } from 'src/utils/types/user'
 import { ref, toRefs, watch } from 'vue'
 const props = defineProps<{ closeEditPage: Function; userInfo: UserInfo }>()
 const formData = ref<UserInfo>(props.userInfo)
-console.log('info', props.userInfo, formData.value)
 const formRef = ref(null)
 const canUpdate = ref(false)
 // 这个会被axios拦截吗？注意
@@ -36,7 +35,6 @@ function isObjectEmpty(obj) {
 watch(
     () => formData.value,
     () => {
-        console.log('data', formData.value)
         if (isObjectEmpty(formData.value)) {
             canUpdate.value = false
         } else {

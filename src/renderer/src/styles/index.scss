@@ -1,22 +1,39 @@
 // 最左侧边框和最右侧部分
-$background-gray1-color:#f2f2f2;
+$background-gray1-color: #f2f2f2;
 // hover未置顶方块
-$background-gray2-color:#f5f5f5;
+$background-gray2-color: #f5f5f5;
 // click管理
-$background-gray3-color:#e0e0e0;
+$background-gray3-color: #e0e0e0;
 // hover置顶方块
-$background-gray4-color:#e7e7e7;
+$background-gray4-color: #e7e7e7;
 // 聊天框，click方块
-$background-blue-color:#0099ff;
-
-
-
-
-
+$background-blue-color: #0099ff;
 
 .dark-theme {
-    $background-gray1-color:#111111;
-    $background-gray2-color:#2d2d2d;
+    $background-gray1-color: #111111;
+    $background-gray2-color: #2d2d2d;
     // $background-gray3-color:;
     // $background-gray4-color:;
+}
+
+.beautify-scrollbar {
+    &::-webkit-scrollbar {
+        width: 8px; /* 滚动条宽度 */
+        height: 4px; //这个高度只对水平的滚动条起作用
+        background-color: transparent; /* 滚动条轨道背景色 */
+    }
+    /* 对应scrollbar的拖动的那个滑块 */
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.3); /* 滚动条滑块颜色 */
+        border-radius: 10px; /* 滚动条滑块边角半径 */
+    }
+    /* 对应scrollbar左右，上下两侧的两个箭头按钮 */
+    &::-webkit-scrollbar-button {
+        display: none; /* 隐藏滚动条按钮 */
+    }
+    /* 箭头按钮所在位置 */
+    &::-webkit-scrollbar-corner {
+        /* display: none; */
+        background-color: transparent; /* 滚动条轨道角落颜色 */
+    }
 }

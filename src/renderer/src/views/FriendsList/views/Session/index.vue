@@ -41,6 +41,10 @@ onMounted(() => {
     scrollbarHeightObserver.observe(bottomRef.value)
     window.onresize = throttle(updateScrollbarHeight, 200)
     updateScrollbarHeight()
+    // 注意，这个只是暂时放在这里，负责监听该用户收到的下行消息
+    ElectronAPI.onListenDownlinkMsg((_, msg) => {
+        console.log('downlink', msg)
+    })
 })
 function updateScrollbarHeight() {
     scrollbarHeight.value = containerRef.value.offsetHeight - bottomRef.value.offsetHeight - 70

@@ -98,10 +98,13 @@ function openGroupSession(group_id) {
                         @click="() => openFriendSession(item.friend_id)"
                     >
                         <template #info="{ data }">
-                            <div class="name">
+                            <div class="avatar">
+                                <el-avatar :src="data.avatar_url" />
+                            </div>
+                            <div class="name text-overflow-hidden">
                                 {{ data }}
                             </div>
-                            <div class="last-dialog">上次对话</div>
+                            <div class="last-dialog text-overflow-hidden">上次对话</div>
                         </template>
                     </InfoBlock>
                     <InfoBlock
@@ -116,10 +119,13 @@ function openGroupSession(group_id) {
                         @click="() => openGroupSession(item.group_id)"
                     >
                         <template #info="{ data }">
-                            <div class="name">
+                            <div class="avatar">
+                                <el-avatar :src="data.avatar_url" />
+                            </div>
+                            <div class="name text-overflow-hidden">
                                 {{ data }}
                             </div>
-                            <div class="last-dialog">上次对话</div>
+                            <div class="last-dialog text-overflow-hidden">上次对话</div>
                         </template>
                     </InfoBlock>
                 </el-scrollbar>
@@ -171,7 +177,23 @@ function openGroupSession(group_id) {
         min-width: 0;
         background-color: var(--background-gray1-color);
     }
-
+    .info-block {
+        align-items: center;
+        position: relative;
+        .avatar {
+            display: flex;
+            align-items: center;
+            position: absolute;
+            width: 40px;
+            height: 60px;
+        }
+        .name {
+            margin-left: 44px;
+        }
+        .last-dialog {
+            margin-left: 44px;
+        }
+    }
     .info-block:hover {
         background-color: var(--background-gray2-color);
     }

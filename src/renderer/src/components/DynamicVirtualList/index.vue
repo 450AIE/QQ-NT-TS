@@ -61,7 +61,6 @@ function updateVirtualListContent() {
     renderList.value = listData.value.slice(start, end)
     // 5. 更新translateY，如果当前页面上的总数不够buffer*2 + viewCount的数目，那么就不移动
     // translateY
-    console.log(listData.value.length, buffer.value * 2 + viewCount.value, viewCount.value)
     if (listData.value.length > buffer.value * 2 + viewCount.value) {
         translateY.value = start >= 1 ? itemPositions.value[start - 1].bottom : 0
     }
@@ -94,6 +93,7 @@ function findNewAddedMsg() {
             temp.push({
                 id,
                 height: itemEstimateSize.value,
+                // 这些top和bottom要根据当前itemPostions的最后一项以此更新
                 top: id * itemEstimateSize.value,
                 bottom: (id + 1) * itemEstimateSize.value
             })
@@ -113,9 +113,19 @@ watch(
     () => {
         // 假设当前只会push追加，我们找到新增的部分消息push进去（就是id不存在于itemPositions
         // 的就是新增的）
+        // 新增前的最后一个元素，新增的元素的top和bottom要在它的基础上增加
         const newAddedMsg = findNewAddedMsg()
-        for (const msg of newAddedMsg) {
-            itemPositions.value.push(msg)
+        if (itemPositions.value.length > 0) {
+            let preLastIdx = itemPositions.value.length - 1
+            for (const msg of newAddedMsg) {
+                itemPositions.value.push(msg)
+                msg.top = itemPositions.value[preLastIdx++].bottom
+                msg.bottom = msg.top + itemEstimateSize.value
+            }
+        } else {
+            for (const msg of newAddedMsg) {
+                itemPositions.value.push(msg)
+            }
         }
         updateVirtualListContent()
     },
@@ -135,7 +145,7 @@ watch(
 <template>
     <!-- <button @click="() => console.log(itemPositions, start, end)">点我调试</button> -->
     <div
-        class="container"
+        class="container beautify-scrollbar"
         :style="{ height: height + 'px', width: width }"
         ref="containerRef"
         @scroll="updateVirtualListContent"

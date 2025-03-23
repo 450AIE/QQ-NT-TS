@@ -1,17 +1,17 @@
 export const menuFriendArr = [
-    '我的设备',
-    '特别关心',
-    '我的好友',
-    '朋友',
-    '家人',
-    '同学',
-    '不常用联系人'
+    { name: '我的设备', details: [] },
+    { name: '特别关心', details: [] },
+    { name: '我的好友', details: [] },
+    { name: '朋友', details: [] },
+    { name: '家人', details: [] },
+    { name: '同学', details: [] },
+    { name: '不常用联系人', details: [] }
 ]
 
 export const menuGroupArr = [
-    '置顶群聊',
-    '未命名群聊',
-    '我创建的群聊',
-    '我管理的群聊',
-    '我加入的群聊'
+    { name: '置顶群聊', details: [] },
+    { name: '未命名群聊', details: [] },
+    { name: '我创建的群聊', details: [] },
+    { name: '我管理的群聊', details: [] },
+    { name: '我加入的群聊', details: [] }
 ]

@@ -2,9 +2,14 @@
 import { ref, toRefs } from 'vue'
 import EditPage from './components/EditPage/index.vue'
 import { UserInfo } from 'src/utils/types/user'
+import useUserInfoStore from '@renderer/store/UserInfoStore'
+import { storeToRefs } from 'pinia'
 const openUpdateUserInfoPage = ref<boolean>(false)
 const props = defineProps<{ userInfo: UserInfo }>()
 const propsRef = toRefs(props.userInfo)
+const userInfoStoreRefs = storeToRefs(useUserInfoStore())
+const userInfo = userInfoStoreRefs.userInfo.value
+console.log('11', userInfo)
 </script>
 
 <template>
@@ -14,22 +19,14 @@ const propsRef = toRefs(props.userInfo)
                 <el-avatar />
             </div>
             <div class="content">
-                {{
-                    propsRef.nickname
-                        ? propsRef.nickname
-                        : propsRef.username
-                          ? propsRef.username
-                          : 'GO高手'
-                }}
+                {{ userInfo.username ?? 'Go高手' }}
             </div>
             <div class="thumbs-up">点赞</div>
         </div>
         <ul class="content-container">
             <li class="signature">
                 <span class="field">签名</span>
-                <span class="detail">{{
-                    propsRef.extra ? propsRef.extra : '人不要脸，天下无敌'
-                }}</span>
+                <span class="detail">{{ userInfo.extra ?? '人不要脸，天下无敌' }}</span>
             </li>
             <li class="address">
                 <span class="field">所在地</span>

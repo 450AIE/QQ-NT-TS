@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import LeftSubOptions from '@renderer/components/LeftSubOptions/index.vue'
 import { Plus, Search } from '@element-plus/icons-vue'
 import { onMounted, ref, onUnmounted } from 'vue'
@@ -10,12 +10,19 @@ import AppOperate from '@renderer/components/AppOperate/index.vue'
 import SearchBar from '@renderer/components/SearchBar/index.vue'
 import { getAllFriendsInfoAPI } from '@renderer/api/friends'
 import { getAllGroupsInfoAPI } from '@renderer/api/groups'
+
 const scrollHeight = ref(window.innerHeight - 70)
 getAllFriendsInfoAPI().then((res) => {
-    console.log('所有好友信息', res)
+    // console.log('所有好友信息', res)
+    menuFriendArr.forEach((arr, idx) => {
+        arr.details = res
+    })
 })
 getAllGroupsInfoAPI().then((res) => {
-    console.log('所有群组消息', res)
+    // console.log('所有群组消息', res)
+    menuGroupArr.forEach((arr, idx) => {
+        arr.details = res
+    })
 })
 window.addEventListener('resize', () => {
     scrollHeight.value = window.innerHeight - 70
@@ -61,6 +68,20 @@ onUnmounted(() => {
 function openNotificationPage(type) {
     router.push(`/relationship_manage/notification/${type}`)
 }
+function openFriendInfoPage(e: MouseEvent) {
+    const el = e.target.closest('[data-id]')
+    if (el) {
+        const friendId = Number(el.dataset.id)
+        router.push(`/relationship_manage/friend_info/${friendId}`)
+    }
+}
+function openGroupInfoPage(e: MouseEvent) {
+    const el = e.target.closest('[data-id]')
+    if (el) {
+        const groupId = Number(el.dataset.id)
+        router.push(`/relationship_manage/group_info/${groupId}`)
+    }
+}
 </script>
 
 <template>
@@ -88,28 +109,57 @@ function openNotificationPage(type) {
                 </div>
                 <div class="el-collapse-div">
                     <el-collapse class="el-collapse">
-                        <div v-if="chooseRelationship === 0">
+                        <div v-if="chooseRelationship === 0" @click="openFriendInfoPage">
                             <el-collapse-item
-                                :title="item"
+                                :title="item.name"
                                 class="item"
                                 v-for="(item, index) in menuFriendArr"
-                                :key="index"
+                                :key="item.name"
                             >
                                 <!-- <InfoBlock v-for="item in 2" class="info-block"></InfoBlock> -->
-                                <InfoBlock v-for="(item, idx) in 2" class="info-block" :key="idx">
-                                    <template #info> 22 </template>
+                                <InfoBlock
+                                    v-for="(info, idx) in item.details"
+                                    class="info-block"
+                                    :key="idx"
+                                    :data-id="info.friend_id"
+                                >
+                                    <template #info>
+                                        <div class="avatar">
+                                            <el-avatar :src="info.avatar_url" />
+                                        </div>
+                                        <div class="info text-overflow-hidden">
+                                            <div class="name">
+                                                {{ info.username ?? info.friend_id }}
+                                            </div>
+                                            <div class="last-dialog text-overflow-hidden">
+                                                暂未实现上次对话
+                                            </div>
+                                        </div>
+                                    </template>
                                 </InfoBlock>
                             </el-collapse-item>
                         </div>
-                        <div v-else>
+                        <div v-else @click="openGroupInfoPage">
                             <el-collapse-item
-                                :title="item"
+                                :title="item.name"
                                 class="item"
                                 v-for="(item, index) in menuGroupArr"
-                                :key="index"
+                                :key="item.name"
                             >
-                                <InfoBlock v-for="(item, idx) in 2" class="info-block" :key="idx">
-                                    <template #info> 22 </template>
+                                <InfoBlock
+                                    v-for="(info, idx) in item.details"
+                                    class="info-block"
+                                    :key="idx"
+                                    :data-id="info.group_id"
+                                >
+                                    <template #info>
+                                        <div class="avatar">
+                                            <el-avatar :src="info.avatar_url" />
+                                        </div>
+                                        <div class="group-name text-overflow-hidden">
+                                            {{ info.name }}
+                                        </div>
+                                    </template>
                                 </InfoBlock>
                             </el-collapse-item>
                         </div>
@@ -254,6 +304,28 @@ function openNotificationPage(type) {
 
                     .info-block:hover {
                         background-color: var(--background-gray2-color);
+                    }
+                    .info-block {
+                        position: relative;
+                        .avatar {
+                            display: flex;
+                            align-items: center;
+                            height: 100%;
+                        }
+                        .group-name {
+                            position: absolute;
+                            top: 36px;
+                            left: 56px;
+                        }
+                        .info {
+                            position: absolute;
+                            display: flex;
+                            flex-direction: column;
+                            left: 56px;
+                            top: 26px;
+                        }
+                        .last-dialog {
+                        }
                     }
                 }
             }
