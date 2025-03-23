@@ -99,6 +99,7 @@ export class Connection {
                     ...payload,
                     clientId: this.sessionIdToClientMap.get(payload.sessionId)
                 }
+                delete payload.type
                 this.sendUplinkMsg(payload)
                 break
                 // case CMD.Downlink:
@@ -207,30 +208,30 @@ export class Connection {
         this.tcp.write(buffer)
         // console.log('cacheMap', this.cacheMap)
         // 开启定时器，超时重传
-        // setTimeout(() => {
-        //     // 获取这两个用户对话之间的所有buffer
-        //     const bufferMap = this.cacheMap.get(uniqueKey)
-        //     // 缓存中仍然存在这个数据包，说明需要重传
-        //     if (bufferMap && bufferMap.has(clientId)) {
-        //         this.sendUplinkMsg(payload)
-        //         console.log('uplink超时重传')
-        //         const cacheBuffer = bufferMap.get(clientId)
-        //         cacheBuffer.retryTimes++
-        //         // 重传3次还没收到，断开重新连接
-        //         if (cacheBuffer?.retryTimes > 3) {
-        //             // // 断开tcp
-        //             // this.tcp.end()
-        //             // // 重新初始化连接
-        //             // this.initTCP()
-        //             // // 发送重连信息
-        //             // this.send(CMD.Reconn, { reconnBody: null })
-        //             this.reconnect()
-        //         }
-        //     } else {
-        //         // 数据包不见了，说明已经收到对应的ACK了
-        //         console.log('收到了')
-        //     }
-        // }, 5000)
+        setTimeout(() => {
+            // 获取这两个用户对话之间的所有buffer
+            const bufferMap = this.cacheMap.get(uniqueKey)
+            // 缓存中仍然存在这个数据包，说明需要重传
+            if (bufferMap && bufferMap.has(clientId)) {
+                this.sendUplinkMsg(payload)
+                console.log('uplink超时重传')
+                const cacheBuffer = bufferMap.get(clientId)
+                cacheBuffer.retryTimes++
+                // 重传3次还没收到，断开重新连接
+                if (cacheBuffer?.retryTimes > 3) {
+                    // // 断开tcp
+                    // this.tcp.end()
+                    // // 重新初始化连接
+                    // this.initTCP()
+                    // // 发送重连信息
+                    // this.send(CMD.Reconn, { reconnBody: null })
+                    this.reconnect()
+                }
+            } else {
+                // 数据包不见了，说明已经收到对应的ACK了
+                console.log('收到了')
+            }
+        }, 5000)
     }
     // 发送心跳
     sendHeartBeat(payload: any) {

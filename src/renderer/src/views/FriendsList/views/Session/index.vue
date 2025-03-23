@@ -1,27 +1,32 @@
 <script setup>
 import axios from 'axios'
 import { onActivated, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import TextBubble from '@renderer/components/MessageBubble/TextMessage/index.vue'
 import { dragVertical } from '@renderer/utils/dragFunc'
 import { topIconList, bottomIconList } from './iconList'
 import { useRoute } from 'vue-router'
 import { throttle } from 'lodash-es'
 import { getUserInfoAPI } from '@renderer/api/user'
 import { getGroupInfoAPI } from '@renderer/api/groups'
+import TextBubble from '@renderer/components/TextBubble/index.vue'
+import useUserInfoStore from '@renderer/store/UserInfoStore'
+import DynamicVirtualList from '@renderer/components/DynamicVirtualList/index.vue'
+
+const userInfoStore = useUserInfoStore()
 const resizeRef = ref(null)
 const bottomRef = ref(null)
 const inpRef = ref(null)
 const inpMsg = ref('')
 const containerRef = ref(null)
-const scrollRef = ref(null)
-const scrollbarHeight = ref(0)
+const scrollbarHeight = ref(window.innerHeight - 170)
 const titleText = ref('')
 window.onresize = () => {
     console.log(containerRef.value.offsetHeight)
 }
-//
+// 如果是双方聊天，保存对方的信息
 const userInfo = ref({})
+// 如果是群聊聊天，保存群组的信息
 const groupInfo = ref({})
+let id = 0
 //存放所有消息的数组
 const msgArr = ref([])
 const route = useRoute()
@@ -39,7 +44,6 @@ onMounted(() => {
 })
 function updateScrollbarHeight() {
     scrollbarHeight.value = containerRef.value.offsetHeight - bottomRef.value.offsetHeight - 70
-    console.log('height', containerRef.value.offsetHeight)
 }
 onBeforeUnmount(() => {
     scrollbarHeightObserver.disconnect()
@@ -51,7 +55,8 @@ function sendMsg(e) {
         inpMsg.value !== '' &&
         (e.type === 'click' || (e.type === 'keydown' && e.key === 'Enter'))
     ) {
-        msgArr.value.push({ direction: 'row-reverse', msg: inpMsg.value })
+        // 加入该条信息
+        msgArr.value.push({ id: id++, msg: inpMsg.value, senderInfo: userInfoStore.userInfo })
         // createMsgBubble(inpRef.value,0)
         //这里让主进程通知通信进程发送消息
         const deviceId = localStorage.getItem('device_id')
@@ -72,10 +77,9 @@ function sendMsg(e) {
         //这就是返回的消息
     }
 }
-// 监听来自通信进程传递的消息响应
-// ElectronAPI.listenReceiveCommunicationResponse((_, response) => {
-//     console.log('收到了响应的response', response)
-// })
+// 监听对方用户发送的信息
+// 这个的安装和卸载要注意
+// ElectronAPI.onListenReceiveMsg((_, msg) => {})
 // 判断是群聊还是用户来获取数据
 watch(
     () => route.query,
@@ -118,14 +122,33 @@ watch(
             </div>
         </div>
         <div class="session-window">
-            <el-scrollbar ref="scrollRef" :height="scrollbarHeight" class="scrollbar">
-                <TextBubble
-                    v-for="(item, index) in msgArr"
-                    :key="index"
-                    :msg="item.msg"
-                    :direction="item.direction"
-                />
-            </el-scrollbar>
+            <!-- 稳定后用不定高虚拟列表替换 -->
+            <!-- <el-scrollbar ref="scrollRef" :height="scrollbarHeight" class="scrollbar">
+                <div class="one-chat-dialog" v-for="(item, idx) in msgArr" :key="idx">
+                    这里的message暂时只考虑单聊，sender也只是单聊的
+                    <TextBubble
+                        :type="route.query.type"
+                        :message="item.msg"
+                        :sender-info="item.userInfo"
+                    />
+                </div>
+            </el-scrollbar> -->
+            <DynamicVirtualList
+                :buffer="1"
+                :height="scrollbarHeight"
+                :item-estimate-size="75"
+                :item-count="msgArr.length"
+                :list-data="msgArr"
+                width="100%"
+            >
+                <template #default="{ data }">
+                    <TextBubble
+                        :type="route.query.type"
+                        :message="data.msg"
+                        :sender-info="data.userInfo"
+                    />
+                </template>
+            </DynamicVirtualList>
         </div>
         <div class="resize" ref="resizeRef"></div>
         <div class="bottom" ref="bottomRef">

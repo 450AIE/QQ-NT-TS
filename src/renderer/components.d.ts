@@ -10,6 +10,7 @@ declare module 'vue' {
     AppOperate: typeof import('./src/components/AppOperate/index.vue')['default']
     Collapse: typeof import('./src/components/Collapse/index.vue')['default']
     CreateGroup: typeof import('./src/components/SearchBar/componets/CreateGroup/index.vue')['default']
+    DynamicVirtualList: typeof import('./src/components/DynamicVirtualList/index.vue')['default']
     EditPage: typeof import('./src/components/UserInfoMiniCard/components/EditPage/index.vue')['default']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -44,6 +45,7 @@ declare module 'vue' {
     SubIconsManage: typeof import('./src/components/LeftSubOptions/components/SubIconsManage/index.vue')['default']
     SubOptionsItemsCard: typeof import('./src/components/LeftSubOptions/components/SubOptionsManage/components/SubOptionsItemsCard/index.vue')['default']
     SubOptionsManage: typeof import('./src/components/LeftSubOptions/components/SubOptionsManage/index.vue')['default']
+    TextBubble: typeof import('./src/components/TextBubble/index.vue')['default']
     TextMessage: typeof import('./src/components/MessageBubble/TextMessage/index.vue')['default']
     UserInfoMiniCard: typeof import('./src/components/UserInfoMiniCard/index.vue')['default']
   }
