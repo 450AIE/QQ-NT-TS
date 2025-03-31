@@ -37,7 +37,7 @@ const throttleUpdateScrollbarHeight = throttle(updateScrollbarHeight, 200)
 const scrollbarHeightObserver = new ResizeObserver(() => throttleUpdateScrollbarHeight())
 // onActivated(() => console.log('FriendSession'))
 onMounted(() => {
-    dragVertical(resizeRef, bottomRef, 140, 400, throttleUpdateScrollbarHeight)
+    dragVertical(resizeRef, bottomRef, 120, 400, throttleUpdateScrollbarHeight)
     scrollbarHeightObserver.observe(bottomRef.value)
     window.onresize = throttle(updateScrollbarHeight, 200)
     updateScrollbarHeight()
@@ -72,7 +72,9 @@ function sendMsg(e) {
                 userId,
                 // type用来区分是用户还是群聊
                 type: route.query.user_id ? 'user' : 'group',
-                sessionId: route.query.user_id ? route.query.user_id : route.query.group_id,
+                sessionId: route.query.user_id
+                    ? Number(route.query.user_id)
+                    : Number(route.query.group_id),
                 deviceId
             })
         )
@@ -126,20 +128,9 @@ watch(
             </div>
         </div>
         <div class="session-window">
-            <!-- 稳定后用不定高虚拟列表替换 -->
-            <!-- <el-scrollbar ref="scrollRef" :height="scrollbarHeight" class="scrollbar">
-                <div class="one-chat-dialog" v-for="(item, idx) in msgArr" :key="idx">
-                    这里的message暂时只考虑单聊，sender也只是单聊的
-                    <TextBubble
-                        :type="route.query.type"
-                        :message="item.msg"
-                        :sender-info="item.userInfo"
-                    />
-                </div>
-            </el-scrollbar> -->
             <DynamicVirtualList
                 :buffer="1"
-                :height="scrollbarHeight"
+                :height="scrollbarHeight + 'px'"
                 :item-estimate-size="75"
                 :item-count="msgArr.length"
                 :list-data="msgArr"
@@ -154,8 +145,8 @@ watch(
                 </template>
             </DynamicVirtualList>
         </div>
-        <div class="resize" ref="resizeRef"></div>
         <div class="bottom" ref="bottomRef">
+            <div class="resize" ref="resizeRef" />
             <div class="bottom-operate ww">
                 <div class="bottom-icon" v-for="(item, index) in bottomIconList" :key="index">
                     <svg class="icon" aria-hidden="true">
@@ -206,12 +197,15 @@ watch(
         }
     }
     .bottom {
-        position: relative;
+        // position: relative;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
         display: flex;
         flex-direction: column;
         min-height: 120px;
         max-height: 400px;
-        height: 100px;
+        height: 120px;
         border-top: 1px solid var(--friend-session-bottom-border-top-background-color);
         .bottom-operate {
             display: flex;
@@ -283,7 +277,7 @@ watch(
     .top {
         display: flex;
         position: relative;
-        height: 70px;
+        height: 70px !important;
         color: var(--normal-font-color);
         border-bottom: 1px solid var(--friend-session-top-border-bottom-background-color);
         align-items: center;

@@ -1,32 +1,52 @@
 # 🏞QQ-NT-TS
+
 QQ-NT-TS 是我闲暇时间用于练习Electron和Vue3以及Pinia，vite，CSS，实现暗夜模式，a11y等等的联系项目。
 
 ## ⛽️技术栈
 
 **Vue3**
+
 > 核心框架
 
 **Pinia**
-> 自定义了Pinia插件实现状态更新后通知其他窗口更新状态
+
+> 劫持了Pinia.$onAction实现状态更新后通知其他窗口更新状态
 
 **Element Plus**
-> 二次封装并且:deep{}修改了内部的样式
+
+> 二次封装并且:deep(){}修改了内部的样式
 
 **Scss**
-> 主要利用其嵌套语法
+
+> 主要利用其嵌套语法和deep(){}样式穿透
 
 **Vite**
+
 > 优化打包，压缩代码，处理兼容性等等的高速构建工具
 
 ## 🪝通用hooks
 
 **useBeforeCreateGetUpdatedPiniaState**
+
 > 让该窗口可以在创建的时候就去获取最新的Pinia仓库状态并且同步更新
 
 **useUpdatePiniaStateSync**
-> 让该窗口一直监听其他窗口的Pinia仓库状态的更新，并且同步更新，只会更新修改的部分
 
-## Project Setup
+> 让该窗口一直监听其他窗口的Pinia仓库状态的更新，并且同步增量更新
+
+**useReactiveHeight**
+
+> 获取一个响应式高度，自动卸载
+
+## 特点
+
+1. 采用定高和不定高虚拟列表优化好友列表和聊天列表性能
+2. 采用窗口池，稳定维护5个窗口复用优化启动速度
+3. 采用SQLite本地缓存消息，并用多线程读取数据
+ <!-- 4. 采用线程池，多线程读取本地SQLite消息，以及多线程压缩上传的多个图片资源 -->
+4. 采用路由，图片懒加载，事件监听节流来优化性能
+5. 采用protobuf协议，高效，轻量。并实现超时重传，自动重连，任务队列控制并发数目
+6. 支持暗黑模式
 
 ### 安装依赖
 
@@ -34,9 +54,14 @@ QQ-NT-TS 是我闲暇时间用于练习Electron和Vue3以及Pinia，vite，CSS�
 $ pnpm install
 ```
 
-### 开发模式
+### 开发模式运行
 
 ```bash
-$ npm run dev
+$ pnpm run dev
 ```
 
+### 生产模式打包
+
+```bash
+$ pnpm run build
+```

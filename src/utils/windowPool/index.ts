@@ -11,7 +11,7 @@ interface CacheWindow {
 
 function createCacheWindow(
     status: 'used' | 'unused',
-    type: WindowsType,
+    type: WindowsType | null,
     window: BrowserWindow
 ): CacheWindow {
     return {
@@ -136,7 +136,16 @@ export class WindowPoll {
         // })
     }
     // 初始化窗口，提供对应的配置
-    initWindow(type: WindowsType, cacheWindow: CacheWindow, show: boolean = true) {
+    async initWindow(type: WindowsType, cacheWindow: CacheWindow, show: boolean = true) {
+        // const { window } = cacheWindow
+        // window.hide()
+        // window.loadURL('about:blank')
+        // // 这里需要等待一下，避免复用的时候闪烁
+        // await new Promise((resolve) => {
+        //     setTimeout(() => {
+        //         resolve(true)
+        //     }, 20)
+        // })
         switch (type) {
             case WindowsType.ADD_FRIENDS_AND_GROUP_WINDOW:
                 this.initAddFriendsAndGroupWindow(cacheWindow, show)
@@ -167,10 +176,11 @@ export class WindowPoll {
                 return win
             }
         }
+        return null
     }
     // 获取所有活跃的窗口，如果只有状态管理窗口活跃，就可以关闭app
     getAllUsedWindow(): CacheWindow[] {
-        const temp = []
+        const temp: CacheWindow[] = []
         for (const win of this.cacheWindow) {
             if (win.status === 'used') {
                 temp.push(win)

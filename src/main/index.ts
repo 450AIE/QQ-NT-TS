@@ -6,19 +6,26 @@ import { resolve } from 'path'
 import { WindowsType } from './types'
 import systemInfo from './utils/getDeviceInfo'
 import { CMD } from './types/protobuf'
-import { Connection } from "./../utils/tcp/index";
-import { WindowPoll } from "./../utils/windowPool/index";
+import { Connection } from './../utils/tcp/index'
+import { WindowPoll } from './../utils/windowPool/index'
+import { ConcurrentTaskQueue, createTask } from './../utils/taskQueue/index'
 
 let windowPool: WindowPoll
+// 客户端主动推送的消息加入到任务队列中
+const concurrentTaskQueue = new ConcurrentTaskQueue(20)
+// 启动任务队列，之后加任务就直接开始运行了
+concurrentTaskQueue.start()
 const connection = new Connection()
 // protobuf必须传递驼峰
 ipcMain.on('send-uplink-msg', (_, uplinkMsg) => {
     uplinkMsg = JSON.parse(uplinkMsg)
-    connection.send(CMD.Uplink, uplinkMsg)
+    // connection.send(CMD.Uplink, uplinkMsg)
+    concurrentTaskQueue.enqueueTask(createTask(() => connection.send(CMD.Uplink, uplinkMsg)))
 })
 ipcMain.on('login', (_, msg) => {
     msg = JSON.parse(msg)
-    connection.send(CMD.Login, msg)
+    // connection.send(CMD.Login, msg)
+    concurrentTaskQueue.enqueueTask(createTask(() => connection.send(CMD.Login, msg)))
 })
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -195,12 +202,12 @@ ipcMain.on('emit-full-pinia-state', (e, jsonStore, targetId) => {
 })
 
 function findRendererProcessById(processId) {
-    const windows = BrowserWindow.getAllWindows();
+    const windows = BrowserWindow.getAllWindows()
     for (const win of windows) {
-        const webContents = win.webContents;
+        const webContents = win.webContents
         if (webContents && webContents.getProcessId() === processId) {
-            return win; // 返回匹配的渲染进程
+            return win // 返回匹配的渲染进程
         }
     }
-    return null; // 如果未找到匹配的渲染进程，返回 null
+    return null // 如果未找到匹配的渲染进程，返回 null
 }

@@ -5,7 +5,7 @@ import { decodeDataBuffer, makeDataProtoBuf } from '../../main/utils/protobuf/pr
 import { ipcMain } from 'electron'
 import { WindowPoll } from '../windowPool'
 import { WindowsType } from '../../main/types'
-
+import Long from 'long'
 // 计算buffer的长度在头部拼接一个4byte的表示文件大小的头部信息，并
 // 返回整个拼接后的buffer
 // export function createProtobufPackage(buffer: Buffer) {
@@ -29,6 +29,8 @@ export class Connection {
     connId: number
     // 当前用户id
     userId: string
+    // 当前用户信息
+    deviceId: string
     // 窗口池，便于获取窗口
     windowPool: WindowPoll
     tcp: net.Socket
@@ -42,9 +44,11 @@ export class Connection {
     cacheMap: Map<string, Map<ClientID, CacheBuffer>>
     // 登陆消息的缓存buffer。注意用户点击登陆后在收到之前禁用登陆按钮，
     // 避免到达的顺序错误
-    loginCache: CacheBuffer
+    loginCache: CacheBuffer | null
     // 重连缓存
-    reconnCache: Buffer
+    reconnCache: Buffer | null
+    //
+    heartBeatId: number | null
     constructor(windowPool?: WindowPoll, HOST: string = '47.120.6.54', PORT: number = 8001) {
         this.initTCP(HOST, PORT)
         this.windowPool = windowPool
@@ -70,18 +74,17 @@ export class Connection {
         // }, 5000)
     }
     // payload是对象
-    send(cmd: CMD, payload: any) {
+    private send(cmd: CMD, payload: any) {
         // console.log('收到的payload:', payload)
         // payload = JSON.parse(payload)
         // 这些的send传递的就是data部分，要在send函数中拼接头部长度信息
-        let newPayload
         switch (cmd) {
             case CMD.Login:
                 this.sendLoginMsg(payload)
                 break
             case CMD.Uplink:
                 if (payload.type === 'user') {
-                    console.log('发送的user信息')
+                    payload.sessionId = BigInt(payload.sessionId)
                     // 更新sessionIdToClientMap的clientId值，保证递增
                     if (!this.sessionIdToClientMap.has(payload.sessionId)) {
                         this.sessionIdToClientMap.set(payload.sessionId, 0)
@@ -92,8 +95,8 @@ export class Connection {
                         )
                     }
                 } else if (payload.type === 'group') {
-                    console.log('发送的group信息')
-                    payload.sessionId = setHighestBitToOne(8)
+                    console.log('发送的group信息', payload.sessionId)
+                    payload.sessionId = setHighestBitToOne(payload.sessionId)
                     console.log('传递的sessionId二进制', payload.sessionId.toString(2))
                     // 更新sessionIdToClientMap的clientId值，保证递增
                     if (!this.sessionIdToClientMap.has(payload.sessionId)) {
@@ -106,11 +109,11 @@ export class Connection {
                     }
                 }
                 delete payload.type
-                newPayload = {
+                payload = {
                     ...payload,
                     clientId: this.sessionIdToClientMap.get(payload.sessionId)
                 }
-                this.sendUplinkMsg(newPayload)
+                this.sendUplinkMsg(payload)
                 break
                 // case CMD.Downlink:
                 //     this.sendDownlinkMsg(payload)
@@ -124,11 +127,10 @@ export class Connection {
         }
     }
     // 处理收到的数据
-    receive(buffer: Buffer) {
+    private receive(buffer: Buffer) {
         // protobuf反序列化
         const data = decodeDataBuffer(buffer.subarray(4))
         const { cmd, payload } = data
-        console.log('收到数据', data)
         // 根据cmd分发处理
         //  服务器推送过来的只有ACK和Downlink
         switch (cmd) {
@@ -141,7 +143,7 @@ export class Connection {
                 break
         }
     }
-    initTCP(HOST: string = '47.120.6.54', PORT: number = 8001) {
+    private initTCP(HOST: string = '47.120.6.54', PORT: number = 8001) {
         this.tcp = new net.Socket()
         // 全部刷新清空吗?
         this.cacheMap = new Map()
@@ -159,13 +161,13 @@ export class Connection {
             console.log('断开连接')
         })
         // 自动心跳
-        setInterval(() => {
+        this.heartBeatId = setInterval(() => {
             const buffer = makeDataProtoBuf(CMD.Heartbeat, { heartbeatBody: null })
             this.tcp.write(this.createProtobufPackage(buffer))
         }, 5000)
     }
     // 发送登陆数据
-    sendLoginMsg(payload: any) {
+    private sendLoginMsg(payload: any) {
         const { userId } = payload
         this.userId = userId
         let buffer = makeDataProtoBuf(CMD.Login, payload)
@@ -187,24 +189,22 @@ export class Connection {
         }, 5000)
     }
     // 群聊或者用户id，群聊id的最高位为1
-    sendUplinkMsg(payload: any) {
+    private sendUplinkMsg(payload: any) {
         const textEncoder = new TextEncoder()
         // 1. 提取信息
         let { userId, sessionId, clientId, uplinkBody } = payload
         clientId = BigInt(clientId)
         const newPayload = {
             ...payload,
+            sessionId: Long.fromBigInt(sessionId, true),
             uplinkBody: textEncoder.encode(uplinkBody)
         }
-        console.log('发送的Uplink', newPayload, 2)
+        console.log('发送的Uplink', newPayload)
         // 2. protobuf序列化，打包
         let buffer = makeDataProtoBuf(CMD.Uplink, newPayload)
         buffer = this.createProtobufPackage(buffer)
         // 3. 缓存起来，便于重传
         const uniqueKey = this.generateUniqueKey([String(userId), String(sessionId)])
-        // if (type === 'group') {
-        // uniqueKey = this.generateUniqueKey([String(sessionId)])
-        // }
         // 不存在就创建，存在就加入
         if (!this.cacheMap.has(uniqueKey)) {
             const clientBufferMap = new Map()
@@ -218,39 +218,43 @@ export class Connection {
         this.tcp.write(buffer)
         // console.log('cacheMap', this.cacheMap)
         // 开启定时器，超时重传
-        // setTimeout(() => {
-        //     // 获取这两个用户对话之间的所有buffer
-        //     const bufferMap = this.cacheMap.get(uniqueKey)
-        //     // 缓存中仍然存在这个数据包，说明需要重传
-        //     if (bufferMap && bufferMap.has(clientId)) {
-        //         this.sendUplinkMsg(payload)
-        //         console.log('uplink超时重传')
-        //         const cacheBuffer = bufferMap.get(clientId)
-        //         cacheBuffer.retryTimes++
-        //         // 重传3次还没收到，断开重新连接
-        //         if (cacheBuffer?.retryTimes > 3) {
-        //             // // 断开tcp
-        //             // this.tcp.end()
-        //             // // 重新初始化连接
-        //             // this.initTCP()
-        //             // // 发送重连信息
-        //             // this.send(CMD.Reconn, { reconnBody: null })
-        //             this.reconnect()
-        //         }
-        //     } else {
-        //         // 数据包不见了，说明已经收到对应的ACK了
-        //         console.log('收到了')
-        //     }
-        // }, 5000)
+        setTimeout(() => {
+            // 获取这两个用户对话之间的所有buffer
+            const bufferMap = this.cacheMap.get(uniqueKey)
+            // 缓存中仍然存在这个数据包，说明需要重传
+            if (bufferMap && bufferMap.has(clientId)) {
+                this.sendUplinkMsg(payload)
+                console.log('uplink超时重传')
+                console.log('uniqueKey', uniqueKey, 'cacheMap', this.cacheMap)
+                const cacheBuffer = bufferMap.get(clientId)
+                cacheBuffer.retryTimes++
+                // 重传3次还没收到，断开重新连接
+                if (cacheBuffer?.retryTimes > 3) {
+                    // // 断开tcp
+                    // this.tcp.end()
+                    // // 重新初始化连接
+                    // this.initTCP()
+                    // // 发送重连信息
+                    // this.send(CMD.Reconn, { reconnBody: null })
+                    this.reconnect()
+                }
+            } else {
+                // 数据包不见了，说明已经收到对应的ACK了
+                console.log('收到了')
+            }
+        }, 5000)
     }
     // 发送心跳
-    sendHeartBeat(payload: any) {
+    private sendHeartBeat(payload: any) {
         let buffer = makeDataProtoBuf(CMD.Heartbeat, payload)
         buffer = this.createProtobufPackage(buffer)
         this.tcp.write(buffer)
     }
     // 多次超时重传都未收到ACK，断开TCP重新连接，并且发送重连消息
+    // 如果重连都多次重传失败，那么会一直去请求重连
     private reconnect() {
+        // 停止心跳
+        clearInterval(this.heartBeatId)
         // 断开tcp
         this.tcp.end()
         console.log('断开TCP进行重连')
@@ -259,10 +263,14 @@ export class Connection {
         // 发送重连信息
         this.send(CMD.Reconn, { reconnBody: null })
     }
-    // 收到了下行消息，返回ACK
-    sendAckMsg(payload: any) { }
-    // sendDownlinkMsg(payload: any) { }
-    sendReconnMsg(payload: any) {
+    // 收到了（当前仅有下行要ACK）下行消息，返回ACK
+    private sendAckMsg(payload: any) {
+        let buffer = makeDataProtoBuf(CMD.Ack, payload)
+        buffer = this.createProtobufPackage(buffer)
+        // ACK不缓存，不重传
+        this.tcp.write(buffer)
+    }
+    private sendReconnMsg(payload: any) {
         let buffer = makeDataProtoBuf(CMD.Reconn, payload)
         buffer = this.createProtobufPackage(buffer)
         // 缓存
@@ -281,23 +289,24 @@ export class Connection {
     private processUplinkMsg(payload: any) {
         // console.log('ACK转换前的sessionId', payload.sessionId)
         let { sessionId, clientId } = payload
+        console.log('收到uplinkACK,转换之前sessionId', sessionId, sessionId.toString(2))
         // 先转换为int64
         clientId = this.transInt64ToBigInt(clientId)
+        console.log('转换后', typeof sessionId, sessionId.toString(2))
         sessionId = this.transInt64ToBigInt(sessionId)
         // console.log('sessionId二进制', sessionId.toString(2))
         // console.log('ACK转换后的sessionId', sessionId)
         let uniqueKey
         // 是群聊
         if (isGroupUplink(sessionId)) {
-            console.log('group', sessionId)
+            sessionId = setHighestBitToZero(sessionId)
             uniqueKey = this.generateUniqueKey([String(sessionId), String(this.userId)])
+            console.log('是群聊，计算的uniqueKey', uniqueKey)
         } else {
             // 不是群聊
-            console.log('user', sessionId)
             uniqueKey = this.generateUniqueKey([String(sessionId), String(this.userId)])
         }
         // 找到对应缓存清除
-        // const uniqueKey = this.generateUniqueKey([String(sessionId), String(this.userId)])
         const clientBufferMap = this.cacheMap.get(uniqueKey)
         // console.log('找到', clientBufferMap)
         // console.log('uniqueKey', uniqueKey)
@@ -309,7 +318,7 @@ export class Connection {
         }
     }
     // 收到ACK，这里的body是已经protobuf反序列化了的payload。删除对应缓存的消息
-    processAckMsg(body: any) {
+    private processAckMsg(body: any) {
         console.log('收到ACK的payload', body)
         // const len = buffer.readUInt32BE(0)
         const { toType } = body
@@ -333,9 +342,14 @@ export class Connection {
         // 因为是在主进程中，所以直接发送
         const mainWindow = this.windowPool.getWindow(WindowsType.MAIN_WINDOW)
         mainWindow?.window.webContents.send('receive-downlink-msg', '收到下行消息')
+        // 发送ACK
+        this.send(CMD.Ack, { toType: CMD.Downlink })
+        // 还要本地DB保存消息
+        // 1. 先判断是群聊还是用户
     }
     private processLoginMsg(body: any) {
         const { connId } = body
+        // 保存本次连接id
         this.connId = connId
         // 清除登陆缓存
         this.loginCache = null
@@ -346,7 +360,7 @@ export class Connection {
         this.reconnCache = null
         console.log('重连消息携带的信息', payload)
     }
-    createProtobufPackage(buffer: Buffer) {
+    private createProtobufPackage(buffer: Buffer) {
         const len = buffer.length
         const head = Buffer.alloc(4)
         head.writeUint32BE(len, 0)
@@ -354,13 +368,24 @@ export class Connection {
     }
     // readProtobufPayload(buffer: Buffer) { }
     // 根据所有的id计算出一个key
-    generateUniqueKey(ids: string[]) {
-        // 去重
-        const uniqueArr = Array.from(new Set(ids))
-        // 排序
-        uniqueArr.sort()
-        // 拼接
-        return uniqueArr.join('-')
+    // generateUniqueKey(ids: string[]) {
+    //     // 去重
+    //     const uniqueArr = Array.from(new Set(ids))
+    //     // 排序
+    //     uniqueArr.sort()
+    //     // 拼接
+    //     return uniqueArr.join('-')
+    // }
+    private generateUniqueKey(charArray) {
+        charArray.sort()
+        const str = JSON.stringify(charArray)
+        let hash = 0
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i)
+            hash = (hash << 5) - hash + char
+            hash |= 0 // Convert to 32bit integer
+        }
+        return 'id_' + Math.abs(hash).toString(36)
     }
     // 将收到的Go的int64转换为BigInt的完整值
     private transInt64ToBigInt(data) {
@@ -392,6 +417,19 @@ export class Connection {
             buffer
         }
     }
+    // 如果用户退出登陆，那么清空状态，保留该TCP通道以及deviceId
+    private clear() {
+        clearInterval(this.heartBeatId)
+        this.sessionIdToClientMap.clear()
+        this.cacheMap.clear()
+        this.connId = null
+        // this.deviceId = null
+        this.loginCache = null
+    }
+    shiftAccount() {
+        this.clear()
+        this.initTCP()
+    }
 }
 
 // 将最高位设置为1，表示群聊
@@ -401,6 +439,14 @@ function setHighestBitToOne(num) {
     }
     const mask = 1n << 63n // 创建掩码，第63位为1
     return num | mask // 将最高位设置为1
+}
+
+function setHighestBitToZero(num) {
+    if (typeof num !== 'bigint') {
+        num = BigInt(num) // 确保输入是 BigInt 类型
+    }
+    const mask = ~(1n << 63n) // 创建掩码，第63位为0，其余位为1
+    return num & mask // 将最高位清零
 }
 
 function isGroupUplink(num) {

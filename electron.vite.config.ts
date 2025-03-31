@@ -9,18 +9,7 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 export default defineConfig({
     main: {
-        plugins: [
-            externalizeDepsPlugin(),
-            // protoPlugin(),
-            // viteStaticCopy({
-            //     targets: [
-            //         {
-            //             src: 'src/main/utils/protobuf/message.proto',
-            //             dest: ''
-            //         }
-            //     ]
-            // })
-        ],
+        plugins: [externalizeDepsPlugin()],
         resolve: {
             alias: {
                 '@main': resolve('src/main/')
@@ -40,6 +29,9 @@ export default defineConfig({
             },
             extensions: ['.js', '.ts', '.vue', '.json']
         },
+        define: {
+            __VUE_OPTIONS_API__: false
+        },
         plugins: [
             vue(),
             AutoImport({
@@ -54,6 +46,20 @@ export default defineConfig({
                 scss: {
                     additionalData: "@import './src/renderer/src/styles/index.scss';",
                     javascriptEnabled: true
+                }
+            }
+        },
+        // 优化前有160kb，606kb，1147kb的js文件太大了
+        build: {
+            rollupOptions: {
+                output: {
+                    manualChunks: {
+                        utils: ['lodash-es', 'long', 'systeminformation'],
+                        net: ['axios', 'protobufjs'],
+                        'ui-component': ['element-plus'],
+                        wangEditor: ['@wangeditor/editor-for-vue'],
+                        vue: ['vue-router']
+                    }
                 }
             }
         }
