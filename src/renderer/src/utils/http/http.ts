@@ -1,6 +1,7 @@
 // import useBaseConfigStore from '@renderer/store/BaseConfigStore'
 // import useUserInfoStore from '@renderer/store/UserInfoStore'
 import axios from 'axios'
+import { requestURLHandler } from './handler'
 // import { toRefs } from 'vue'
 
 const http = axios.create({
@@ -10,6 +11,7 @@ const http = axios.create({
 })
 http.interceptors.request.use((request) => {
     // const userInfoStore = useUserInfoStore()
+    requestURLHandler(request)
     // 自动带上device_id和caller_id
     if (request.data) {
         const user_id = localStorage.getItem('user_id')

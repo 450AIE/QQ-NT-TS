@@ -1,5 +1,4 @@
-<script setup>
-import axios from 'axios'
+<script lang="ts" setup>
 import { onActivated, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { dragVertical } from '@renderer/utils/dragFunc'
 import { topIconList, bottomIconList } from './iconList'
@@ -10,6 +9,8 @@ import { getGroupInfoAPI } from '@renderer/api/groups'
 import TextBubble from '@renderer/components/TextBubble/index.vue'
 import useUserInfoStore from '@renderer/store/UserInfoStore'
 import DynamicVirtualList from '@renderer/components/DynamicVirtualList/index.vue'
+import uploadFileBySlice from '@renderer/utils/fileUpload'
+import { sendUplinkMsg } from '@renderer/api/communication'
 
 const userInfoStore = useUserInfoStore()
 const resizeRef = ref(null)
@@ -65,19 +66,17 @@ function sendMsg(e) {
         //这里让主进程通知通信进程发送消息
         const deviceId = localStorage.getItem('device_id')
         const userId = localStorage.getItem('user_id')
-        ElectronAPI.sendCommunicationMsg(
-            JSON.stringify({
-                uplinkBody: inpMsg.value,
-                // 发送方用户的id
-                userId,
-                // type用来区分是用户还是群聊
-                type: route.query.user_id ? 'user' : 'group',
-                sessionId: route.query.user_id
-                    ? Number(route.query.user_id)
-                    : Number(route.query.group_id),
-                deviceId
-            })
-        )
+        sendUplinkMsg({
+            uplinkBody: inpMsg.value,
+            // 发送方用户的id
+            userId,
+            // type用来区分是用户还是群聊
+            type: route.query.user_id ? 'user' : 'group',
+            sessionId: route.query.user_id
+                ? Number(route.query.user_id)
+                : Number(route.query.group_id),
+            deviceId
+        })
         inpMsg.value = ''
         // console.log('我的id', userId, '别人的id', route.query.user_id)
         //这就是返回的消息
@@ -115,6 +114,12 @@ watch(
         immediate: true
     }
 )
+// 上传文件，暂时只支持选一个
+function uploadFile(e) {
+    const file: File = e.target.files[0]
+    console.log('选择的文件', file)
+    uploadFileBySlice(file)
+}
 </script>
 
 <template>
@@ -149,9 +154,12 @@ watch(
             <div class="resize" ref="resizeRef" />
             <div class="bottom-operate ww">
                 <div class="bottom-icon" v-for="(item, index) in bottomIconList" :key="index">
-                    <svg class="icon" aria-hidden="true">
-                        <use :xlink:href="item"></use>
-                    </svg>
+                    <input type="file" class="file-input" id="file-input" @change="uploadFile" />
+                    <label :for="item.type">
+                        <svg class="icon" aria-hidden="true">
+                            <use :xlink:href="item.name"></use>
+                        </svg>
+                    </label>
                 </div>
             </div>
             <textarea class="msg-inp ww" v-model="inpMsg" ref="inpRef" @keydown="sendMsg" />
@@ -184,6 +192,9 @@ watch(
         width: 100%;
         cursor: s-resize;
         background-color: var(--resize-bar-background-color);
+    }
+    .file-input {
+        display: none;
     }
     .ww {
         padding: 0 20px;

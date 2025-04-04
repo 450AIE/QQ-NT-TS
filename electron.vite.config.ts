@@ -25,7 +25,8 @@ export default defineConfig({
                 '@renderer': resolve('src/renderer/src'),
                 '@components': resolve('src/renderer/src/components'),
                 '@views': resolve('src/renderer/src/views'),
-                '@hooks': resolve('src/renderer/src/hooks/')
+                '@hooks': resolve('src/renderer/src/hooks/'),
+                '@main': resolve('src/main/')
             },
             extensions: ['.js', '.ts', '.vue', '.json']
         },
