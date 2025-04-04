@@ -11,9 +11,11 @@ module.exports = {
         '@vue/eslint-config-prettier'
     ],
     rules: {
-        'semi': 'off',
-        'vue/require-default-prop': 'off',
-        'vue/multi-word-component-names': 'off',
-        '@typescript-eslint/no-explicit-any': 'off'
+        'max-len': [2, 120],
+        'vue/require-default-prop': 0,
+        'vue/multi-word-component-names': 0,
+        '@typescript-eslint/no-explicit-any': 0,
+        '@typescript-eslint/no-unused-vars': 1,  // 警告（未使用的变量）
+        'prefer-const': 0,
     }
 }

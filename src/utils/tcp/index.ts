@@ -2,7 +2,6 @@
 import net from 'net'
 import { CMD } from '../../main/types/protobuf'
 import { decodeDataBuffer, makeDataProtoBuf } from '../../main/utils/protobuf/protobuf'
-import { ipcMain } from 'electron'
 import { WindowPoll } from '../windowPool'
 import { WindowsType } from '../../main/types'
 import Long from 'long'
@@ -46,32 +45,12 @@ export class Connection {
     // 避免到达的顺序错误
     loginCache: CacheBuffer | null
     // 重连缓存
-    reconnCache: Buffer | null
+    reconnCache: CacheBuffer | null
     //
     heartBeatId: number | null
     constructor(windowPool?: WindowPoll, HOST: string = '47.120.6.54', PORT: number = 8001) {
         this.initTCP(HOST, PORT)
         this.windowPool = windowPool
-        // this.tcp = new net.Socket()
-        // this.cacheMap = new Map()
-        // this.sessionIdToClientMap = new Map()
-        // 连接
-        // this.tcp.connect(PORT, HOST, () => {
-        //     console.log('连接成功')
-        // })
-        // // 监听数据
-        // this.tcp.on('data', (buffer) => {
-        //     this.receive(buffer)
-        // })
-        // // 监听断开连接
-        // this.tcp.on('close', () => {
-        //     console.log('断开连接')
-        // })
-        // 自动心跳
-        // setInterval(() => {
-        //     const buffer = makeDataProtoBuf(CMD.Heartbeat, { heartbeatBody: null })
-        //     this.tcp.write(this.createProtobufPackage(buffer))
-        // }, 5000)
     }
     // payload是对象
     private send(cmd: CMD, payload: any) {
@@ -95,9 +74,9 @@ export class Connection {
                         )
                     }
                 } else if (payload.type === 'group') {
-                    console.log('发送的group信息', payload.sessionId)
+                    // console.log('发送的group信息', payload.sessionId)
                     payload.sessionId = setHighestBitToOne(payload.sessionId)
-                    console.log('传递的sessionId二进制', payload.sessionId.toString(2))
+                    // console.log('传递的sessionId二进制', payload.sessionId.toString(2))
                     // 更新sessionIdToClientMap的clientId值，保证递增
                     if (!this.sessionIdToClientMap.has(payload.sessionId)) {
                         this.sessionIdToClientMap.set(payload.sessionId, 0)
@@ -114,9 +93,6 @@ export class Connection {
                     clientId: this.sessionIdToClientMap.get(payload.sessionId)
                 }
                 this.sendUplinkMsg(payload)
-                break
-                // case CMD.Downlink:
-                //     this.sendDownlinkMsg(payload)
                 break
             case CMD.Reconn:
                 this.sendReconnMsg(payload)
@@ -174,7 +150,7 @@ export class Connection {
         buffer = this.createProtobufPackage(buffer)
         this.loginCache = this.createCacheBuffer(buffer)
         this.tcp.write(buffer)
-        // 超时重传
+        // 超时重传，指数退避避免网络洪流
         setTimeout(() => {
             // loginCache还存在，说明没收到ACK，继续发
             if (this.loginCache) {
@@ -186,10 +162,10 @@ export class Connection {
             } else {
                 // 已经收到ACK了，不执行
             }
-        }, 5000)
+        }, exponentialBackoff(this.loginCache.retryTimes))
     }
     // 群聊或者用户id，群聊id的最高位为1
-    private sendUplinkMsg(payload: any) {
+    private sendUplinkMsg(payload: any, retryTimes: number = 0) {
         const textEncoder = new TextEncoder()
         // 1. 提取信息
         let { userId, sessionId, clientId, uplinkBody } = payload
@@ -200,6 +176,7 @@ export class Connection {
             uplinkBody: textEncoder.encode(uplinkBody)
         }
         console.log('发送的Uplink', newPayload)
+        console.log('发送的Uplink的clientId', newPayload.clientId)
         // 2. protobuf序列化，打包
         let buffer = makeDataProtoBuf(CMD.Uplink, newPayload)
         buffer = this.createProtobufPackage(buffer)
@@ -218,31 +195,28 @@ export class Connection {
         this.tcp.write(buffer)
         // console.log('cacheMap', this.cacheMap)
         // 开启定时器，超时重传
-        setTimeout(() => {
-            // 获取这两个用户对话之间的所有buffer
-            const bufferMap = this.cacheMap.get(uniqueKey)
-            // 缓存中仍然存在这个数据包，说明需要重传
-            if (bufferMap && bufferMap.has(clientId)) {
-                this.sendUplinkMsg(payload)
-                console.log('uplink超时重传')
-                console.log('uniqueKey', uniqueKey, 'cacheMap', this.cacheMap)
-                const cacheBuffer = bufferMap.get(clientId)
-                cacheBuffer.retryTimes++
-                // 重传3次还没收到，断开重新连接
-                if (cacheBuffer?.retryTimes > 3) {
-                    // // 断开tcp
-                    // this.tcp.end()
-                    // // 重新初始化连接
-                    // this.initTCP()
-                    // // 发送重连信息
-                    // this.send(CMD.Reconn, { reconnBody: null })
-                    this.reconnect()
+        setTimeout(
+            () => {
+                // 获取这两个用户对话之间的所有buffer
+                const bufferMap = this.cacheMap.get(uniqueKey)
+                // 缓存中仍然存在这个数据包，说明需要重传
+                if (bufferMap && bufferMap.has(clientId)) {
+                    this.sendUplinkMsg(payload, retryTimes + 1)
+                    console.log('uplink超时重传')
+                    // console.log('uniqueKey', uniqueKey, 'cacheMap', this.cacheMap)
+                    const cacheBuffer = bufferMap.get(clientId)
+                    cacheBuffer.retryTimes++
+                    // 重传3次还没收到，断开重新连接
+                    if (cacheBuffer?.retryTimes > 3) {
+                        this.reconnect()
+                    }
+                } else {
+                    // 数据包不见了，说明已经收到对应的ACK了
+                    console.log('收到了')
                 }
-            } else {
-                // 数据包不见了，说明已经收到对应的ACK了
-                console.log('收到了')
-            }
-        }, 5000)
+            },
+            exponentialBackoff(retryTimes, { baseDelay: 2000 })
+        )
     }
     // 发送心跳
     private sendHeartBeat(payload: any) {
@@ -265,6 +239,7 @@ export class Connection {
     }
     // 收到了（当前仅有下行要ACK）下行消息，返回ACK
     private sendAckMsg(payload: any) {
+        console.log('payload', payload)
         let buffer = makeDataProtoBuf(CMD.Ack, payload)
         buffer = this.createProtobufPackage(buffer)
         // ACK不缓存，不重传
@@ -274,16 +249,20 @@ export class Connection {
         let buffer = makeDataProtoBuf(CMD.Reconn, payload)
         buffer = this.createProtobufPackage(buffer)
         // 缓存
-        this.reconnCache = buffer
+        this.reconnCache = this.createCacheBuffer(buffer)
         this.tcp.write(buffer)
-        setTimeout(() => {
-            if (this.reconnCache) {
-                // 超时重传
-                this.sendReconnMsg(payload)
-            } else {
-                // 收到ACK了
-            }
-        }, 1500)
+        setTimeout(
+            () => {
+                if (this.reconnCache) {
+                    // 超时重传
+                    this.reconnCache.retryTimes++
+                    this.sendReconnMsg(payload)
+                } else {
+                    // 收到ACK了
+                }
+            },
+            exponentialBackoff(this.reconnCache?.retryTimes, { maxDelay: 6000 })
+        )
     }
     // 这个ACK是处理上行消息的，要清除对应缓存
     private processUplinkMsg(payload: any) {
@@ -351,6 +330,7 @@ export class Connection {
         const { connId } = body
         // 保存本次连接id
         this.connId = connId
+        console.log('连接号码', this.transInt64ToBigInt(connId))
         // 清除登陆缓存
         this.loginCache = null
         console.log('删掉login缓存')
@@ -455,4 +435,27 @@ function isGroupUplink(num) {
     }
     const mask = 1n << 63n // 创建掩码，第64位为1
     return (num & mask) !== 0n // 判断第64位是否为1
+}
+
+/**
+ * 指数退避函数
+ * @param retryCount 当前重试次数（从0开始）
+ * @param options 配置项
+ * @returns 计算后的延迟时间（毫秒）
+ */
+function exponentialBackoff(
+    retryCount: number,
+    options: {
+        baseDelay?: number // 基础延迟（默认1000ms）
+        maxDelay?: number // 最大延迟（默认20秒）
+        jitter?: boolean // 是否启用随机抖动（默认true）
+    } = {}
+): number {
+    const { baseDelay = 1000, maxDelay = 20000, jitter = true } = options
+    // 1. 计算指数延迟（公式：baseDelay * 2^retryCount）
+    const expDelay = baseDelay * Math.pow(2, retryCount)
+    // 2. 应用随机抖动（在0~expDelay之间随机取值）
+    const delay = jitter ? Math.random() * expDelay : expDelay
+    // 3. 限制最大延迟
+    return Math.min(delay, maxDelay)
 }

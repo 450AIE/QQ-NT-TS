@@ -8,7 +8,7 @@ import systemInfo from './utils/getDeviceInfo'
 import { CMD } from './types/protobuf'
 import { Connection } from './../utils/tcp/index'
 import { WindowPoll } from './../utils/windowPool/index'
-import { ConcurrentTaskQueue, createTask } from './../utils/taskQueue/index'
+import { ConcurrentTaskQueue } from './../utils/taskQueue/index'
 
 let windowPool: WindowPoll
 // 客户端主动推送的消息加入到任务队列中
@@ -19,13 +19,11 @@ const connection = new Connection()
 // protobuf必须传递驼峰
 ipcMain.on('send-uplink-msg', (_, uplinkMsg) => {
     uplinkMsg = JSON.parse(uplinkMsg)
-    // connection.send(CMD.Uplink, uplinkMsg)
-    concurrentTaskQueue.enqueueTask(createTask(() => connection.send(CMD.Uplink, uplinkMsg)))
+    concurrentTaskQueue.enqueueTask(() => connection.send(CMD.Uplink, uplinkMsg))
 })
 ipcMain.on('login', (_, msg) => {
     msg = JSON.parse(msg)
-    // connection.send(CMD.Login, msg)
-    concurrentTaskQueue.enqueueTask(createTask(() => connection.send(CMD.Login, msg)))
+    concurrentTaskQueue.enqueueTask(() => connection.send(CMD.Login, msg))
 })
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

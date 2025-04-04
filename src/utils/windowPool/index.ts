@@ -20,7 +20,7 @@ function createCacheWindow(
         window
     }
 }
-
+let startTime = 0
 // 暂时每个窗口只允许创建一个
 // 当只剩下状态管理窗口的时候，就要关闭app了
 export class WindowPoll {
@@ -58,6 +58,7 @@ export class WindowPoll {
     async borrowWindow(type: WindowsType) {
         // console.log(`借${type}窗口`)
         return new Promise((resolve) => {
+            startTime = Date.now()
             // 1. 先看池子中有无上次放回后可直接复用的
             for (const win of this.cacheWindow) {
                 // 如果已经有该页面了，就不能创建了
@@ -226,11 +227,10 @@ export class WindowPoll {
         win.on('hide', () => {
             this.returnWindow(WindowsType.ADD_FRIENDS_AND_GROUP_WINDOW)
         })
-        if (show) {
-            win.show()
-        } else {
-            win.hide()
-        }
+        // win.on('show', () => {
+        //     console.log('耗时', Date.now() - startTime)
+
+        // })
         // 读取对应的URL
         if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
             win.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/add_friend_and_group')
@@ -239,10 +239,16 @@ export class WindowPoll {
                 hash: 'add_friend_and_group'
             })
         }
+        if (show) {
+            win.show()
+        } else {
+            win.hide()
+        }
     }
     private initLoginWindow(cacheWindow: CacheWindow, show: boolean = true) {
         const { window: win } = cacheWindow
         cacheWindow.type = WindowsType.LOGIN_WINDOW
+        win.setMinimumSize(0, 0)
         win.setSize(350, 500)
         win.setResizable(false)
         win.setAlwaysOnTop(true)
@@ -253,6 +259,10 @@ export class WindowPoll {
         })
         // 清除上次hide监听，避免错误
         win.removeAllListeners('hide')
+        // win.on('show', () => {
+        //     console.log('耗时', Date.now() - startTime)
+
+        // })
         // 窗口关闭的时候，要归还窗口
         win.on('hide', () => {
             this.returnWindow(WindowsType.LOGIN_WINDOW)
@@ -265,13 +275,6 @@ export class WindowPoll {
                 win.hide()
             }
         })
-        if (!this.isFristOpenLogin) {
-            if (show) {
-                win.show()
-            } else {
-                win.hide()
-            }
-        }
         // 读取对应的URL
         if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
             win.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/login')
@@ -280,11 +283,18 @@ export class WindowPoll {
                 hash: 'login'
             })
         }
+        if (!this.isFristOpenLogin) {
+            if (show) {
+                win.show()
+            } else {
+                win.hide()
+            }
+        }
     }
     private initMainWindow(cacheWindow: CacheWindow, show: boolean = true) {
         const { window: win } = cacheWindow
         cacheWindow.type = WindowsType.MAIN_WINDOW
-        win.setSize(800, 600)
+        win.setSize(1000, 800)
         win.setMinimumSize(600, 600)
         win.webContents.setWindowOpenHandler((details) => {
             shell.openExternal(details.url)
@@ -296,11 +306,10 @@ export class WindowPoll {
         win.on('hide', () => {
             this.returnWindow(WindowsType.MAIN_WINDOW)
         })
-        if (show) {
-            win.show()
-        } else {
-            win.hide()
-        }
+        // win.on('show', () => {
+        //     console.log('耗时', Date.now() - startTime)
+
+        // })
         // 读取对应的URL
         if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
             win.loadURL(process.env['ELECTRON_RENDERER_URL'])
@@ -309,11 +318,16 @@ export class WindowPoll {
                 hash: '/'
             })
         }
+        if (show) {
+            win.show()
+        } else {
+            win.hide()
+        }
     }
     private initSettingWindow(cacheWindow: CacheWindow, show: boolean = true) {
         const { window: win } = cacheWindow
         cacheWindow.type = WindowsType.SETTING_WINDOW
-        win.setSize(700, 800)
+        win.setSize(1000, 800)
         win.setMinimumSize(700, 800)
         win.setResizable(true)
         win.setAlwaysOnTop(true)
@@ -323,11 +337,10 @@ export class WindowPoll {
         win.on('hide', () => {
             this.returnWindow(WindowsType.SETTING_WINDOW)
         })
-        if (show) {
-            win.show()
-        } else {
-            win.hide()
-        }
+        // win.on('show', () => {
+        //     console.log('耗时', Date.now() - startTime)
+
+        // })
         // 读取对应的URL
         if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
             win.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/setting_global')
@@ -335,6 +348,11 @@ export class WindowPoll {
             win.loadFile(join(__dirname, '../renderer/index.html'), {
                 hash: '/setting_global'
             })
+        }
+        if (show) {
+            win.show()
+        } else {
+            win.hide()
         }
     }
     private initStateManageWindow(cacheWindow: CacheWindow, show: boolean = true) {
@@ -347,11 +365,10 @@ export class WindowPoll {
         win.on('hide', () => {
             this.returnWindow(WindowsType.STATE_MANAGE_WINDOW)
         })
-        if (show) {
-            win.show()
-        } else {
-            win.hide()
-        }
+        // win.on('show', () => {
+        //     console.log('耗时', Date.now() - startTime)
+
+        // })
         // 读取对应的URL
         if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
             win.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/state_manage')
@@ -359,6 +376,11 @@ export class WindowPoll {
             win.loadFile(join(__dirname, '../renderer/index.html'), {
                 hash: '/state_manage'
             })
+        }
+        if (show) {
+            win.show()
+        } else {
+            win.hide()
         }
     }
     private initCreateNoteWindow(cacheWindow: CacheWindow, show: boolean = true) {
@@ -373,11 +395,9 @@ export class WindowPoll {
         win.on('hide', () => {
             this.returnWindow(WindowsType.CREATE_NOTE_WINDOW)
         })
-        if (show) {
-            win.show()
-        } else {
-            win.hide()
-        }
+        // win.on('show', () => {
+        //     console.log('耗时', Date.now() - startTime)
+        // })
         // 读取对应的URL
         if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
             win.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/create_note')
@@ -385,6 +405,11 @@ export class WindowPoll {
             win.loadFile(join(__dirname, '../renderer/index.html'), {
                 hash: '/create_note'
             })
+        }
+        if (show) {
+            win.show()
+        } else {
+            win.hide()
         }
     }
     private initCollectWindow(cacheWindow: CacheWindow, show: boolean = true) {
@@ -398,11 +423,6 @@ export class WindowPoll {
         win.on('hide', () => {
             this.returnWindow(WindowsType.COLLECT_WINDOW)
         })
-        if (show) {
-            win.show()
-        } else {
-            win.hide()
-        }
         // 读取对应的URL
         if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
             win.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/collect')
@@ -410,6 +430,11 @@ export class WindowPoll {
             win.loadFile(join(__dirname, '../renderer/index.html'), {
                 hash: '/collect'
             })
+        }
+        if (show) {
+            win.show()
+        } else {
+            win.hide()
         }
     }
 }

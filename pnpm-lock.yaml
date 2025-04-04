@@ -35,6 +35,9 @@ importers:
       element-plus:
         specifier: ^2.8.4
         version: 2.8.4(vue@3.5.8(typescript@5.6.2))
+      hash-wasm:
+        specifier: ^4.12.0
+        version: 4.12.0
       knex:
         specifier: ^3.1.0
         version: 3.1.0(sqlite3@5.1.7)
@@ -2208,6 +2211,9 @@ packages:
 
   has-unicode@2.0.1:
     resolution: {integrity: sha512-8Rf9Y83NBReMnx0gFzA8JImQACstCYWUplepDa9xprwwtmgEZUF0h/i5xSA625zB/I37EtrswSST6OXxwaaIJQ==}
+
+  hash-wasm@4.12.0:
+    resolution: {integrity: sha512-+/2B2rYLb48I/evdOIhP+K/DD2ca2fgBjp6O+GBEnCDk2e4rpeXIK8GvIyRPjTezgmWn9gmKwkQjjx6BtqDHVQ==}
 
   hasown@2.0.2:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
@@ -6010,6 +6016,8 @@ snapshots:
 
   has-unicode@2.0.1:
     optional: true
+
+  hash-wasm@4.12.0: {}
 
   hasown@2.0.2:
     dependencies:

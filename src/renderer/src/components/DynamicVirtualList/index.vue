@@ -171,6 +171,7 @@ watch(
 .container {
     overflow: auto;
     position: relative;
+    transform: translateY(0px);
     .content {
         list-style: none;
         width: 100%;

@@ -3,5 +3,3 @@ export function getTypeMaker(type) {
         return Object.prototype.toString.call(obj) === type
     }
 }
-
-export const isErrorTask = getTypeMaker('ErrorTask')
