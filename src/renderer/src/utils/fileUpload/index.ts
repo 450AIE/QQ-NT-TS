@@ -8,14 +8,14 @@ type FileSlice = FormData
 const md5WebWorkerPool = createMD5WebWorkPool(10)
 const concurrentTaskQueue = new ConcurrentTaskQueue(10)
 // 如果分块上传失败了就保存到这个map中，等待手动点击感叹号上传
-// 也就是断点上传
-const sliceMap = new WeakMap<FileHash, FileSlice[]>()
+// 也就是断点续传。在程序关闭的时候会保存这个Map的文件hash和分块的hash到本地存储中
+const sliceMap = new Map<FileHash, FileSlice[]>()
 
 /**
  * 断点上传，点击感叹号重新上传
  * @param fileHash 对应文件的hash值
  */
-function reUploadFileSlice(fileHash: FileHash) {
+export function reUploadFileSlice(fileHash: FileHash) {
     // 获取所有缓存的分块上传
     if (sliceMap.has(fileHash)) {
         const fileSlices = sliceMap.get(fileHash)

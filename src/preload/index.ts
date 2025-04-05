@@ -3,10 +3,12 @@ import stateUpdateSync from './StateUpdateSync'
 import windowManage from './WindowManage'
 import fs from './fs'
 import net from './net'
+import db from './db'
 
 contextBridge.exposeInMainWorld('ElectronAPI', {
     ...stateUpdateSync,
     ...windowManage,
     ...fs,
-    ...net
+    ...net,
+    ...db
 })

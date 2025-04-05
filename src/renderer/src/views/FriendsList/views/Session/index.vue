@@ -46,6 +46,36 @@ onMounted(() => {
     ElectronAPI.onListenDownlinkMsg((_, msg) => {
         console.log('downlink', msg)
     })
+    // 用来监听主进程请求最新消息的事件
+    ElectronAPI.onListenSendNewAddedMsg(async () => {
+        console.log('主进程请求最新消息')
+        const msgs = []
+        userInfoStore.messageMap.forEach((value) => {
+            msgs.push(...value)
+        })
+        // 将最新消息发送给主进程
+        const res = await ElectronAPI.sendNewAddedMsg(JSON.stringify(msgs))
+        // 如果成功，那么就要删除缓存的消息，不过可能出现只正确保存了一部分消息的情况
+        userInfoStore.clearMessageMap()
+        // console.log('这次消息传递的结果', res)
+    })
+    // 一进入页面就要尝试去获取本地的聊天记录，同时去请求最新的聊天记录，diff对比也可以知道
+    // 哪些消息是上传失败的，从而显示感叹号重新上传
+    userInfoStore.localMessageMap.forEach((value, receiverId) => {
+        if (receiverId !== Number(route.query.user_id || route.query.group_id)) return
+        value.forEach((item) => {
+            msgArr.value.push({
+                isMyself: false,
+                ...item,
+                id: id++,
+                senderInfo: {
+                    user_id: item.senderId,
+                    username: 'none',
+                    avatar_url: 'none'
+                }
+            })
+        })
+    })
 })
 function updateScrollbarHeight() {
     scrollbarHeight.value = containerRef.value.offsetHeight - bottomRef.value.offsetHeight - 70
@@ -61,9 +91,25 @@ function sendMsg(e) {
         (e.type === 'click' || (e.type === 'keydown' && e.key === 'Enter'))
     ) {
         // 加入该条信息
-        msgArr.value.push({ id: id++, msg: inpMsg.value, senderInfo: userInfoStore.userInfo })
+        msgArr.value.push({ id: id++, message: inpMsg.value, senderInfo: userInfoStore.userInfo })
+        // 保存到map中，key为好友的id，value为与该好友的聊天记录
+        userInfoStore.addMessage(Number(route.query.user_id || route.query.group_id), {
+            receiverId: Number(route.query.user_id || route.query.group_id),
+            type: route.query.type,
+            senderId: userInfoStore.userInfo.user_id,
+            message: inpMsg.value,
+            timestamp: Date.now()
+        })
+        // 本地的也要加
+        userInfoStore.addLocalMessageMap(Number(route.query.user_id || route.query.group_id), {
+            receiverId: Number(route.query.user_id || route.query.group_id),
+            type: route.query.type,
+            senderId: userInfoStore.userInfo.user_id,
+            message: inpMsg.value,
+            timestamp: Date.now()
+        })
         // createMsgBubble(inpRef.value,0)
-        //这里让主进程通知通信进程发送消息
+        // 这里让主进程通知通信进程发送消息
         const deviceId = localStorage.getItem('device_id')
         const userId = localStorage.getItem('user_id')
         sendUplinkMsg({
@@ -88,10 +134,25 @@ function sendMsg(e) {
 // 判断是群聊还是用户来获取数据
 watch(
     () => route.query,
-    (newQuery, oldQuery) => {
+    () => {
         const {
             query: { type, user_id, group_id }
         } = route
+        // 改变了要清空列表，再用新的数据填充
+        msgArr.value = []
+        msgArr.value = userInfoStore.localMessageMap
+            .get(Number(user_id || group_id))
+            ?.map((item) => {
+                return {
+                    id: id++,
+                    message: item.message,
+                    senderInfo: {
+                        user_id: item.senderId,
+                        username: 'none',
+                        avatar_url: 'none'
+                    }
+                }
+            })
         if (type === 'user') {
             getUserInfoAPI(user_id).then((res) => {
                 // console.log('user', res)
@@ -111,7 +172,8 @@ watch(
         }
     },
     {
-        immediate: true
+        immediate: true,
+        deep: true
     }
 )
 // 上传文件，暂时只支持选一个
@@ -144,7 +206,7 @@ function uploadFile(e) {
                 <template #default="{ data }">
                     <TextBubble
                         :type="route.query.type"
-                        :message="data.msg"
+                        :message="data.message"
                         :sender-info="data.userInfo"
                     />
                 </template>

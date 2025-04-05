@@ -12,6 +12,7 @@ import useUserInfoStore from '@renderer/store/UserInfoStore'
 import SubOptionsManage from '@renderer/components/LeftSubOptions/components/SubOptionsManage/index.vue'
 import useBeforeCreateGetUpdatedPiniaState from '@renderer/hooks/useBeforeCreateGetUpdatedPiniaState'
 import { getUserInfoAPI } from '@renderer/api/user'
+import { Message } from 'src/utils/types/message'
 // 监听pinia更新
 useUpdatePiniaStateSync()
 defineOptions({
@@ -145,6 +146,22 @@ watch(
         immediate: true
     }
 )
+onMounted(() => {
+    ElectronAPI.getLocalCommunicationMsgs().then((res) => {
+        const message: Message[] = JSON.parse(res)
+        console.log('收到推送的消息', message)
+        if (message.length > 0) {
+            for (const msg of message) {
+                // 只有这条消息的发送法是自己的时候才保存
+                if (msg.senderId == localStorage.getItem('user_id')) {
+                    console.log('本地消息', msg)
+                    userInfoStore.addLocalMessageMap(msg.receiverId, msg)
+                }
+            }
+        }
+        console.log('获取的本地消息', message)
+    })
+})
 </script>
 
 <template>

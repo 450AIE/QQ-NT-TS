@@ -1,5 +1,7 @@
 import { createUpdate } from '../../../../utils/updateMap'
 
+// 不需要同步的状态
+const excludeState = []
 /**
  * 拦截pinia的action调用，通知各窗口同步状态
  */
@@ -10,7 +12,7 @@ function stateSync({ store }) {
         // console.log('调用的action为:',name)
         // console.log('形参args为:',args)
         // 修改state类型的函数就要劫持，通知所有窗口更新
-        if (name.startsWith('set')) {
+        if (name.startsWith('set') && !excludeState.includes(name)) {
             // res为该action函数的返回值
             after((res) => {
                 // 如果返回true，代表是主动更新的，要触发其他窗口更新
@@ -27,6 +29,7 @@ function stateSync({ store }) {
                         new Date().getTime(),
                         true
                     )
+                    // eslint-disable-next-line no-undef
                     ElectronAPI.notifyHasWindowStateUpdate(JSON.stringify(update))
                 }
             })

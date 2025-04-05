@@ -9,6 +9,7 @@ import { getAllFriendsInfoAPI } from '@renderer/api/friends'
 import { UserInfo } from 'src/utils/types/user'
 import { getAllGroupsInfoAPI } from '@renderer/api/groups'
 import { GroupInfo } from 'src/utils/types/group'
+import LeftSubOptions from '@renderer/components/LeftSubOptions/index.vue'
 
 defineOptions({
     name: 'FriendList'
@@ -133,11 +134,6 @@ function openGroupSession(group_id) {
         </div>
         <div ref="resize" class="resize"></div>
         <div ref="right" class="right-view">
-            <!-- <router-view v-slot="{Component}"> -->
-            <!-- <keep-alive> -->
-            <!-- <component :is="Component" /> -->
-            <!-- </keep-alive> -->
-            <!-- </router-view> -->
             <router-view />
         </div>
     </div>

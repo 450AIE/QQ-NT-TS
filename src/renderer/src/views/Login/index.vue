@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import AppOperate from '@components/AppOperate/index.vue'
 import UserAvatar from '../../assets/user.png'
 import useUpdatePiniaStateSync from '@renderer/hooks/useUpdatePiniaStateSync'

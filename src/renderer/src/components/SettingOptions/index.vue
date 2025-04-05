@@ -1,11 +1,13 @@
 <script setup>
+import useUserInfoStore from '@renderer/store/UserInfoStore'
 import { settingIconList } from './iconList'
-
+const userInfoStore = useUserInfoStore()
 function settingOperate(index) {
     if (index === 6) {
         ElectronAPI.createSettingGlobalWindow()
     } else if (index === 7) {
-        // 退出登陆，干掉其他所有窗口，不过窗口的pinia状态怎么保留下来呢?
+        userInfoStore.clearLocalMessageMap()
+        // 退出登陆
         ElectronAPI.createLoginWindow()
     }
 }

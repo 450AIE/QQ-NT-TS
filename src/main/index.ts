@@ -9,17 +9,19 @@ import { CMD } from './types/protobuf'
 import { Connection } from './../utils/tcp/index'
 import { WindowPoll } from './../utils/windowPool/index'
 import { ConcurrentTaskQueue } from './../utils/taskQueue/index'
-
+// 消息数据库实例
+import { MessageDBInstance } from './../utils/db/index'
+// 标记是否获取了本地消息，避免重复获取，只有退出登陆并重新登陆时才会获取
+let isGettedLocalMsg = 0
 let windowPool: WindowPoll
 // 客户端主动推送的消息加入到任务队列中
 const concurrentTaskQueue = new ConcurrentTaskQueue(20)
-// 启动任务队列，之后加任务就直接开始运行了
-concurrentTaskQueue.start()
+// TCP连接实例
 const connection = new Connection()
 // protobuf必须传递驼峰
 ipcMain.on('send-uplink-msg', (_, uplinkMsg) => {
-    uplinkMsg = JSON.parse(uplinkMsg)
-    concurrentTaskQueue.enqueueTask(() => connection.send(CMD.Uplink, uplinkMsg))
+    // uplinkMsg = JSON.parse(uplinkMsg)
+    // concurrentTaskQueue.enqueueTask(() => connection.send(CMD.Uplink, uplinkMsg))
 })
 ipcMain.on('login', (_, msg) => {
     msg = JSON.parse(msg)
@@ -95,6 +97,8 @@ ipcMain.on('create-create-note-window', () => {
 })
 ipcMain.on('create-login-window', async () => {
     await windowPool.borrowWindow(WindowsType.LOGIN_WINDOW)
+    // 标记false，这样进入mainUI的时候就可以重新获取本地消息了
+    isGettedLocalMsg = 1
     windowPool.hideWindowExcept([WindowsType.LOGIN_WINDOW])
 })
 ipcMain.on('write-baseConfigStore-files', (_, fileData) => {
@@ -118,14 +122,6 @@ ipcMain.handle('read-baseConfigStore-files', () => {
         console.dir(error)
     }
 })
-// 将撰写的笔记保存到本地
-// ipcMain.on('write-note-files',(_,fileData)=>{
-//     try {
-//         return fs.writeFile(resolve(app.getPath('userData'),'./notes.DAT'),fileData,'utf-8')
-//     }catch(error){
-//         console.dir(error)
-//     }
-// })
 // 读取笔记
 ipcMain.handle('read-all-note-files', async () => {
     try {
@@ -209,3 +205,45 @@ function findRendererProcessById(processId) {
     }
     return null // 如果未找到匹配的渲染进程，返回 null
 }
+/**
+ * 监听数据库操作
+ */
+
+// 2. 主进程收到消息后，通知数据库操作，并且返回Promise表示是否成功
+ipcMain.handle('send-new-added-message', (_, message) => {
+    message = JSON.parse(message)
+    if (message.length > 0) {
+        if (!MessageDBInstance.messageTableExists()) {
+            MessageDBInstance.createMessageTable()
+        }
+        message.forEach((msg) => {
+            MessageDBInstance.insertMessage(msg)
+        })
+    }
+})
+setInterval(() => {
+    // 1. 主进程请求获取最新的消息
+    const mainWindow = windowPool.getWindow(WindowsType.MAIN_WINDOW)
+    if (mainWindow.window) {
+        mainWindow.window.webContents.send('get-new-added-message')
+    }
+}, 5000)
+
+// 4. 登陆OK后，要获取本地SQLite数据库中的消息
+ipcMain.handle('get-local-communication-msgs', async () => {
+    // 如果已经获取了本地消息，就不再获取了
+    if (isGettedLocalMsg >= 2) return '[]'
+    isGettedLocalMsg++
+    console.log('变为true')
+    // 不存在表就创建表，然后返回空
+    if (!MessageDBInstance.messageTableExists()) {
+        console.log('表不存在，创建表')
+        MessageDBInstance.createMessageTable()
+        return '[]'
+    } else {
+        // 查询所有的消息
+        const messages = await MessageDBInstance.getAllMessages()
+        // console.log('主进程推送本地消息', messages)
+        return JSON.stringify(messages)
+    }
+})

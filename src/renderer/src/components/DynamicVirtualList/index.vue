@@ -25,7 +25,6 @@ const itemPositions = ref(
 // 首先用传递的初始预估值计算出fill的初始预估高度
 const fillHeight = ref(itemEstimateSize.value * itemCount.value)
 function updateVirtualListContent() {
-    console.log('tri')
     // 滚动距离
     const scrollTop = containerRef.value.scrollTop
     // 1. 计算可视区域元素的位置，并将对应的itemPositions信息修改
