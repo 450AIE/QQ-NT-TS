@@ -12,6 +12,7 @@ import { UserInfo } from 'src/utils/types/user'
 import { GroupInfo } from 'src/utils/types/group'
 import { applyForBeingFriendAPI } from '@renderer/api/friends'
 import FixedVirtualList from '@renderer/components/FixedVirtualList/index.vue'
+import { getGroupInfoAPI } from '@renderer/api/groups'
 
 useBeforeCreateGetUpdatedPiniaState()
 useUpdatePiniaStateSync()
@@ -31,11 +32,16 @@ async function search() {
             userRenderList.value = res.filter((i) => i.user_id != userId)
         }
     } else if (selectedLabelID.value === 'group') {
+        const res = await getGroupInfoAPI(inputValue.value)
+        if (res) {
+            groupRenderList.value = [res]
+        }
     }
 }
-async function applyToAddFriend(user_id: string, remarks?: string = '', desc?: string = '') {
-    await applyForBeingFriendAPI(user_id, remarks, desc)
+function applyToAddFriend(user_id: string, remarks?: string = '', desc?: string = '') {
+    applyForBeingFriendAPI(user_id, remarks, desc)
 }
+function applyToEnterGroup() {}
 </script>
 
 <template>
@@ -98,12 +104,12 @@ async function applyToAddFriend(user_id: string, remarks?: string = '', desc?: s
                             <template #info>
                                 <div class="info">
                                     <el-avatar :src="data.avatar_url" class="avatar" />
-                                    <span class="username">{{ data.username }}</span>
-                                    <span class="userid">{{ data.user_id || '暂无' }}</span>
+                                    <span class="username">{{ data.name }}</span>
+                                    <span class="userid">{{ data.group_id || '暂无' }}</span>
                                 </div>
                             </template>
                             <template #button>
-                                <el-button @click="() => applyToAddFriend(data.user_id)"
+                                <el-button @click="() => applyToEnterGroup(data.group_id)"
                                     >添加</el-button
                                 >
                             </template>

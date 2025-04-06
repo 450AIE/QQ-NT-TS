@@ -5,7 +5,7 @@ import { uploadFileAPI } from '@renderer/api/upload'
 type FileHash = string
 type FileSlice = FormData
 // webWorker线程池多线程md5标识符标识
-const md5WebWorkerPool = createMD5WebWorkPool(10)
+const md5WebWorkerPool = createMD5WebWorkPool(6)
 const concurrentTaskQueue = new ConcurrentTaskQueue(10)
 // 如果分块上传失败了就保存到这个map中，等待手动点击感叹号上传
 // 也就是断点续传。在程序关闭的时候会保存这个Map的文件hash和分块的hash到本地存储中

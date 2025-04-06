@@ -1,6 +1,6 @@
 # 🏞QQ-NT-TS
 
-QQ-NT-TS 是我闲暇时间用于练习Electron和Vue3以及Pinia，vite，CSS，实现暗夜模式，a11y等等的联系项目。
+QQ-NT-TS 是我闲暇时间用于练习Electron和Vue3以及Pinia，vite，CSS，webWorker，组件封装，实现暗夜模式，等等的练习项目。
 
 ## ⛽️技术栈
 
@@ -52,6 +52,8 @@ QQ-NT-TS 是我闲暇时间用于练习Electron和Vue3以及Pinia，vite，CSS�
 
 ```bash
 $ pnpm install
+# 预处理hasky以及编译better-sqlite3
+$ pnpm run prepare
 # 虽然混用包是大忌，但是pnpm是在安装不起electron，先cnpm应急
 $ cnpm install --save-dev electron
 ```

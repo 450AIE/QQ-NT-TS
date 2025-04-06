@@ -19,13 +19,13 @@ const concurrentTaskQueue = new ConcurrentTaskQueue(20)
 // TCP连接实例
 const connection = new Connection()
 // protobuf必须传递驼峰
-ipcMain.on('send-uplink-msg', (_, uplinkMsg) => {
+ipcMain.handle('send-uplink-msg', (_, uplinkMsg) => {
     // uplinkMsg = JSON.parse(uplinkMsg)
-    // concurrentTaskQueue.enqueueTask(() => connection.send(CMD.Uplink, uplinkMsg))
+    // return concurrentTaskQueue.enqueueTask(() => connection.send(CMD.Uplink, uplinkMsg))
 })
-ipcMain.on('login', (_, msg) => {
+ipcMain.handle('login', (_, msg) => {
     msg = JSON.parse(msg)
-    concurrentTaskQueue.enqueueTask(() => connection.send(CMD.Login, msg))
+    return concurrentTaskQueue.enqueueTask(() => connection.send(CMD.Login, msg))
 })
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -234,7 +234,6 @@ ipcMain.handle('get-local-communication-msgs', async () => {
     // 如果已经获取了本地消息，就不再获取了
     if (isGettedLocalMsg >= 2) return '[]'
     isGettedLocalMsg++
-    console.log('变为true')
     // 不存在表就创建表，然后返回空
     if (!MessageDBInstance.messageTableExists()) {
         console.log('表不存在，创建表')

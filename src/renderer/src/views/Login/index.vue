@@ -2,7 +2,7 @@
 import AppOperate from '@components/AppOperate/index.vue'
 import UserAvatar from '../../assets/user.png'
 import useUpdatePiniaStateSync from '@renderer/hooks/useUpdatePiniaStateSync'
-import { ref } from 'vue'
+import { onMounted, onUpdated, ref } from 'vue'
 import { loginAPI, registerAPI } from '@renderer/api/login'
 import { getUserInfoAPI } from '@renderer/api/user'
 import useUserInfoStore from '@renderer/store/UserInfoStore'
@@ -25,15 +25,9 @@ async function login() {
     localStorage.setItem('token', token)
     localStorage.setItem('user_id', user_id)
     // 发送protobuf登陆
-    ElectronAPI.login(JSON.stringify({ userId: user_id, deviceId: device_id }))
-    //
-    // 还要获取自己的用户信息
-    // response = await getUserInfoAPI(user_id, user_id, device_id)
-    // const { username } = response
-    // userInfoStore.setUserInfo(response)
-    // console.log(response)
-    // 登陆
-    // 然后打开主页面
+    await ElectronAPI.login(JSON.stringify({ userId: user_id, deviceId: device_id }))
+    account.value = ''
+    password.value = ''
     ElectronAPI.createMainWindow()
 }
 </script>

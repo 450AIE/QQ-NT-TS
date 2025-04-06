@@ -11,6 +11,7 @@ import useUserInfoStore from '@renderer/store/UserInfoStore'
 import DynamicVirtualList from '@renderer/components/DynamicVirtualList/index.vue'
 import uploadFileBySlice from '@renderer/utils/fileUpload'
 import { sendUplinkMsg } from '@renderer/api/communication'
+import { escapeHTML } from '@renderer/utils/safe'
 
 const userInfoStore = useUserInfoStore()
 const resizeRef = ref(null)
@@ -90,6 +91,7 @@ function sendMsg(e) {
         inpMsg.value !== '' &&
         (e.type === 'click' || (e.type === 'keydown' && e.key === 'Enter'))
     ) {
+        const msg = escapeHTML(inpMsg.value)
         // 加入该条信息
         msgArr.value.push({ id: id++, message: inpMsg.value, senderInfo: userInfoStore.userInfo })
         // 保存到map中，key为好友的id，value为与该好友的聊天记录
@@ -97,7 +99,7 @@ function sendMsg(e) {
             receiverId: Number(route.query.user_id || route.query.group_id),
             type: route.query.type,
             senderId: userInfoStore.userInfo.user_id,
-            message: inpMsg.value,
+            message: msg,
             timestamp: Date.now()
         })
         // 本地的也要加

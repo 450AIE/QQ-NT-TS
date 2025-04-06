@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import InfoBlock from '@renderer/components/InfoBlock/index.vue'
-import { onActivated, onMounted, onUnmounted, ref } from 'vue'
+import { onActivated, onMounted, onUnmounted, onUpdated, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { dragHorizontal } from '../../utils/dragFunc'
 import AppOerate from '@renderer/components/AppOperate/index.vue'
@@ -68,7 +68,6 @@ onUnmounted(() => {
     document.onmouseup = null
     window.onresize = null
 })
-
 // 根据传递的参数判断是用户还是群聊
 function openFriendSession(user_id) {
     isSessionID.value = 'user' + user_id

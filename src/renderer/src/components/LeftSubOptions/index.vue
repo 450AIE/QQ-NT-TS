@@ -13,15 +13,12 @@ import SubOptionsManage from '@renderer/components/LeftSubOptions/components/Sub
 import useBeforeCreateGetUpdatedPiniaState from '@renderer/hooks/useBeforeCreateGetUpdatedPiniaState'
 import { getUserInfoAPI } from '@renderer/api/user'
 import { Message } from 'src/utils/types/message'
+import { decodeHTML } from '@renderer/utils/safe'
 // 监听pinia更新
 useUpdatePiniaStateSync()
 defineOptions({
     name: 'LeftSubOptions'
 })
-// onActivated(() => {
-//     console.log('leftsuboptions activated')
-// })
-// console.log('全局fontSize:',document.querySelector('#app').setProperty('--global-font-size','30px'))
 useBeforeCreateGetUpdatedPiniaState()
 const baseConfigStore = useBaseConfigStore()
 // 展示侧边栏管理的图标
@@ -119,8 +116,6 @@ function onListenerWindowHeightToUnfoldIcons() {
     // 已经选择了的所有options数目，排除了5个固定的
     const selectedIconsSum = upperIconList.value.length - 5
     const restHeight = windowHeight - 85 - (5 + 4) * 45
-    // console.log('剩余高度',restHeight)
-    // console.log('当前有的多余图标数目',addedIconSum)
     const newIconSum = parseInt(restHeight / 45)
     // 要收纳的总数
     const foldedIconsSum = selectedIconsSum - newIconSum
@@ -149,17 +144,21 @@ watch(
 onMounted(() => {
     ElectronAPI.getLocalCommunicationMsgs().then((res) => {
         const message: Message[] = JSON.parse(res)
-        console.log('收到推送的消息', message)
+        // console.log('收到推送的消息', message)
         if (message.length > 0) {
             for (const msg of message) {
                 // 只有这条消息的发送法是自己的时候才保存
                 if (msg.senderId == localStorage.getItem('user_id')) {
-                    console.log('本地消息', msg)
-                    userInfoStore.addLocalMessageMap(msg.receiverId, msg)
+                    // console.log('本地消息', msg)
+                    userInfoStore.addLocalMessageMap(msg.receiverId, {
+                        ...msg,
+                        // 将消息解码回来展示，因为是在{{}}展示的，可以预防XSS攻击
+                        message: decodeHTML(msg.message)
+                    })
                 }
             }
         }
-        console.log('获取的本地消息', message)
+        // console.log('获取的本地消息', message)
     })
 })
 </script>
