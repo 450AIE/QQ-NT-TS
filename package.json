@@ -33,6 +33,7 @@
         "axios": "^1.8.1",
         "better-sqlite3": "^11.9.1",
         "dompurify": "^3.2.5",
+        "electron": "^35.1.5",
         "electron-updater": "^6.1.7",
         "element-plus": "^2.8.4",
         "hash-wasm": "^4.12.0",

@@ -60,7 +60,8 @@ $ pnpm run prepare
 
 ! 注意，如果pnpm run dev后报错Electron uninstall，请跳转到第一个错误“getElectronPath”函数中，打印
 pathFile的文件地址，找到Electron安装依赖的位置，然后进入对应的位置，执行npm run postinstall
-即可。
+即可。（一般来说都是QQ-NT-TS\node_modules\.pnpm\electron@35.1.5\node_modules\electron目录下，
+执行npm run postinstall命令即可）
 
 ```bash
 $ pnpm run dev
