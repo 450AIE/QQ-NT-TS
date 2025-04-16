@@ -54,7 +54,7 @@ export class Connection {
     }
     // payload是对象
     private send(cmd: CMD, payload: any) {
-        // console.log('收到的payload:', payload)
+        console.log('收到的payload:', payload)
         // payload = JSON.parse(payload)
         // 这些的send传递的就是data部分，要在send函数中拼接头部长度信息
         switch (cmd) {
@@ -104,6 +104,7 @@ export class Connection {
     }
     // 处理收到的数据
     private receive(buffer: Buffer) {
+        console.log('1')
         // protobuf反序列化
         const data = decodeDataBuffer(buffer.subarray(4))
         const { cmd, payload } = data

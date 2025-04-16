@@ -20,8 +20,8 @@ const concurrentTaskQueue = new ConcurrentTaskQueue(20)
 const connection = new Connection()
 // protobuf必须传递驼峰
 ipcMain.handle('send-uplink-msg', (_, uplinkMsg) => {
-    // uplinkMsg = JSON.parse(uplinkMsg)
-    // return concurrentTaskQueue.enqueueTask(() => connection.send(CMD.Uplink, uplinkMsg))
+    uplinkMsg = JSON.parse(uplinkMsg)
+    return concurrentTaskQueue.enqueueTask(() => connection.send(CMD.Uplink, uplinkMsg))
 })
 ipcMain.handle('login', (_, msg) => {
     msg = JSON.parse(msg)
@@ -221,13 +221,14 @@ ipcMain.handle('send-new-added-message', (_, message) => {
         })
     }
 })
-setInterval(() => {
-    // 1. 主进程请求获取最新的消息
-    const mainWindow = windowPool.getWindow(WindowsType.MAIN_WINDOW)
-    if (mainWindow.window) {
-        mainWindow.window.webContents.send('get-new-added-message')
-    }
-}, 5000)
+// 定时同步本地SQLite
+// setInterval(() => {
+//     // 1. 主进程请求获取最新的消息
+//     const mainWindow = windowPool.getWindow(WindowsType.MAIN_WINDOW)
+//     if (mainWindow.window) {
+//         mainWindow.window.webContents.send('get-new-added-message')
+//     }
+// }, 5000)
 
 // 4. 登陆OK后，要获取本地SQLite数据库中的消息
 ipcMain.handle('get-local-communication-msgs', async () => {

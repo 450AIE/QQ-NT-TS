@@ -54,11 +54,13 @@ QQ-NT-TS 是我闲暇时间用于练习Electron和Vue3以及Pinia，vite，CSS�
 $ pnpm install
 # 预处理hasky以及编译better-sqlite3
 $ pnpm run prepare
-# 虽然混用包是大忌，但是pnpm是在安装不起electron，先cnpm应急
-$ cnpm install --save-dev electron
 ```
 
 ### 开发模式运行
+
+! 注意，如果pnpm run dev后报错Electron uninstall，请跳转到第一个错误“getElectronPath”函数中，打印
+pathFile的文件地址，找到Electron安装依赖的位置，然后进入对应的位置，执行npm run postinstall
+即可。
 
 ```bash
 $ pnpm run dev

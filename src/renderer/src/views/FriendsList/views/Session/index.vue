@@ -141,20 +141,18 @@ watch(
             query: { type, user_id, group_id }
         } = route
         // 改变了要清空列表，再用新的数据填充
-        msgArr.value = []
-        msgArr.value = userInfoStore.localMessageMap
-            .get(Number(user_id || group_id))
-            ?.map((item) => {
-                return {
-                    id: id++,
-                    message: item.message,
-                    senderInfo: {
-                        user_id: item.senderId,
-                        username: 'none',
-                        avatar_url: 'none'
-                    }
-                }
-            })
+        // msgArr.value =
+        //     userInfoStore.localMessageMap.get(Number(user_id || group_id))?.map((item) => {
+        //         return {
+        //             id: id++,
+        //             message: item.message,
+        //             senderInfo: {
+        //                 user_id: item.senderId,
+        //                 username: 'none',
+        //                 avatar_url: 'none'
+        //             }
+        //         }
+        //     }) || []
         if (type === 'user') {
             getUserInfoAPI(user_id).then((res) => {
                 // console.log('user', res)
