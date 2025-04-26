@@ -318,7 +318,7 @@ export class Connection {
         }
     }
     private processDownlinkMsg(payload: any) {
-        console.log('处理downlink')
+        console.log('处理downlink', payload)
         // 因为是在主进程中，所以直接发送
         const mainWindow = this.windowPool.getWindow(WindowsType.MAIN_WINDOW)
         mainWindow?.window.webContents.send('receive-downlink-msg', '收到下行消息')

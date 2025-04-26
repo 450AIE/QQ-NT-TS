@@ -247,3 +247,7 @@ ipcMain.handle('get-local-communication-msgs', async () => {
         return JSON.stringify(messages)
     }
 })
+// 可以捕获主进程中出现的错误
+process.on('uncaughtException', (err) => {
+    console.log('错误', err)
+})

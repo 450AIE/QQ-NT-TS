@@ -12,6 +12,8 @@ import DynamicVirtualList from '@renderer/components/DynamicVirtualList/index.vu
 import uploadFileBySlice from '@renderer/utils/fileUpload'
 import { sendUplinkMsg } from '@renderer/api/communication'
 import { escapeHTML } from '@renderer/utils/safe'
+import DynamicVirtualListSuper from '@renderer/components/DynamicVirtualListSuper'
+import UUID from '../../../../../../utils/uuid/index'
 
 const userInfoStore = useUserInfoStore()
 const resizeRef = ref(null)
@@ -28,7 +30,6 @@ window.onresize = () => {
 const userInfo = ref({})
 // 如果是群聊聊天，保存群组的信息
 const groupInfo = ref({})
-let id = 0
 //存放所有消息的数组
 const msgArr = ref([])
 const route = useRoute()
@@ -93,7 +94,12 @@ function sendMsg(e) {
     ) {
         const msg = escapeHTML(inpMsg.value)
         // 加入该条信息
-        msgArr.value.push({ id: id++, message: inpMsg.value, senderInfo: userInfoStore.userInfo })
+        msgArr.value.push({
+            id: UUID(),
+            message: inpMsg.value,
+            senderInfo: userInfoStore.userInfo
+        })
+        // msgArr.value.push({ id: id++, message: inpMsg.value, senderInfo: userInfoStore.userInfo })
         // 保存到map中，key为好友的id，value为与该好友的聊天记录
         userInfoStore.addMessage(Number(route.query.user_id || route.query.group_id), {
             receiverId: Number(route.query.user_id || route.query.group_id),
@@ -195,7 +201,7 @@ function uploadFile(e) {
             </div>
         </div>
         <div class="session-window">
-            <DynamicVirtualList
+            <!-- <DynamicVirtualList
                 :buffer="1"
                 :height="scrollbarHeight + 'px'"
                 :item-estimate-size="75"
@@ -210,7 +216,23 @@ function uploadFile(e) {
                         :sender-info="data.userInfo"
                     />
                 </template>
-            </DynamicVirtualList>
+            </DynamicVirtualList> -->
+            <DynamicVirtualListSuper
+                :buffer="1"
+                :height="scrollbarHeight + 'px'"
+                :item-estimate-size="75"
+                :item-count="msgArr.length"
+                :list-data="msgArr"
+                width="100%"
+            >
+                <template #default="{ data }">
+                    <TextBubble
+                        :type="route.query.type"
+                        :message="data.message"
+                        :sender-info="data.userInfo"
+                    />
+                </template>
+            </DynamicVirtualListSuper>
         </div>
         <div class="bottom" ref="bottomRef">
             <div class="resize" ref="resizeRef" />

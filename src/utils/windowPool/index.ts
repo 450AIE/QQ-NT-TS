@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron'
 import { WindowsType } from '../../main/types/index'
-import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
+import { join } from 'path'
 
 interface CacheWindow {
     status: 'used' | 'unused'
@@ -20,7 +20,6 @@ function createCacheWindow(
         window
     }
 }
-let startTime = 0
 // 暂时每个窗口只允许创建一个
 // 当只剩下状态管理窗口的时候，就要关闭app了
 export class WindowPoll {
@@ -58,7 +57,6 @@ export class WindowPoll {
     async borrowWindow(type: WindowsType) {
         // console.log(`借${type}窗口`)
         return new Promise((resolve) => {
-            startTime = Date.now()
             // 1. 先看池子中有无上次放回后可直接复用的
             for (const win of this.cacheWindow) {
                 // 如果已经有该页面了，就不能创建了
@@ -138,15 +136,6 @@ export class WindowPoll {
     }
     // 初始化窗口，提供对应的配置
     async initWindow(type: WindowsType, cacheWindow: CacheWindow, show: boolean = true) {
-        // const { window } = cacheWindow
-        // window.hide()
-        // window.loadURL('about:blank')
-        // // 这里需要等待一下，避免复用的时候闪烁
-        // await new Promise((resolve) => {
-        //     setTimeout(() => {
-        //         resolve(true)
-        //     }, 20)
-        // })
         switch (type) {
             case WindowsType.ADD_FRIENDS_AND_GROUP_WINDOW:
                 this.initAddFriendsAndGroupWindow(cacheWindow, show)
@@ -227,10 +216,6 @@ export class WindowPoll {
         win.on('hide', () => {
             this.returnWindow(WindowsType.ADD_FRIENDS_AND_GROUP_WINDOW)
         })
-        // win.on('show', () => {
-        //     console.log('耗时', Date.now() - startTime)
-
-        // })
         // 读取对应的URL
         if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
             win.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/add_friend_and_group')
@@ -259,10 +244,6 @@ export class WindowPoll {
         })
         // 清除上次hide监听，避免错误
         win.removeAllListeners('hide')
-        // win.on('show', () => {
-        //     console.log('耗时', Date.now() - startTime)
-
-        // })
         // 窗口关闭的时候，要归还窗口
         win.on('hide', () => {
             this.returnWindow(WindowsType.LOGIN_WINDOW)
@@ -306,10 +287,6 @@ export class WindowPoll {
         win.on('hide', () => {
             this.returnWindow(WindowsType.MAIN_WINDOW)
         })
-        // win.on('show', () => {
-        //     console.log('耗时', Date.now() - startTime)
-
-        // })
         // 读取对应的URL
         if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
             win.loadURL(process.env['ELECTRON_RENDERER_URL'])
@@ -337,10 +314,6 @@ export class WindowPoll {
         win.on('hide', () => {
             this.returnWindow(WindowsType.SETTING_WINDOW)
         })
-        // win.on('show', () => {
-        //     console.log('耗时', Date.now() - startTime)
-
-        // })
         // 读取对应的URL
         if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
             win.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/setting_global')
@@ -365,10 +338,6 @@ export class WindowPoll {
         win.on('hide', () => {
             this.returnWindow(WindowsType.STATE_MANAGE_WINDOW)
         })
-        // win.on('show', () => {
-        //     console.log('耗时', Date.now() - startTime)
-
-        // })
         // 读取对应的URL
         if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
             win.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/state_manage')
@@ -395,9 +364,6 @@ export class WindowPoll {
         win.on('hide', () => {
             this.returnWindow(WindowsType.CREATE_NOTE_WINDOW)
         })
-        // win.on('show', () => {
-        //     console.log('耗时', Date.now() - startTime)
-        // })
         // 读取对应的URL
         if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
             win.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/create_note')

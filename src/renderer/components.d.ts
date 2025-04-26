@@ -11,6 +11,7 @@ declare module 'vue' {
     Collapse: typeof import('./src/components/Collapse/index.vue')['default']
     CreateGroup: typeof import('./src/components/SearchBar/componets/CreateGroup/index.vue')['default']
     DynamicVirtualList: typeof import('./src/components/DynamicVirtualList/index.vue')['default']
+    DynamicVirtualListSuper: typeof import('./src/components/DynamicVirtualListSuper/index.vue')['default']
     EditPage: typeof import('./src/components/UserInfoMiniCard/components/EditPage/index.vue')['default']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElButton: typeof import('element-plus/es')['ElButton']

@@ -145,7 +145,7 @@ watch(
 <template>
     <!-- <button @click="() => console.log(itemPositions, start, end)">点我调试</button> -->
     <div
-        class="container beautify-scrollbar"
+        class="container-12 beautify-scrollbar"
         :style="{ height: height, width: width }"
         ref="containerRef"
         @scroll="updateVirtualListContent"
@@ -158,7 +158,6 @@ watch(
             }"
         >
             <!-- 这个itemRefs始终收集到的都是展示在页面上的元素DOM，不在页面上的收集不到 -->
-            <!-- 如果原本的数据没有id，那就map产生id -->
             <li v-for="(item, idx) in renderList" :key="item.id" ref="itemRefs" :id="item.id">
                 <slot :data="item"></slot>
             </li>
@@ -167,7 +166,7 @@ watch(
 </template>
 
 <style lang="scss" scoped>
-.container {
+.container-12 {
     overflow: auto;
     position: relative;
     transform: translateY(0px);

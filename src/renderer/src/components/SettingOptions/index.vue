@@ -2,14 +2,17 @@
 import useUserInfoStore from '@renderer/store/UserInfoStore'
 import { settingIconList } from './iconList'
 const userInfoStore = useUserInfoStore()
-function settingOperate(index) {
-    if (index === 6) {
-        ElectronAPI.createSettingGlobalWindow()
-    } else if (index === 7) {
+// 策略模式
+const strategies = {
+    6: () => ElectronAPI.createSettingGlobalWindow(),
+    7: () => {
         userInfoStore.clearLocalMessageMap()
         // 退出登陆
         ElectronAPI.createLoginWindow()
     }
+}
+function settingOperate(index) {
+    strategies[index]?.()
 }
 // onActivated(()=>console.log('setting'))
 // onDeactivated(()=>console.log('desetting'))
